@@ -76,13 +76,13 @@ class MCMC:
                 self.G_function(epi,depth,M0_old,strike,dip,rake)
 
                 if BW == True:
-                    Xi_bw_new, amplitude, fig = self.mis.CC_BW(self.BW_obs,self.BW_syn,self.or_time,self.prior['PLOT'])
+                    Xi_bw_new, amplitude,time_shift_new, fig = self.mis.CC_BW(self.BW_obs,self.BW_syn,self.or_time,self.prior['PLOT'])
 
-                    s_z_new = 1 * Xi_bw_new[0]
-                    s_r_new = 1 * Xi_bw_new[1]
-                    s_t_new = 5 * Xi_bw_new[2]
-                    p_z_new = 5 * Xi_bw_new[3]
-                    p_r_new = 2 * Xi_bw_new[4]
+                    s_z_new =  Xi_bw_new[0] # 1 *
+                    s_r_new =  Xi_bw_new[1] # 1 *
+                    s_t_new =  Xi_bw_new[2] # 5 *
+                    p_z_new =  Xi_bw_new[3] # 5 *
+                    p_r_new =  Xi_bw_new[4] # 2 *
                     bw_new = s_z_new + s_r_new + s_t_new + p_z_new + p_r_new
                     Xi_new = bw_new
                 if SW == True:
@@ -92,12 +92,12 @@ class MCMC:
                     raise ValueError('Surface waves Not implemented yet')
                     # Xi_new = bw_new + sw_new
 
-                M0 = M0_old / np.sqrt(np.mean(amplitude))
+                M0 = M0_old / np.mean(amplitude)
 
                 if self.i == 0:
                     if self.prior['PLOT'] == True and self.i % 1 == 0:
                         # self.plot()
-                        fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%i.png' % (self.prior['save_name'], self.i))
+                        fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%05i.png' % (self.prior['save_name'], self.i))
                         plt.close("all")
                     if BW == True:
                         self.s_z_old = s_z_new
@@ -117,15 +117,16 @@ class MCMC:
                     dip_old = dip
                     rake_old = rake
                     M0_old = M0
+                    time_shift_old = time_shift_new
                     self.write_sample(save_file, epi_old, depth_old, strike_old, dip_old, rake_old, M0_old, Xi_old, BW,
-                                      SW, accept=1)
+                                      SW,time_shift_old, accept=1)
 
                     continue
                 random = np.random.random_sample((1,))
                 if (Xi_new < Xi_old) or (np.exp((Xi_old - Xi_new) / self.prior['Temperature']) > random):
                     if self.prior['PLOT'] == True and self.i % 1 == 0:
                         # self.plot()
-                        fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%i.png' % (self.prior['save_name'], self.i))
+                        fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%05i.png' % (self.prior['save_name'], self.i))
                         plt.close("all")
                     print(Xi_new)
                     if BW == True:
@@ -146,13 +147,14 @@ class MCMC:
                     dip_old = dip
                     rake_old = rake
                     M0_old = M0
+                    time_shift_old = time_shift_new
                     accepted = accepted + 1
-                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,accept=1)
+                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old,accept=1)
                 else:
                     if self.prior['PLOT']:
                         plt.close("all")
                     rejected += 1
-                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW, accept=0)
+                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old, accept=0)
             save_file.close()
 
     def G_function(self, epi, depth, M0, strike, dip, rake ):
@@ -173,8 +175,8 @@ class MCMC:
         # strike = 320
         # dip = 65
         # rake = 110
-        epi =86
-        depth = 35000
+        # epi =86
+        # depth = 35000
         dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
                                                                                  lon1=self.prior['lo_r'],
                                                                                  azi1=self.prior['baz'],
@@ -185,6 +187,7 @@ class MCMC:
         st_syn = self.seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth,
                                                                strike=strike, dip=dip, rake=rake,
                                                                time=self.or_time, M0=M0)
+
 
         # npts = self.BW_obs.P_stream.traces[0].stats.npts
         # tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
@@ -200,7 +203,7 @@ class MCMC:
         if BW == True and SW == True:
             raise ValueError('Surface waves Not implemented yet')
         elif BW == True:
-            file_name.write("epi,depth,strike,dip,rake,M0,Total-misfit,p_z,p_r,s_z,s_r,s_t,bw_tot,accept\n\r")
+            file_name.write("epi, depth, strike, dip, rake, M0, Total-misfit, p_z, p_r, s_z, s_r, s_t, bw_tot, shift_S, shift-P, Iteration\n\r")
             file_name.write("Velocity Model:%s\n\r" %self.prior['VELOC'])
             file_name.write("Station:%s\n\r" % self.BW_obs.BW_stream.traces[0].stats.station)
             file_name.write("Sampling rate:%.2f\n\r" % self.BW_obs.BW_stream.traces[0].stats.sampling_rate)
@@ -217,13 +220,13 @@ class MCMC:
         elif SW == True:
             raise ValueError('Surface waves Not implemented yet')
 
-    def write_sample(self,file_name, epi, depth, strike,dip,rake, M0, Xi_old,BW,SW,accept=0):
-        file_name.write("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f," % (epi, depth, strike, dip, rake, M0,Xi_old))
+    def write_sample(self,file_name, epi, depth, strike,dip,rake, M0, Xi_old,BW,SW,time_shift,accept=0):
+        file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (epi, depth, strike, dip, rake, M0,Xi_old))
         if BW == True:
-            file_name.write("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f" % (self.p_z_old, self.p_r_old, self.s_z_old, self.s_r_old, self.s_t_old,self.bw_old))
+            file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (self.p_z_old, self.p_r_old, self.s_z_old, self.s_r_old, self.s_t_old,self.bw_old))
         if SW == True:
             raise ValueError('Surface waves Not implemented yet')
-        file_name.write(",%i\n\r" % (self.i))
+        file_name.write("%i, %i, %i\n\r" % (time_shift[0],time_shift[1],self.i))
 
     def plot(self):
         stream = Stream()
