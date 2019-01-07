@@ -1,5 +1,6 @@
 import numpy as np
 import obspy.signal.cross_correlation as cc
+
 import matplotlib.pylab as plt
 from obspy.core.stream import Stream
 
@@ -60,6 +61,24 @@ class Misfit:
             # plt.close()
         sum_misfit = np.sum(misfit)
         return sum_misfit, time_shift
+
+    def CC_BW_3c(self,BW_obs,BW_syn,or_time,plot = False):
+        p_obs = BW_obs.P_stream
+        p_syn = BW_syn.P_stream
+        s_obs = BW_obs.S_stream
+        s_syn = BW_syn.S_stream
+
+
+        start = s_syn[2].stats.starttime
+        end = s_syn[2].stats.endtime
+        S_obs = s_obs.copy()
+        S_obs.trim(start,end)
+        S_syn = s_syn.copy()
+        S_syn.trim(start, end)
+
+        len_S_obs = len(s_obs[2].data)
+
+        ind,val = cc.xcorr_3c(S_obs, S_syn, len_S_obs, components=['Z', 'R', 'T'], full_xcorr=False, abs_max=False)
 
     def CC_BW(self,BW_obs,BW_syn,or_time,plot = False):
         # fig = plt.figure(figsize=(12, 10))
@@ -135,17 +154,28 @@ class Misfit:
                                 s_syn[2].data[0:len_S_obs],
                                 int(len_S_obs))
         shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
+
+
+        # cc_obspy = cc.correlate(s_obs[2].data, s_syn[2].data, int(0.25 * len(s_obs[2].data)))
+        # shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
+
+
         shift = np.argmax(cc_obspy)
         time_shift = np.append(time_shift, shift_centered)
 
-        mu_s = np.array([0.6, 0.6, 0.9])
+        mu_s = np.array([0.5, 0.5, 0.9])
         sigma_s = np.array([0.3, 0.3, 0.1])
+
 
         for i in range(len(s_obs)):
             delta = s_obs[i].stats.delta
             cc_obspy = cc.correlate(s_obs[i].data[0:len_S_obs],
                                     s_syn[i].data[0:len_S_obs],
                                     int(len_S_obs))
+
+            # cc_obspy = cc.correlate(s_obs[i].data, s_syn[i].data, int(0.25 * len(s_obs[i].data)))
+
+
             CC_s = cc_obspy[shift]
             #shift, CC_s = cc.xcorr_max(cc_obspy, abs_max=False)
 
@@ -153,6 +183,8 @@ class Misfit:
 
 
             misfit = np.append(misfit, ((CC_s - mu_s[i]) ** 2) / (2 * (sigma_s[i]) ** 2))# + np.abs(shift))
+
+            # misfit = np.append(misfit, ((CC_s - 0.99) ** 2) / (2 * (0.1) ** 2))  # + np.abs(shift))
 
             if plot:
                 time_array = np.arange(len(s_obs[i].data)) * delta
@@ -166,11 +198,11 @@ class Misfit:
                 ymin, ymax = ax1.get_ylim()
                 xmin, xmax = ax1.get_xlim()
                 if i == 0:
-                    plt.text(xmax - 30, ymax / 1.7, "S-Z - %.4f - %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                    plt.text(xmax - 30, ymax / 1.7, "S-Z - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
                 elif i == 1:
-                    plt.text(xmax - 30, ymax / 1.7, "S-R - %.4f - %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                    plt.text(xmax - 30, ymax / 1.7, "S-R - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
                 elif i == 2:
-                    plt.text(xmax - 30, ymax / 1.7, "S-T - %.4f - %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                    plt.text(xmax - 30, ymax / 1.7, "S-T - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
                 ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
                 ax1.tick_params(axis='x', labelsize=18)
                 ax1.tick_params(axis='y', labelsize=18)
@@ -181,11 +213,18 @@ class Misfit:
                                 p_syn[0].data[0:len_P_obs],
                                 int(len_P_obs))
         shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
+
+        # cc_obspy = cc.correlate(p_obs[0].data, p_syn[0].data, int(0.25 * len(p_obs[0].data)))
+        # shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
+
+
         shift = np.argmax(cc_obspy)
         time_shift = np.append(time_shift, shift_centered)
 
         mu_p = np.array([0.95, 0.9])
         sigma_p = np.array([0.1, 0.2])
+
+
 
         # P- correlation
         for i in range(len(p_obs)):
@@ -197,10 +236,15 @@ class Misfit:
             cc_obspy = cc.correlate(p_obs[i].data[0:len_P_obs],
                                     p_syn[i].data[0:len_P_obs],
                                     int(len_P_obs))
+
+            # cc_obspy = cc.correlate(p_obs[i].data, p_syn[i].data, int(0.25 * len(p_obs[i].data)))
+
             CC_p = cc_obspy[shift]
             # shift, CC_p = cc.xcorr_max(cc_obspy, abs_max=False)
 
             misfit = np.append(misfit, ((CC_p - mu_p[i] ) ** 2) / (2 * (sigma_p[i]) ** 2) )#+ np.abs(shift))
+
+            # misfit = np.append(misfit, ((CC_p - 0.99) ** 2) / (2 * (0.1) ** 2))  # + np.abs(shift))
 
             p_syn_shift_obspy = self.shift(p_syn[i].data, -shift_centered)
             start = int((p_start_obs.timestamp - or_time.timestamp - 100) / delta)
@@ -230,10 +274,10 @@ class Misfit:
                 ax1.tick_params(axis='x', labelsize=18)
                 ax1.tick_params(axis='y', labelsize=18)
                 plt.tight_layout()
-            # plt.show()
+
             if i == 1 and plot == True:
                 plt.legend(loc='lower left', fontsize=15)
-
+        # plt.show()
         sum_misfit = np.sum(misfit)
         return misfit, amplitude, time_shift,fig
 

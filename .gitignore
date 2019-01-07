@@ -1,0 +1,4 @@
+./Database/
+./Extra/
+copare_databases.py
+*.npz

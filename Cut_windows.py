@@ -41,7 +41,7 @@ class Cut_windows:
 
         P_stream = Stream()
         S_stream = Stream()
-        BW_stream = Stream()
+        # BW_stream = Stream()
 
         for i,trace in enumerate(stream.traces):
             trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
@@ -60,8 +60,8 @@ class Cut_windows:
                                        "channel": trace.stats.channel})
 
             if 'T' in trace.stats.channel:
-                total_trace = zero_trace.__add__(S_trace, method=0, interpolation_samples=0, fill_value=S_trace.data,
-                                                 sanity_checks=True)
+                # total_trace = zero_trace.__add__(S_trace, method=0, interpolation_samples=0, fill_value=S_trace.data,
+                #                                  sanity_checks=True)
                 total_s_trace = Trace(np.zeros(npts_s),
                       header={"starttime": or_time, 'delta': trace.stats.delta,
                               "station": trace.stats.station,
@@ -70,9 +70,9 @@ class Cut_windows:
                                                                        fill_value=S_trace.data,
                                                                        sanity_checks=True)
             else:
-                P_and_S = P_trace.__add__(S_trace, fill_value=0, sanity_checks=True)
-                total_trace = zero_trace.__add__(P_and_S, method=0, interpolation_samples=0,
-                                                 fill_value=P_and_S.data, sanity_checks=True)
+                # P_and_S = P_trace.__add__(S_trace, fill_value=0, sanity_checks=True)
+                # total_trace = zero_trace.__add__(P_and_S, method=0, interpolation_samples=0,
+                #                                  fill_value=P_and_S.data, sanity_checks=True)
                 total_p_trace = Trace(np.zeros(npts_p),
                       header={"starttime": or_time, 'delta': trace.stats.delta,
                               "station": trace.stats.station,
@@ -89,23 +89,25 @@ class Cut_windows:
                                                                        sanity_checks=True)
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
-            BW_stream.append(total_trace)
+            # BW_stream.append(total_trace)
             # === Apply filters ===
             self.S_stream = self.S_filter(S_stream)
             self.P_stream = self.BW_filter(P_stream)
-            self.BW_stream = self.BW_filter(BW_stream)
+            # self.BW_stream = self.BW_filter(BW_stream)
 
 
 
     def Get_bw_windows_MANUAL(self, stream, tt_P,tt_S, or_time, npts):
         self.original = stream
         self.start_P = obspy.UTCDateTime(tt_P.timestamp - 10)
+        # self.start_P = obspy.UTCDateTime(tt_P.timestamp - 5)
         self.or_P_len = int((self.start_P - or_time)/ stream.traces[0].stats.delta)
         self.start_S = obspy.UTCDateTime(tt_S.timestamp - 15)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
         end_P = obspy.UTCDateTime(tt_P.timestamp + 20)
         end_S = obspy.UTCDateTime(tt_S.timestamp + 50)
+        # end_S = obspy.UTCDateTime(tt_S.timestamp + 35)
 
         P_stream = Stream()
         S_stream = Stream()
@@ -165,19 +167,24 @@ class Cut_windows:
 
 
     def BW_filter(self, stream):
-        # stream.filter('highpass', freq=1.0 / 30.0)
-        stream.filter('highpass', freq=1.0 / 10.0, zerophase=True)
-        # stream.filter('highpass', freq=0.05)
-        stream.filter('lowpass', freq=0.75, zerophase=True)
+        # stream.filter('highpass', freq=0.5)
         # stream.filter('lowpass', freq=0.1)
+
+
+        # stream.filter('highpass', freq=1.0 / 10.0, zerophase=True) #mars
+        stream.filter('highpass', freq=1.0/20.0, zerophase=True) #earth
+        stream.filter('lowpass', freq=1.0/7.0, zerophase=True)#earth
+        # stream.filter('lowpass', freq=1.0/5.0, zerophase=True)#mars
         return stream
 
     def S_filter(self, stream):
-        # stream.filter('highpass', freq=1.0 / 30.0)
-        stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)
-        # stream.filter('highpass', freq=0.05)
-        stream.filter('lowpass', freq=1.0 / 7.0, zerophase=True)
+        # stream.filter('highpass', freq=0.5)
         # stream.filter('lowpass', freq=0.1)
+
+        # stream.filter('highpass', freq=1.0 / 30.0)#mars
+        stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)#earth
+        # stream.filter('highpass', freq=0.05)#mars
+        stream.filter('lowpass', freq=1.0 / 7.0, zerophase=True)# earth
         return stream
 
 

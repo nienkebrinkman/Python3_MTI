@@ -159,24 +159,6 @@ class MCMC:
 
     def G_function(self, epi, depth, M0, strike, dip, rake ):
 
-
-        #
-        # strike = 260#99.88#186
-        # dip = 10#77.03#50
-        # rake = -150#68.81#80
-        # epi = 88.9
-        # depth = 25000
-        # self.time_at_rec = obspy.UTCDateTime(2018,9,5,18,7,59)#obspy.UTCDateTime(2011,8,23,17,51,04)
-
-
-
-
-        # #
-        # strike = 320
-        # dip = 65
-        # rake = 110
-        # epi =86
-        # depth = 35000
         dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
                                                                                  lon1=self.prior['lo_r'],
                                                                                  azi1=self.prior['baz'],
@@ -188,13 +170,6 @@ class MCMC:
                                                                strike=strike, dip=dip, rake=rake,
                                                                time=self.or_time, M0=M0)
 
-
-        # npts = self.BW_obs.P_stream.traces[0].stats.npts
-        # tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
-        # tt_S = obspy.UTCDateTime(2019, 1, 3, 15, 18, 34.6)
-        # self.BW_syn.Get_bw_windows_MANUAL(st_syn, tt_P, tt_S, self.or_time, npts=self.prior['npts'])
-
-
         self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['npts'])
 
 
@@ -205,8 +180,8 @@ class MCMC:
         elif BW == True:
             file_name.write("epi, depth, strike, dip, rake, M0, Total-misfit, p_z, p_r, s_z, s_r, s_t, bw_tot, shift_S, shift-P, Iteration\n\r")
             file_name.write("Velocity Model:%s\n\r" %self.prior['VELOC'])
-            file_name.write("Station:%s\n\r" % self.BW_obs.BW_stream.traces[0].stats.station)
-            file_name.write("Sampling rate:%.2f\n\r" % self.BW_obs.BW_stream.traces[0].stats.sampling_rate)
+            file_name.write("Station:%s\n\r" % self.BW_obs.P_stream.traces[0].stats.station)
+            file_name.write("Sampling rate:%.2f\n\r" % self.BW_obs.P_stream.traces[0].stats.sampling_rate)
             file_name.write("la_r:%.4f\n\r" % self.prior['la_r'])
             file_name.write("lo_r:%.4f\n\r" % self.prior['lo_r'])
             file_name.write("kind:%s\n\r" % self.prior['kind'])  #
@@ -215,7 +190,7 @@ class MCMC:
             file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
             file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #
             file_name.write("Flattening:%.4f\n\r" % self.prior['f'])  #
-            file_name.write("Noise model:%s\n\r" % self.prior['noise_model'])  #
+            file_name.write("Azimuth:%.4f\n\r" % self.prior['az'])  #
 
         elif SW == True:
             raise ValueError('Surface waves Not implemented yet')

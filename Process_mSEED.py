@@ -8,7 +8,7 @@ class Process_mSEED:
                                   level='response')
     def remove_instrument(self):
         # === Remove instrument response ===
-        self.stream.remove_response(self.inv,pre_filt=(0.005, 0.01, 0.4, 0.5))
+        self.stream.remove_response(self.inv,pre_filt=(0.005, 0.01, 0.4, 0.5),output="DISP")
         return self.stream
 
     def automatic_rotate(self,baz):

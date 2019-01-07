@@ -16,7 +16,7 @@ class Get_Parameters:
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path = '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/start_sample.txt'#'/home/nienke/start_sample.txt'#
+        start_sample_path = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/MSS/start_sample.txt'#'/home/nienke/start_sample.txt'#
 
 
         if start_sample_path == None:
@@ -34,8 +34,8 @@ class Get_Parameters:
     def PRIOR(self,stream,inventory=None):
         trace = stream.traces[0]
         PRIOR = {}
-        PRIOR['PLOT'] = False
-        PRIOR['save_name'] = 'EH_' + trace.id.replace('.','_')
+        PRIOR['PLOT'] = True
+        PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
         PRIOR['save_dir'] = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/MSS'#'/home/nienke/MSS'
         # = Radius of the body used =
         PRIOR['radius'] = 3389.5 # Mars
@@ -69,13 +69,13 @@ class Get_Parameters:
         # = Velocity model =
 
         #   -Mars-
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/EH45TcoldCrust1b_1s'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
-        PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        # PRIOR['VELOC_taup'] = 'MAAK.npz'
+        # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
+        PRIOR['VELOC_taup'] = 'MAAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -87,7 +87,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 100000
+        PRIOR['sample_number'] = 5000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -112,8 +112,8 @@ class Get_Parameters:
 
         # = Range epi and depth =
         PRIOR['epi']={}
-        PRIOR['epi']['range_min'] = epi - 10
-        PRIOR['epi']['range_max'] = epi + 10
+        PRIOR['epi']['range_min'] = epi - 1
+        PRIOR['epi']['range_max'] = epi + 1
         PRIOR['epi']['spread'] = 1
         if self.depth == None:
             PRIOR['depth'] = {}
@@ -122,8 +122,8 @@ class Get_Parameters:
             PRIOR['depth']['spread'] = 1000
         else:
             PRIOR['depth'] = {}
-            PRIOR['depth']['range_min'] = depth - 10000
-            PRIOR['depth']['range_max'] = depth + 10000
+            PRIOR['depth']['range_min'] = depth - 25000
+            PRIOR['depth']['range_max'] = depth + 25000
             PRIOR['depth']['spread'] = 1000
 
         return PRIOR

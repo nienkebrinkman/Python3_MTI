@@ -24,8 +24,8 @@ class Get_Seismogram():
     def get_seis_manual(self, la_s, lo_s, depth, strike, dip, rake, time, M0):
         source = self.get_source(la_s=la_s, lo_s=lo_s, depth=depth, strike=strike, dip=dip, rake=rake, time=time, M0=M0)
         receiver = self.get_receiver()
-        traces = self.db.get_seismograms(source=source, receiver=receiver, components=self.prior['components'],kind=self.prior['kind'])
-        traces.interpolate(sampling_rate=self.prior['sampling_rate'])
+        traces = self.db.get_seismograms(source=source, receiver=receiver, components=self.prior['components'],kind=self.prior['kind'],dt = 1.0/self.prior['sampling_rate'])
+        # traces.interpolate(sampling_rate=self.prior['sampling_rate'])
         traces.traces[0].data = np.float64(traces.traces[0].data)
         traces.traces[1].data = np.float64(traces.traces[1].data)
         traces.traces[2].data = np.float64(traces.traces[2].data)
