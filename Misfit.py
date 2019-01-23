@@ -5,63 +5,6 @@ import matplotlib.pylab as plt
 from obspy.core.stream import Stream
 
 class Misfit:
-    def L2_BW(self, BW_obs, BW_syn, or_time, var):
-        p_obs = BW_obs.P_stream
-        p_syn = BW_syn.P_stream
-        s_obs = BW_obs.S_stream
-        s_syn = BW_syn.S_stream
-        dt = s_obs[0].meta.delta
-        misfit = np.array([])
-        time_shift = np.array([], dtype=int)
-        # S - correlations:
-        for i in range(len(s_obs)):
-            cc_obspy = cc.correlate(s_obs[i].data, s_syn[i].data, int(0.25* len(s_obs[i].data)))
-            shift, CC_s = cc.xcorr_max(cc_obspy)
-
-            s_syn_shift = self.shift(s_syn[i].data, -shift)
-            time_shift = np.append(time_shift, shift)
-
-            # d_obs_mean = np.mean(s_obs[i].data)
-            # var_array = var * d_obs_mean
-
-            var_array = np.var(s_obs[i].data)
-            # var_array = var**2
-
-            misfit = np.append(misfit, np.matmul((s_obs[i].data - s_syn_shift).T, (s_obs[i].data - s_syn_shift)) / (
-                2 * (var_array)))
-            # time = -time_shift * dt  # Relatively, the s_wave arrives now time later or earlier than it originally did
-
-            # plt.plot(s_syn_shift,label='s_shifted',linewidth=0.3)
-            # plt.plot(s_syn[i], label='s_syn',linewidth=0.3)
-            # plt.plot(s_obs[i], label='s_obs',linewidth=0.3)
-            # plt.legend()
-            # plt.savefig()
-            # plt.close()
-        # P- correlation
-        for i in range(len(p_obs)):
-            cc_obspy = cc.correlate(s_obs[i].data, s_syn[i].data, int(0.25 * len(p_obs[i].data)))
-            shift, CC_p = cc.xcorr_max(cc_obspy)
-
-            p_syn_shift = self.shift(p_syn[i].data, -shift)
-            time_shift = np.append(time_shift, shift)
-
-            # d_obs_mean = np.mean(p_obs[i].data)
-            # var_array = var * d_obs_mean
-            var_array = np.var(p_obs[i].data)
-
-            misfit = np.append(misfit, np.matmul((p_obs[i].data - p_syn_shift).T, (p_obs[i].data - p_syn_shift)) / (
-                2 * (var_array)))
-            # time = -time_shift + len(s_obs)] * dt  # Relatively, the s_wave arrives now time later or earlier than it originally did
-
-            plt.plot(p_syn_shift, label='p_shifted')
-            plt.plot(p_syn[i], label='p_syn')
-            plt.plot(p_obs[i], label='p_obs')
-            plt.legend()
-            plt.show()
-            # plt.close()
-        sum_misfit = np.sum(misfit)
-        return sum_misfit, time_shift
-
     def CC_BW_3c(self,BW_obs,BW_syn,or_time,plot = False):
         p_obs = BW_obs.P_stream
         p_syn = BW_syn.P_stream
@@ -126,26 +69,12 @@ class Misfit:
         misfit_obs = np.array([])
         time_shift = np.array([], dtype=int)
         amplitude = np.array([])
-        #
-        # amp_obs = p_obs.copy()
-        # amp_obs.trim(p_start_obs, p_start_obs + 30)
-        # amp_syn = p_syn.copy()
-        # amp_syn.trim(p_start_syn, p_start_syn + 30)
+
 
         if plot:
             fig = plt.figure(figsize=(10, 12))
         else:
             fig = 1
-
-
-        #
-        # t1 = s_start_obs
-        # t2 = s_start_syn
-        #
-        # tr1 = BW_obs.S_stream.select(component="Z")[0]
-        # tr2 = BW_syn.S_stream.select(component="Z")[0]
-        #
-        # dt, coeff = cc.xcorr_pick_correction(t1, tr1, t2, tr2, 5, 20, 10, plot=True)
 
         # S - correlations:
         # Calculate Shift based on T component
@@ -155,16 +84,11 @@ class Misfit:
                                 int(len_S_obs))
         shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
 
-
-        # cc_obspy = cc.correlate(s_obs[2].data, s_syn[2].data, int(0.25 * len(s_obs[2].data)))
-        # shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
-
-
         shift = np.argmax(cc_obspy)
         time_shift = np.append(time_shift, shift_centered)
 
         mu_s = np.array([0.5, 0.5, 0.9])
-        sigma_s = np.array([0.3, 0.3, 0.1])
+        sigma_s = np.array([0.3, 0.3, 0.2])
 
 
         for i in range(len(s_obs)):
@@ -172,12 +96,7 @@ class Misfit:
             cc_obspy = cc.correlate(s_obs[i].data[0:len_S_obs],
                                     s_syn[i].data[0:len_S_obs],
                                     int(len_S_obs))
-
-            # cc_obspy = cc.correlate(s_obs[i].data, s_syn[i].data, int(0.25 * len(s_obs[i].data)))
-
-
             CC_s = cc_obspy[shift]
-            #shift, CC_s = cc.xcorr_max(cc_obspy, abs_max=False)
 
             s_syn_shift_obspy = self.shift(s_syn[i].data, -shift_centered)
 

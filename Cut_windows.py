@@ -35,7 +35,7 @@ class Cut_windows:
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
 
-        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 20)
+        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 40)
         end_S = obspy.UTCDateTime(or_time_sec + tt_S + 50)
 
 
@@ -95,6 +95,10 @@ class Cut_windows:
             self.P_stream = self.BW_filter(P_stream)
             # self.BW_stream = self.BW_filter(BW_stream)
 
+            # === Taper the data ===
+            # self.S_stream.taper(10,'cosine')
+            # self.P_stream.taper(10,'cosine')
+
 
 
     def Get_bw_windows_MANUAL(self, stream, tt_P,tt_S, or_time, npts):
@@ -105,7 +109,7 @@ class Cut_windows:
         self.start_S = obspy.UTCDateTime(tt_S.timestamp - 15)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
-        end_P = obspy.UTCDateTime(tt_P.timestamp + 20)
+        end_P = obspy.UTCDateTime(tt_P.timestamp + 15)
         end_S = obspy.UTCDateTime(tt_S.timestamp + 50)
         # end_S = obspy.UTCDateTime(tt_S.timestamp + 35)
 

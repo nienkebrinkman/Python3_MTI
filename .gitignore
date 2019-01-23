@@ -2,3 +2,7 @@
 ./Extra/
 copare_databases.py
 *.npz
+Database/
+Extra/
+Get_Parameters_DWAK.py
+__pychache__*
