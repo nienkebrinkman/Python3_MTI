@@ -3,6 +3,7 @@ import obspy
 import geographiclib.geodesic as geo
 import matplotlib.pylab as plt
 import pylab
+import os
 
 from obspy.core.stream import Stream
 
@@ -97,6 +98,8 @@ class MCMC:
                 if self.i == 0:
                     if self.prior['PLOT'] == True and self.i % 1 == 0:
                         # self.plot()
+                        if not os.path.exists(self.prior['save_dir'] + '/plots/'):
+                            os.makedirs('my_folder')
                         fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%05i.png' % (self.prior['save_name'], self.i))
                         plt.close("all")
                     if BW == True:

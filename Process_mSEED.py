@@ -21,7 +21,6 @@ class Process_mSEED:
             raise ValueError('Channels cant be rotated')
         return self.stream
 
-
     def rotate_NEZ_RTZ(self,baz):
         # === Convert the NEZ to RTZ coordinates ===
         self.stream.rotate(method='NE->RT', back_azimuth=baz)

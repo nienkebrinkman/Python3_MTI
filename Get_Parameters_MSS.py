@@ -2,21 +2,26 @@
 
 import obspy
 import numpy as np
+import os
 from obspy.geodetics import kilometer2degrees
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.core.event.event import Event
+from obspy.core.event import read_events
+
+
 
 from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory ='/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/'# '/home/nienke/'#
+        self.directory = '/home/nienke/MARSQUAKES/'# '/home/nienke/'#
+        self.inv = self.directory + 'mss_event.xml'
         mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
         mSEED_path = self.directory + mSEED_file
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/MSS/start_sample.txt'#'/home/nienke/start_sample.txt'#
+        start_sample_path = None#'/home/nienke/Documents/Master/Thesis/Data/Input/start_sample.txt'#'/home/nienke/start_sample.txt'#
 
 
         if start_sample_path == None:
@@ -27,16 +32,25 @@ class Get_Parameters:
             epi = np.random.uniform(PRIOR['epi']['range_min'], PRIOR['epi']['range_max'])
             depth = np.random.uniform(PRIOR['depth']['range_min'], PRIOR['depth']['range_max'])
 
-            start_sample_path = create.get_sample_manual(epi,depth,strike,dip,rake,self.M0,self.directory+'start_sample.txt')
+            start_sample_path = create.get_sample_manual(epi,depth,strike,dip,rake,PRIOR['M0'],self.directory+'start_sample.txt')
         return start_sample_path
 
 
-    def PRIOR(self,stream,inventory=None):
+    def PRIOR(self,stream,inventory=False):
+        if inventory:
+            if self.cat == None:
+                raise ValueError('No path for xml file specified!')
+            else:
+                inv = read_events(self.inv)
+
         trace = stream.traces[0]
         PRIOR = {}
         PRIOR['PLOT'] = True
         PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
-        PRIOR['save_dir'] = '/home/nienke/Documents/Master/Thesis/Data'#'/home/nienke/MSS'
+        PRIOR['save_dir'] = self.directory + '/Output'  #'/home/nienke/MSS'
+        if not os.path.exists(PRIOR['save_dir']):
+            os.makedirs(PRIOR['save_dir'])
+
         # = Radius of the body used =
         PRIOR['radius'] = 3389.5 # Mars
         # PRIOR['radius'] = 6378137.0 # Earth
@@ -46,26 +60,37 @@ class Get_Parameters:
         # PRIOR['f'] = 1 / 298.257223563 # Earth
 
         # = Receiver =
-        if inventory == None:
+        if inventory == False:
             print('Location of InSight is used!')
             PRIOR['la_r'] = 4.5 # InSight
             PRIOR['lo_r'] = 136 # InSight
         else:
-            PRIOR['la_r'] = inventory._networks[0].stations[0]._latitude  #4.5 # InSight
-            PRIOR['lo_r'] = inventory._networks[0].stations[0]._longitude #136 # InSight
+            PRIOR['la_r'] = inv._networks[0].stations[0]._latitude  #4.5 # InSight
+            PRIOR['lo_r'] = inv._networks[0].stations[0]._longitude #136 # InSight
         PRIOR['network'] = trace.stats.network
         PRIOR['station'] = trace.stats.channel
         PRIOR['location'] = trace.stats.location
         PRIOR['rec_depth'] = 589 # For BFO station
 
         # = Source =
-        PRIOR['origin_time'] = obspy.UTCDateTime(2019, 1, 3, 15, 00, 53)
-        PRIOR['depth_s'] = 1
-        PRIOR['la_s'] = 1
-        PRIOR['lo_s'] = 1
-        Mw = 3.6
-        PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw) # Scalar Moment
-        self.M0 = PRIOR['M0']
+        ## Catalogue:
+        if inventory == False:
+            PRIOR['origin_time'] = obspy.UTCDateTime(2019, 1, 3, 15, 00, 30)
+            PRIOR['depth_s'] = 38438
+            PRIOR['la_s'] = - 26.443
+            PRIOR['lo_s'] = - 50.920
+            Mw = 4.46
+
+        else:
+            PRIOR['la_s'] = inv.events[0].origins[0].latitude
+            PRIOR['lo_s'] = inv.events[0].origins[0].longitude
+            PRIOR['depth_s'] = inv.events[0].origins[0].depth
+            PRIOR['origin_time'] = inv.events[0].origins[0].time
+            Mw = 4.46
+
+
+        PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw)  # Scalar Moment
+        # self.M0 = PRIOR['M0']
         PRIOR['components'] = ["Z", "R", "T"]
         PRIOR['kind'] = 'velocity'
 
@@ -77,18 +102,18 @@ class Get_Parameters:
 
 
 
-        epi = kilometer2degrees(dist, radius=PRIOR['radius'])
+        PRIOR['epi_s'] = kilometer2degrees(dist, radius=PRIOR['radius'])
 
         # = Velocity model =
 
         #   -Mars-
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
+        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
 
-        # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
+        PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = './Velocity_models/MAAK.npz'
+        PRIOR['VELOC_taup'] = 'MAAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -100,7 +125,7 @@ class Get_Parameters:
         # = Sample information =
         # PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        # PRIOR['sample_number'] = 5000
+        PRIOR['sample_number'] = 5000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -123,10 +148,10 @@ class Get_Parameters:
 
         # = Range epi and depth =
         PRIOR['epi']={}
-        PRIOR['epi']['range_min'] = PRIOR['epi'] - 1
-        PRIOR['epi']['range_max'] = PRIOR['epi']  + 1
+        PRIOR['epi']['range_min'] = PRIOR['epi_s'] - 1
+        PRIOR['epi']['range_max'] = PRIOR['epi_s']  + 1
         PRIOR['epi']['spread'] = 1
-        if self.depth == None:
+        if PRIOR['depth_s'] == None:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = 0
             PRIOR['depth']['range_max'] = 50000

@@ -33,23 +33,23 @@ def main():
     # st = Process.remove_instrument()
 
     PRIOR = get_parameters.PRIOR(stream)
-    PARAMETERS = get_parameters.Get_Unknown()
+    # PARAMETERS = get_parameters.Get_Unknown()
 
-    la_s= PARAMETERS['la_s']
-    lo_s= PARAMETERS['lo_s']
+    la_s=  PRIOR['la_s']
+    lo_s=  PRIOR['lo_s']
     la_r = PRIOR['la_r']
     lo_r = PRIOR['lo_r']
     dist, az, baz = gps2dist_azimuth(lat1=la_s, lon1=lo_s,
                                      lat2=la_r, lon2=lo_r,a=PRIOR['radius'], f=PRIOR['f'])
-    PRIOR['baz'] = 243
+    # PRIOR['baz'] = 243
     # PRIOR['az'] = 84
 
     # st = Process.automatic_rotate(PRIOR['baz'])
 
-    # epi = kilometer2degrees(dist, radius=PRIOR['radius'])
-    epi = 86 # Uncertainty is 10 degrees
+    epi = kilometer2degrees(dist, radius=PRIOR['radius'])
+    # epi = 86 # Uncertainty is 10 degrees
     # depth = PARAMETERS['depth_s']
-    depth = 36000 # 25000
+    # depth = 36000 # 25000
 
     PRIOR = get_parameters.Get_ranges(epi,depth,PRIOR)
     sample_path = get_parameters.Start_sample_path(PRIOR)
