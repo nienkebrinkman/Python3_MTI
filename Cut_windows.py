@@ -184,7 +184,7 @@ class Cut_windows:
         BW_stream = Stream()
 
         for i, trace in enumerate(stream.traces):
-            trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
+            # trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
 
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
@@ -242,22 +242,28 @@ class Cut_windows:
         # stream.filter('highpass', freq=0.5)
         # stream.filter('lowpass', freq=0.1)
 
+        stream.filter('lowpass', freq=0.75, zerophase=True) # MSS
+        stream.filter('highpass', freq=1.0 / 10.0, zerophase=True) # MSS
 
         # stream.filter('highpass', freq=1.0 / 10.0, zerophase=True) #mars
-        stream.filter('highpass', freq=1.0/20.0, zerophase=True) #earth
-        stream.filter('lowpass', freq=1.0/7.0, zerophase=True)#earth
+        # stream.filter('highpass', freq=1.0/20.0, zerophase=True) #earth
+        # stream.filter('lowpass', freq=1.0/7.0, zerophase=True)#earth
         # stream.filter('lowpass', freq=1.0/5.0, zerophase=True)#mars
         return stream
 
     def S_filter(self, stream):
-        # stream.filter('highpass', freq=0.5)
-        # stream.filter('lowpass', freq=0.1)
+        stream.filter('highpass', freq=0.5)
+        stream.filter('lowpass', freq=0.1)
 
         # stream.filter('highpass', freq=1.0 / 30.0)#mars
-        stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)#earth
+        # stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)#earth
         # stream.filter('highpass', freq=0.05)#mars
-        stream.filter('lowpass', freq=1.0 / 7.0, zerophase=True)# earth
+        # stream.filter('lowpass', freq=1.0 / 7.0, zerophase=True)# earth
+        stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)#MSS
+        stream.filter('lowpass', freq=1.0 / 7.0, zerophase=True)#MSS
         return stream
+
+
 
 
 

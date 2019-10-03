@@ -14,9 +14,11 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/MARSQUAKES/'# '/home/nienke/'#
+        self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/MSS/'# '/home/nienke/MARSQUAKES/'
+        # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = self.directory + 'mss_event.xml'
         mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
+        # mSEED_file = 'waveforms_VBB.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
         mSEED_path = self.directory + mSEED_file
         return mSEED_path
 
@@ -47,7 +49,7 @@ class Get_Parameters:
         PRIOR = {}
         PRIOR['PLOT'] = True
         PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
-        PRIOR['save_dir'] = self.directory + '/Output'  #'/home/nienke/MSS'
+        PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
 
@@ -70,7 +72,7 @@ class Get_Parameters:
         PRIOR['network'] = trace.stats.network
         PRIOR['station'] = trace.stats.channel
         PRIOR['location'] = trace.stats.location
-        PRIOR['rec_depth'] = 589 # For BFO station
+        PRIOR['rec_depth'] = 0#589 # For BFO station
 
         # = Source =
         ## Catalogue:
@@ -78,7 +80,7 @@ class Get_Parameters:
             PRIOR['origin_time'] = obspy.UTCDateTime(2019, 1, 3, 15, 00, 30)
             PRIOR['depth_s'] = 38438
             PRIOR['la_s'] = - 26.443
-            PRIOR['lo_s'] = - 50.920
+            PRIOR['lo_s'] = 50.920
             Mw = 4.46
 
         else:
@@ -99,21 +101,25 @@ class Get_Parameters:
                                          lat2=PRIOR['la_r'], lon2=PRIOR['lo_r'], a=PRIOR['radius'], f=PRIOR['f'])
         PRIOR['baz'] = baz
         PRIOR['az'] = az
-
-
-
         PRIOR['epi_s'] = kilometer2degrees(dist, radius=PRIOR['radius'])
+
+        # PRIOR['baz'] = 243
+        # PRIOR['epi_s'] = 86
+
+
+
+
 
         # = Velocity model =
 
         #   -Mars-
-        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
 
-        PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
+        # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = 'MAAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Database/MAAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -123,7 +129,7 @@ class Get_Parameters:
         # PRIOR['noise_model'] = 'Tcompact' #'STS2' #
 
         # = Sample information =
-        # PRIOR['npts'] = 30000
+        PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
         PRIOR['sample_number'] = 5000
         # PRIOR['sampling_rate'] = 20 # [Hz]
@@ -158,8 +164,8 @@ class Get_Parameters:
             PRIOR['depth']['spread'] = 1000
         else:
             PRIOR['depth'] = {}
-            PRIOR['depth']['range_min'] = PRIOR['depth_s'] - 25000
-            PRIOR['depth']['range_max'] = PRIOR['depth_s'] + 25000
+            PRIOR['depth']['range_min'] = PRIOR['depth_s'] - 10000
+            PRIOR['depth']['range_max'] = PRIOR['depth_s'] + 10000
             PRIOR['depth']['spread'] = 1000
 
         return PRIOR
@@ -188,6 +194,13 @@ class Get_Parameters:
         PARAMETERS['strike'] = 333  # 79
         PARAMETERS['dip'] = 61  # 50
         PARAMETERS['rake'] = 83  # 20
+
+        m_pp = -214996686134000.0
+        m_rp = 247303763622000.0
+        m_rr = 3531870796970000.0
+        m_rt = -3487091494290000.0
+        m_tp = 1008979372750000.0
+        m_tt =-3316874110840000.0
 
         PARAMETERS['origin_time'] = obspy.UTCDateTime(2019,1,3,15,00,53)#obspy.UTCDateTime(2018,9,5,18,7,59)
         return PARAMETERS

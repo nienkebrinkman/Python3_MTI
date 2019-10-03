@@ -17,6 +17,7 @@ def main():
     get_parameters = Get_Parameters()
     mSEED_path = get_parameters.Get_Path()
     stream = obspy.read(mSEED_path)
+    stream.interpolate(sampling_rate = 5.0)
     # stream.plot()
 
     # Stream for only BFO station
@@ -33,6 +34,7 @@ def main():
     # st = Process.automatic_rotate(PRIOR['baz']) # Rotate your Traces
 
     PRIOR = get_parameters.Get_ranges(PRIOR)
+
     sample_path = get_parameters.Start_sample_path(PRIOR)
 
     # === Cut the BW windows (P&S) ===

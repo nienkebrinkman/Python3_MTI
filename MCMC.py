@@ -99,7 +99,7 @@ class MCMC:
                     if self.prior['PLOT'] == True and self.i % 1 == 0:
                         # self.plot()
                         if not os.path.exists(self.prior['save_dir'] + '/plots/'):
-                            os.makedirs('my_folder')
+                            os.makedirs(self.prior['save_dir'] + '/plots/')
                         fig.savefig(self.prior['save_dir'] + '/plots/SHIFT_%s_%05i.png' % (self.prior['save_name'], self.i))
                         plt.close("all")
                     if BW == True:
