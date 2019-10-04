@@ -7,6 +7,7 @@ from obspy.geodetics import kilometer2degrees
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.core.event.event import Event
 from obspy.core.event import read_events
+from pyrocko import moment_tensor as mtm
 
 
 
@@ -14,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/MSS/'# '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/Documents/Master/Thesis/Data/MSS/'# '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = self.directory + 'mss_event.xml'
         mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -92,6 +93,7 @@ class Get_Parameters:
 
 
         PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw)  # Scalar Moment
+        exp = mtm.magnitude_to_moment(Mw) # Using Pyrocko package....
         # self.M0 = PRIOR['M0']
         PRIOR['components'] = ["Z", "R", "T"]
         PRIOR['kind'] = 'velocity'
@@ -113,13 +115,13 @@ class Get_Parameters:
         # = Velocity model =
 
         #   -Mars-
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
-        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
+        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/DWAK_1s/'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Database/MAAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Thesis/Data/Database/DWAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -172,37 +174,37 @@ class Get_Parameters:
 
 
     def Get_Unknown(self):
-        PARAMETERS = {}
-        # event = obspy.read_events('/home/nienke/mss_event.xml')
-
-        event = obspy.read_events(
-            '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/mss_event.xml')
-
-        magnitude = Event.preferred_magnitude(event.events[0])
-        # Mw = magnitude.mag
-        source = Event.preferred_origin(event.events[0])
-        depth = source.depth
-        la_s = source.latitude
-        lo_s = source.longitude
-        time = source.time
-
-        # Source parameters
-        PARAMETERS['la_s'] = -26
-        PARAMETERS['lo_s'] = 53
-
-        PARAMETERS['depth_s'] = 36000  # [m]
-        PARAMETERS['strike'] = 333  # 79
-        PARAMETERS['dip'] = 61  # 50
-        PARAMETERS['rake'] = 83  # 20
-
-        m_pp = -214996686134000.0
-        m_rp = 247303763622000.0
-        m_rr = 3531870796970000.0
-        m_rt = -3487091494290000.0
-        m_tp = 1008979372750000.0
-        m_tt =-3316874110840000.0
-
-        PARAMETERS['origin_time'] = obspy.UTCDateTime(2019,1,3,15,00,53)#obspy.UTCDateTime(2018,9,5,18,7,59)
+        # PARAMETERS = {}
+        # # event = obspy.read_events('/home/nienke/mss_event.xml')
+        #
+        # event = obspy.read_events(
+        #     '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/mss_event.xml')
+        #
+        # magnitude = Event.preferred_magnitude(event.events[0])
+        # # Mw = magnitude.mag
+        # source = Event.preferred_origin(event.events[0])
+        # depth = source.depth
+        # la_s = source.latitude
+        # lo_s = source.longitude
+        # time = source.time
+        #
+        # # Source parameters
+        # PARAMETERS['la_s'] = -26
+        # PARAMETERS['lo_s'] = 53
+        #
+        # PARAMETERS['depth_s'] = 36000  # [m]
+        # PARAMETERS['strike'] = 333  # 79
+        # PARAMETERS['dip'] = 61  # 50
+        # PARAMETERS['rake'] = 83  # 20
+        #
+        # m_pp = -214996686134000.0
+        # m_rp = 247303763622000.0
+        # m_rr = 3531870796970000.0
+        # m_rt = -3487091494290000.0
+        # m_tp = 1008979372750000.0
+        # m_tt =-3316874110840000.0
+        #
+        # PARAMETERS['origin_time'] = obspy.UTCDateTime(2019,1,3,15,00,53)#obspy.UTCDateTime(2018,9,5,18,7,59)
         return PARAMETERS
 
     def Magnitude2Scalarmoment(self,Mw):

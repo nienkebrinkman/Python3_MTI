@@ -21,7 +21,7 @@ class Cut_windows:
                                     phase_list=['S'])
         return tt[0].time
 
-    def Get_bw_windows(self, stream, epi, depth, or_time,npts):
+    def Get_bw_windows(self, stream, epi, depth, or_time, npts):
         self.original = stream
         or_time_sec = or_time.timestamp
         tt_P = self.get_P(epi, depth)
@@ -242,8 +242,9 @@ class Cut_windows:
         # stream.filter('highpass', freq=0.5)
         # stream.filter('lowpass', freq=0.1)
 
+        stream.filter('highpass', freq=1.0 / 10.0, zerophase=True)  # MSS
         stream.filter('lowpass', freq=0.75, zerophase=True) # MSS
-        stream.filter('highpass', freq=1.0 / 10.0, zerophase=True) # MSS
+
 
         # stream.filter('highpass', freq=1.0 / 10.0, zerophase=True) #mars
         # stream.filter('highpass', freq=1.0/20.0, zerophase=True) #earth
@@ -252,8 +253,8 @@ class Cut_windows:
         return stream
 
     def S_filter(self, stream):
-        stream.filter('highpass', freq=0.5)
-        stream.filter('lowpass', freq=0.1)
+        # stream.filter('highpass', freq=0.5)
+        # stream.filter('lowpass', freq=0.1)
 
         # stream.filter('highpass', freq=1.0 / 30.0)#mars
         # stream.filter('highpass', freq=1.0 / 30.0, zerophase=True)#earth

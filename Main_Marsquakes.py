@@ -17,7 +17,7 @@ def main():
     get_parameters = Get_Parameters()
     mSEED_path = get_parameters.Get_Path()
     stream = obspy.read(mSEED_path)
-    stream.interpolate(sampling_rate = 5.0)
+    stream.resample(sampling_rate = 20.)
     # stream.plot()
 
     # Stream for only BFO station
@@ -41,10 +41,10 @@ def main():
     BW_obs = Cut_windows(PRIOR['VELOC_taup'])
 
     npts = stream.traces[0].stats.npts
-    # BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts = npts)
-    tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
-    tt_S = obspy.UTCDateTime(2019, 1, 3, 15, 18, 34.6)
-    BW_obs.Get_bw_windows_MANUAL_OLD(stream, tt_P, tt_S, PRIOR['origin_time'], npts=npts)
+    BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts = npts)
+    # tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
+    # tt_S = obspy.UTCDateTime(2019, 1, 3, 15, 18, 34.6)
+    # BW_obs.Get_bw_windows_MANUAL_OLD(stream, tt_P, tt_S, PRIOR['origin_time'], npts=npts)
 
     # === Start the MCMC ===
     mcmc = MCMC(PRIOR['origin_time'], PRIOR, sample_path=sample_path)

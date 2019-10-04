@@ -27,14 +27,21 @@ import io
 from Get_Parameters import Get_Parameters
 
 
+from pyrocko import moment_tensor as mtm
+
+
+
+
+
 def main():
     ## Post - Processing [processing the results from inversion]
     result = Post_processing_sdr()
 
     strike, dip, rake = aux_plane(139, 23, 65)
 
-    directory = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials'
-    path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/5_II_BFO_00_BHZ.txt'
+    directory = '/home/nienke/Documents/Master/Thesis/Data/MSS/Output'
+    path_to_file ='/home/nienke/Documents/Master/Thesis/Data/MSS/Output/MAAK_7J_SYNT4_02_MHZ.txt'
+    path_to_file_BBB ='/home/nienke/Documents/Master/Thesis/Data/MSS/Output/MAAK_BBB.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
 
@@ -53,10 +60,39 @@ def main():
     # real_v=np.array([88.52638906313514,10000,28,22,-107,4.4668359215096166e+17 ]) # -- 2 --
     # real_v=np.array([93.30019067657031,10000,87,44,-96,1.7782794100389228e+18 ]) # -- 3 --
     # real_v=np.array([54.01252893905707,10000,261,85,-175,1.2589254117941714e+18 ]) # -- 4 --
-    real_v=np.array([54.01252893905707,10000,262,83,-175,6.309573444801892e+17 ]) # -- 5 --
+    # real_v=np.array([54.01252893905707,10000,262,83,-175,6.309573444801892e+17 ]) # -- 5 --
     # real_v=np.array([95.18311630916064,18000,150,17,-76,3.548133892335731e+18]) # -- 7 --
 
+    magnitude = 4.46  # Magnitude of the earthquake
+    exp = mtm.magnitude_to_moment(magnitude)  # convert the mag to moment in [Nm]
+    m_pp = -214996686134000.0
+    m_rp = 247303763622000.0
+    m_rr = 3531870796970000.0
+    m_rt = -3487091494290000.0
+    m_tp = 1008979372750000.0
+    m_tt = -3316874110840000.0
 
+    m_dd = m_rr
+    m_nn = m_tt
+    m_ee = m_pp
+    m_nd = m_rt
+    m_ed = -m_rt
+    m_ne = -m_tp
+    # init pyrocko moment tensor
+    m = mtm.MomentTensor(
+        mnn=m_nn * exp,
+        mee=m_ee * exp,
+        mdd=m_dd * exp,
+        mne=m_ne * exp,
+        mnd=m_nd * exp,
+        med=m_ed * exp)
+
+    # gives out both nodal planes:
+    (s1, d1, r1), (s2, d2, r2) = m.both_strike_dip_rake()
+
+    print('strike1=%s, dip1=%s, rake1=%s' % (s1, d1, r1))
+    print('strike2=%s, dip2=%s, rake2=%s' % (s2, d2, r2))
+    real_v = np.array([86,36000,s2,d2,r2,316227766016837.94]) # MSS event 5.0
     # real_v = np.array([86,36000,270,60,-40,316227766016837.94]) # MSS event 5.0
 
     savename = 'Trials'
@@ -74,7 +110,7 @@ def main():
     # result.get_beachballs(REAL['strike'], REAL['dip'],REAL['rake'],PRIOR['M0'],directory+'/beachball.pdf')
     # result.trace_density(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
-    # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
+    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     # result.full_moment_traces(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     # result.get_accepted_samples(filepath=path_to_file,savename=savename,directory=directory, column_names,skiprows=skiprows)
     # result.get_convergence(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,show=show)
@@ -84,49 +120,49 @@ def main():
     # result.get_pdf(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,burnin=burnin)
     # result.get_stereonets(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
 
-
-    PRIOR = {}
-    PRIOR['Observed'] ='/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/Earth/2018-09-05-mww66-hokkaido-japan-region.miniseed'
-
-    PRIOR['Real_epi'] =80.25
-    PRIOR['Real_depth'] =35000
-
-    PRIOR['radius'] = 6378137.0  # Earth
-    PRIOR['f'] = 1 / 298.257223563  # Earth
-
-    stream = obspy.read(PRIOR['Observed'])
-    from obspy.clients.fdsn.client import Client
-    client = Client("IRIS")
-    inv = client.get_stations(network=stream.traces[0].stats.network, station=stream.traces[0].stats.station,
-                                   level='response')
-
-    # = Receiver =
-    PRIOR['la_r'] = inv._networks[0].stations[0]._latitude  # 4.5 # InSight
-    PRIOR['lo_r'] = inv._networks[0].stations[0]._longitude  # 136 # InSight
-
-    PRIOR['network'] = '7J'
-    PRIOR['station'] = "SYNT1"
-    PRIOR['location'] = u'02'
-
-    # = Source =
-
-    PRIOR['components'] = ["Z", "R", "T"]
-    PRIOR['kind'] = 'velocity'
-
-    # = Velocity model =
-
-    #   -Mars-
-    # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/EH45TcoldCrust1b_1s'
-    # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-
-    #   -Earth-
-    PRIOR['VELOC'] = 'syngine://iasp91_2s'  # '/opt/iasp91'
-    PRIOR['VELOC_taup'] = 'iasp91'
-
-    PRIOR['npts'] = 30000
-    PRIOR['sampling_rate'] = 20  # [Hz]
-    PRIOR['baz']= 67330.7672 - 180
-    PRIOR['or_time'] = obspy.UTCDateTime(2018,9,5,18,7,59)
+    #
+    # PRIOR = {}
+    # PRIOR['Observed'] ='/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/Earth/2018-09-05-mww66-hokkaido-japan-region.miniseed'
+    #
+    # PRIOR['Real_epi'] =80.25
+    # PRIOR['Real_depth'] =35000
+    #
+    # PRIOR['radius'] = 6378137.0  # Earth
+    # PRIOR['f'] = 1 / 298.257223563  # Earth
+    #
+    # stream = obspy.read(PRIOR['Observed'])
+    # from obspy.clients.fdsn.client import Client
+    # client = Client("IRIS")
+    # inv = client.get_stations(network=stream.traces[0].stats.network, station=stream.traces[0].stats.station,
+    #                                level='response')
+    #
+    # # = Receiver =
+    # PRIOR['la_r'] = inv._networks[0].stations[0]._latitude  # 4.5 # InSight
+    # PRIOR['lo_r'] = inv._networks[0].stations[0]._longitude  # 136 # InSight
+    #
+    # PRIOR['network'] = '7J'
+    # PRIOR['station'] = "SYNT1"
+    # PRIOR['location'] = u'02'
+    #
+    # # = Source =
+    #
+    # PRIOR['components'] = ["Z", "R", "T"]
+    # PRIOR['kind'] = 'velocity'
+    #
+    # # = Velocity model =
+    #
+    # #   -Mars-
+    # # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/EH45TcoldCrust1b_1s'
+    # # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
+    #
+    # #   -Earth-
+    # PRIOR['VELOC'] = 'syngine://iasp91_2s'  # '/opt/iasp91'
+    # PRIOR['VELOC_taup'] = 'iasp91'
+    #
+    # PRIOR['npts'] = 30000
+    # PRIOR['sampling_rate'] = 20  # [Hz]
+    # PRIOR['baz']= 67330.7672 - 180
+    # PRIOR['or_time'] = obspy.UTCDateTime(2018,9,5,18,7,59)
 
 
     # PRIOR = {}

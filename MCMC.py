@@ -174,8 +174,16 @@ class MCMC:
                                                                time=self.or_time, M0=M0)
 
         self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['npts'])
-
-
+        ax1 = plt.subplot(111)
+        plt.plot(self.BW_obs.original.traces[0], 'b')
+        plt.plot(self.BW_syn.original.traces[0], 'r')
+        ymin, ymax = ax1.get_ylim()
+        plt.vlines(self.BW_obs.or_P_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_P')
+        plt.vlines(self.BW_syn.or_P_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P')
+        plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
+        plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
+        plt.show()
+        a=1
 
     def write_par(self,file_name,BW,SW):
         if BW == True and SW == True:
