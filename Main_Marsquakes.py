@@ -17,7 +17,7 @@ def main():
     get_parameters = Get_Parameters()
     mSEED_path = get_parameters.Get_Path()
     stream = obspy.read(mSEED_path)
-    stream.resample(sampling_rate = 20.)
+    # stream.resample(sampling_rate = 20.)
     # stream.plot()
 
     # Stream for only BFO station

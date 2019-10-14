@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/Documents/Master/Data/MSS/'# '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = self.directory + 'mss_event.xml'
         mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -24,7 +24,7 @@ class Get_Parameters:
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path =  None # '/home/nienke/Documents/Master/Data/MSS/start_sample.txt'
+        start_sample_path = '/home/nienke/MARSQUAKES/start_sample.txt'
 
 
         if start_sample_path == None:
@@ -48,7 +48,7 @@ class Get_Parameters:
 
         trace = stream.traces[0]
         PRIOR = {}
-        PRIOR['PLOT'] = False
+        PRIOR['PLOT'] = True
         PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
@@ -116,12 +116,12 @@ class Get_Parameters:
 
         #   -Mars-
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/DWAK_1s/'
+        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/DWAK_1s/'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/DWAK.npz'
+        # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/DWAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -133,7 +133,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 50000
+        PRIOR['sample_number'] = 5000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 

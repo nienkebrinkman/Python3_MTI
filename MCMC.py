@@ -121,6 +121,7 @@ class MCMC:
                     rake_old = rake
                     M0_old = M0
                     time_shift_old = time_shift_new
+
                     self.write_sample(save_file, epi_old, depth_old, strike_old, dip_old, rake_old, M0_old, Xi_old, BW,
                                       SW,time_shift_old, accept=1)
 
@@ -152,12 +153,14 @@ class MCMC:
                     M0_old = M0
                     time_shift_old = time_shift_new
                     accepted = accepted + 1
-                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old,accept=1)
+                    if self.i%10 ==0:
+                        self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old,accept=1)
                 else:
                     if self.prior['PLOT']:
                         plt.close("all")
                     rejected += 1
-                    self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old, accept=0)
+                    if self.i % 10 == 0:
+                        self.write_sample(save_file, epi_old, depth_old, strike_old,dip_old,rake_old, M0_old, Xi_old,BW,SW,time_shift_old, accept=0)
             save_file.close()
 
     def G_function(self, epi, depth, M0, strike, dip, rake ):
@@ -174,16 +177,15 @@ class MCMC:
                                                                time=self.or_time, M0=M0)
 
         self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['npts'])
-        ax1 = plt.subplot(111)
-        plt.plot(self.BW_obs.original.traces[0], 'b')
-        plt.plot(self.BW_syn.original.traces[0], 'r')
-        ymin, ymax = ax1.get_ylim()
-        plt.vlines(self.BW_obs.or_P_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_P')
-        plt.vlines(self.BW_syn.or_P_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P')
-        plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
-        plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
-        plt.show()
-        a=1
+        # ax1 = plt.subplot(111)
+        # plt.plot(self.BW_obs.original.traces[0], 'b')
+        # plt.plot(self.BW_syn.original.traces[0], 'r')
+        # ymin, ymax = ax1.get_ylim()
+        # plt.vlines(self.BW_obs.or_P_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_P')
+        # plt.vlines(self.BW_syn.or_P_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P')
+        # plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
+        # plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
+        # plt.show()
 
     def write_par(self,file_name,BW,SW):
         if BW == True and SW == True:

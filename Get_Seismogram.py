@@ -14,16 +14,16 @@ class Get_Seismogram():
         return receiver
 
     def get_source(self, la_s, lo_s, depth, strike, dip, rake, time, M0):
-        # source = instaseis.Source.from_strike_dip_rake(latitude=la_s, longitude=lo_s,
-        #                                                depth_in_m=depth,
-        #                                                strike=strike, dip=dip,
-        #                                                rake=rake, M0=M0,
-        #                                                origin_time=time)
-        source = instaseis.Source.from_strike_dip_rake(latitude=-26.443, longitude=50.920,
-                                                       depth_in_m=38438,
-                                                       strike=120.19814045454422, dip=27.62588224193955,
-                                                       rake=142.29811781206305, M0=5495408738576270.0,
+        source = instaseis.Source.from_strike_dip_rake(latitude=la_s, longitude=lo_s,
+                                                       depth_in_m=depth,
+                                                       strike=strike, dip=dip,
+                                                       rake=rake, M0=M0,
                                                        origin_time=time)
+        # source = instaseis.Source.from_strike_dip_rake(latitude=-26.443, longitude=50.920,
+        #                                                depth_in_m=38438,
+        #                                                strike=277.8411362453696, dip=67.32189723358671,
+        #                                                rake=83.12557942378862, M0=5495408738576270.0,
+        #                                                origin_time=time)
 
 
         # m_pp = -214996686134000.0
@@ -38,8 +38,9 @@ class Get_Seismogram():
     def get_seis_manual(self, la_s, lo_s, depth, strike, dip, rake, time, M0):
         source = self.get_source(la_s=la_s, lo_s=lo_s, depth=depth, strike=strike, dip=dip, rake=rake, time=time, M0=M0)
         receiver = self.get_receiver()
-        traces = self.db.get_seismograms(source=source, receiver=receiver, components=self.prior['components'],kind=self.prior['kind'],dt = 1.0/self.prior['sampling_rate'])
-        # traces.interpolate(sampling_rate=self.prior['sampling_rate'])
+        # traces = self.db.get_seismograms(source=source, receiver=receiver, components=self.prior['components'],kind=self.prior['kind'],dt = 1.0/self.prior['sampling_rate'])
+        traces = self.db.get_seismograms(source=source, receiver=receiver, components=self.prior['components'],kind=self.prior['kind'])
+        traces.interpolate(sampling_rate=self.prior['sampling_rate'])
         traces.traces[0].data = np.float64(traces.traces[0].data)
         traces.traces[1].data = np.float64(traces.traces[1].data)
         traces.traces[2].data = np.float64(traces.traces[2].data)

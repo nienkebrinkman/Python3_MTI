@@ -26,11 +26,7 @@ import io
 
 from Get_Parameters import Get_Parameters
 
-
 from pyrocko import moment_tensor as mtm
-
-
-
 
 
 def main():
@@ -39,12 +35,10 @@ def main():
 
     strike, dip, rake = aux_plane(139, 23, 65)
 
-    directory = '/home/nienke/Documents/Master/Thesis/Data/MSS/Output'
-    path_to_file ='/home/nienke/Documents/Master/Thesis/Data/MSS/Output/MAAK_7J_SYNT4_02_MHZ.txt'
-    path_to_file_BBB ='/home/nienke/Documents/Master/Thesis/Data/MSS/Output/MAAK_BBB.txt'
+    directory = '/home/nienke/Documents/Master/Data/MSS/Output'
+    path_to_file = '/home/nienke/Documents/Master/Data/MSS/Output/MAAK_7J_SYNT4_02_MHZ_Random.txt'
+    # path_to_file_BBB = '/home/nienke/Documents/Master/Data/MSS/Output/output1.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
-
-
 
     # par = Get_Parameters()
     # REAL = par.get_unkown()
@@ -64,7 +58,7 @@ def main():
     # real_v=np.array([95.18311630916064,18000,150,17,-76,3.548133892335731e+18]) # -- 7 --
 
     magnitude = 4.46  # Magnitude of the earthquake
-    exp = mtm.magnitude_to_moment(magnitude)  # convert the mag to moment in [Nm]
+    exp = mtm.magnitude_to_moment(magnitude)  # convert the mag to moment in [Nm] # 5495408738576270.0
     m_pp = -214996686134000.0
     m_rp = 247303763622000.0
     m_rr = 3531870796970000.0
@@ -76,7 +70,7 @@ def main():
     m_nn = m_tt
     m_ee = m_pp
     m_nd = m_rt
-    m_ed = -m_rt
+    m_ed = -m_rp
     m_ne = -m_tp
     # init pyrocko moment tensor
     m = mtm.MomentTensor(
@@ -90,27 +84,35 @@ def main():
     # gives out both nodal planes:
     (s1, d1, r1), (s2, d2, r2) = m.both_strike_dip_rake()
 
-    print('strike1=%s, dip1=%s, rake1=%s' % (s1, d1, r1))
-    print('strike2=%s, dip2=%s, rake2=%s' % (s2, d2, r2))
-    real_v = np.array([86,36000,s2,d2,r2,316227766016837.94]) # MSS event 5.0
+    print('strike1=%s, dip1=%s, rake1=%s' % (
+        s1, d1, r1))  # strike1=244.6022883548614, dip1=73.52631851233593, rake1=67.50622085517007
+    print('strike2=%s, dip2=%s, rake2=%s' % (
+        s2, d2, r2))  # strike2=120.19814045454422, dip2=27.62588224193955, rake2=142.29811781206305
+    real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
+    # beachball([s1,d1,r1], size=200, linewidth=2, facecolor='b')
     # real_v = np.array([86,36000,270,60,-40,316227766016837.94]) # MSS event 5.0
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows =26 # 67
+    skiprows = 26  # 67
     # column_names= ["Epi", "Depth", "Strike", "Dip", "Rake", "M0","Total_misfit","S_z","S_r","S_t","P_z","P_r","BW_misfit","Rtot","Ltot"]
-    column_names= ["Epi", "Depth", "Strike", "Dip", "Rake","M0","Total_misfit","p_z","p_r","s_z","s_r","s_t",'bw_tot','Shift_S','Shift_P','accept']
+    column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
+                    'bw_tot', 'Shift_S', 'Shift_P', 'accept']
     # column_names= ["Epi", "Depth", "Strike", "Dip", "Rake","M0","Total_misfit"]
     # path_to_file, save = result.convert_txt_folder_to_yaml(path, savename)
     # result.get_stereonets(filepath=path_to_file, savename=savename, directory=directory, show=show)
 
     # result.plot_streams(stream_filepath=path_to_stream,filepath=path_to_file,savename=savename, directory=directory,skiprows=skiprows ,column_names=column_names)
-    burnin=0
+    burnin = 0
 
     # result.get_beachballs(REAL['strike'], REAL['dip'],REAL['rake'],PRIOR['M0'],directory+'/beachball.pdf')
     # result.trace_density(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
-    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
-    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
+    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+                 column_names=column_names, real_v=real_v, burnin=burnin)
+    # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names, real_v=real_v, burnin=burnin)
+    File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
+    result.marginal_grid(File, [0,1,2,3,4,5])
     # result.full_moment_traces(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     # result.get_accepted_samples(filepath=path_to_file,savename=savename,directory=directory, column_names,skiprows=skiprows)
     # result.get_convergence(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,show=show)
@@ -164,7 +166,6 @@ def main():
     # PRIOR['baz']= 67330.7672 - 180
     # PRIOR['or_time'] = obspy.UTCDateTime(2018,9,5,18,7,59)
 
-
     # PRIOR = {}
     # # PRIOR['Observed'] = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Database/data_Nienke/M5.0_3914855_deg_2019-09-22.mseed'
     # PRIOR['Observed'] = '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/mss_event.mseed'
@@ -200,7 +201,6 @@ def main():
     # PRIOR['baz']= 243
     # # PRIOR['or_time'] = obspy.UTCDateTime(2019,1,3,15,00,28)
     # PRIOR['or_time'] = obspy.UTCDateTime(2019,1,3,15,00,54)
-
 
     # result.get_waveforms(path_to_file, savename, directory, skiprows, column_names, real_v, burnin, PRIOR)
 
@@ -247,7 +247,7 @@ class Post_processing_sdr:
             yaml_file.close()
             return save_path, savename
 
-    def get_accepted_samples(self,filepath,savename,directory,skiprows,column_names):
+    def get_accepted_samples(self, filepath, savename, directory, skiprows, column_names):
         dir = directory + '/%s' % (savename)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -266,25 +266,25 @@ class Post_processing_sdr:
         L_length = int(data[0][-1])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
         df = pd.DataFrame(data,
                           columns=column_names)
         total = len(df["Accepted"])
-        accepted = np.sum(df["Accepted"]==1)
-        savepath = dir + '/Accept_%i_outof_%i.txt' % (accepted,total)
+        accepted = np.sum(df["Accepted"] == 1)
+        savepath = dir + '/Accept_%i_outof_%i.txt' % (accepted, total)
         with open(savepath, 'w') as save_file:
-            save_file.write("%i,%i\n\r" % (total,accepted))
+            save_file.write("%i,%i\n\r" % (total, accepted))
         save_file.close()
         print("Total amount of samples = %i" % len(df["Accepted"]))
-        print("Total amount of accepted samples = %i" % np.sum(df["Accepted"]==1))
+        print("Total amount of accepted samples = %i" % np.sum(df["Accepted"] == 1))
 
-    def get_convergence(self, filepath, savename, directory,skiprows, column_names,show=True):
+    def get_convergence(self, filepath, savename, directory, skiprows, column_names, show=True):
         dir = directory + '/%s' % (savename)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -333,7 +333,7 @@ class Post_processing_sdr:
             plt.savefig(dir + '/Convergence.pdf')
             plt.close()
 
-    def combine_all(self, filepath, savename, directory, skiprows, column_names,real_v):
+    def combine_all(self, filepath, savename, directory, skiprows, column_names, real_v):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -352,68 +352,68 @@ class Post_processing_sdr:
         R_length = int(data[0][-2])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
-        par=Get_Paramters()
+        par = Get_Paramters()
         REAL = par.get_unkown()
 
         df = pd.DataFrame(data,
                           columns=column_names)
 
-        df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake","M0"]]
+        df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake", "M0"]]
         # fig = plt.figure(figsize=(20,10))
         fig = plt.figure()
-        ax1 = plt.subplot2grid((4,1),(0,0))
-        ax1.axhline(y = real_v[0] ,linewidth = 0.3 , linestyle =':', color = 'b')
-        ax1.plot(df_select['Epi'],label="Epi" ,c = 'b')
+        ax1 = plt.subplot2grid((4, 1), (0, 0))
+        ax1.axhline(y=real_v[0], linewidth=0.3, linestyle=':', color='b')
+        ax1.plot(df_select['Epi'], label="Epi", c='b')
         ax1.tick_params("y", colors='b')
         ax1.set_ylabel('Epi[degree]', color='b')
         ax2 = ax1.twinx()
-        ax2.plot(df_select['Depth'],label="Depth",c ='r')
+        ax2.plot(df_select['Depth'], label="Depth", c='r')
         ax2.axhline(y=real_v[1], linewidth=0.3, linestyle=':', color='r')
         ax2.tick_params('y', colors='r')
         ax2.set_ylabel('Depth [m]', color='r')
         plt.tight_layout()
-        ax3 = plt.subplot2grid((4,1), (1,0))
-        lns1= ax3.plot(df_select['Strike'], label = "Strike", color = "b")
+        ax3 = plt.subplot2grid((4, 1), (1, 0))
+        lns1 = ax3.plot(df_select['Strike'], label="Strike", color="b")
         ax3.axhline(y=real_v[2], linewidth=0.3, linestyle=':', color='b')
         ax3.axhline(y=real_v[3], linewidth=0.3, linestyle=':', color='g')
         ax3.axhline(y=real_v[4], linewidth=0.3, linestyle=':', color='r')
-        lns2 = ax3.plot(df_select['Dip'], label = "Dip" ,color = 'g')
-        lns3 = ax3.plot(df_select['Rake'], label = "Rake", color = 'r')
+        lns2 = ax3.plot(df_select['Dip'], label="Dip", color='g')
+        lns3 = ax3.plot(df_select['Rake'], label="Rake", color='r')
         # ax3.set_ylabel('[degree]', color='k')
         plt.tight_layout()
         axes = ax3.twinx()
-        lns4 =axes.plot(df_select['M0'],label="M0",c ='m')
+        lns4 = axes.plot(df_select['M0'], label="M0", c='m')
         # ax2.axhline(y=REAL['depth_s'], linewidth=0.3, linestyle=':', color='r')
         axes.tick_params('y', colors='m')
         # axes.set_ylabel('M0', color='r')
         plt.yscale('log')
-        lns = lns1 + lns2 + lns3 +lns4
+        lns = lns1 + lns2 + lns3 + lns4
         labs = [l.get_label() for l in lns]
         ax3.legend(lns, labs, loc='center left', bbox_to_anchor=(1.1, 0.5))
         plt.tight_layout()
         R_select = df.filter(like='R_')
         L_select = df.filter(like='L_')
-        df_select_xi = df[["Total_misfit","S_z","S_r","S_t","P_z","P_r","BW_misfit","Rtot","Ltot"]]
-        ax4 = plt.subplot2grid((4,1), (2,0))
-        ax4.plot(df_select_xi['Total_misfit'], label = "Total_misfit",c='r')
+        df_select_xi = df[["Total_misfit", "S_z", "S_r", "S_t", "P_z", "P_r", "BW_misfit", "Rtot", "Ltot"]]
+        ax4 = plt.subplot2grid((4, 1), (2, 0))
+        ax4.plot(df_select_xi['Total_misfit'], label="Total_misfit", c='r')
         # ax4.plot(df_select_xi['S_z'], label = "S_z")
         # ax4.plot(df_select_xi['S_r'], label = "S_r")
         # ax4.plot(df_select_xi['S_t'], label = "S_t")
         # ax4.plot(df_select_xi['P_z'], label = "P_z")
         # ax4.plot(df_select_xi['P_r'], label = "P_r")
-        ax4.plot(df_select_xi['BW_misfit'], label = "BW_tot")
+        ax4.plot(df_select_xi['BW_misfit'], label="BW_tot")
         plt.yscale('log')
         # plt.ylim((pow(10, 0), pow(10, 3)))
         plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
         plt.tight_layout()
-        ax5=plt.subplot2grid((4,1),(3,0))
+        ax5 = plt.subplot2grid((4, 1), (3, 0))
         ax5.plot(df_select_xi['Rtot'], label="Rtot")
         ax5.plot(df_select_xi['Ltot'], label="Ltot")
         # for i in R_select:
@@ -434,7 +434,7 @@ class Post_processing_sdr:
         # plt.ylim((pow(10, 0), pow(10, 4)))
         plt.tight_layout()
         # plt.show()
-        plt.savefig(dir+'/combined_all_par.pdf')
+        plt.savefig(dir + '/combined_all_par.pdf')
         plt.close()
 
     def Misfits(self, filepath, savename, directory, skiprows, column_names):
@@ -456,31 +456,30 @@ class Post_processing_sdr:
         R_length = int(data[0][-2])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
-        par=Get_Paramters()
+        par = Get_Paramters()
         REAL = par.get_unkown()
 
         df = pd.DataFrame(data,
                           columns=column_names)
 
-
-        fig = plt.figure(figsize=(20,5))
+        fig = plt.figure(figsize=(20, 5))
         # fig = plt.figure()
         R_select = df.filter(like='R_')
         L_select = df.filter(like='L_')
-        df_select_xi = df[["Total_misfit","S_z","S_r","S_t","P_z","P_r","BW_misfit","Rtot","Ltot"]]
-        ax4 = plt.subplot2grid((1,1), (0,0))
-        ax4.plot(df_select_xi['Total_misfit'], label = "Total_misfit",c='r',linewidth = 1.1)
-        plt.legend(fontsize = 20)
-        ax4.plot(df_select_xi['Total_misfit'][0:200],c='k',linewidth = 2)
-        ymin,ymax = ax4.get_ylim()
-        ax4.vlines(200, ymin=ymin, ymax=ymax, colors='k', linewidth=2,linestyles=':')
+        df_select_xi = df[["Total_misfit", "S_z", "S_r", "S_t", "P_z", "P_r", "BW_misfit", "Rtot", "Ltot"]]
+        ax4 = plt.subplot2grid((1, 1), (0, 0))
+        ax4.plot(df_select_xi['Total_misfit'], label="Total_misfit", c='r', linewidth=1.1)
+        plt.legend(fontsize=20)
+        ax4.plot(df_select_xi['Total_misfit'][0:200], c='k', linewidth=2)
+        ymin, ymax = ax4.get_ylim()
+        ax4.vlines(200, ymin=ymin, ymax=ymax, colors='k', linewidth=2, linestyles=':')
         # ax4.plot(df_select_xi['S_z'], label = "S_z")
         # ax4.plot(df_select_xi['S_r'], label = "S_r")
         # ax4.plot(df_select_xi['S_t'], label = "S_t")
@@ -489,8 +488,8 @@ class Post_processing_sdr:
         # ax4.plot(df_select_xi['BW_misfit'], label = "BW_tot",linewidth = 0.3)
         # ax4.plot(df_select_xi['Rtot'], label="Rtot",linewidth = 0.3)
         # ax4.plot(df_select_xi['Ltot'], label="Ltot",linewidth = 0.3)
-        ax4.set_xlabel('N = %i' %len(df_select_xi['Total_misfit']), color='b',fontsize =20)
-        ax4.set_ylabel('Misfit value' , color='k',fontsize = 20)
+        ax4.set_xlabel('N = %i' % len(df_select_xi['Total_misfit']), color='b', fontsize=20)
+        ax4.set_ylabel('Misfit value', color='k', fontsize=20)
         ax4.tick_params(axis='x', labelsize=18)
         ax4.tick_params(axis='y', labelsize=18)
         plt.yscale('log')
@@ -499,10 +498,10 @@ class Post_processing_sdr:
         # plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         plt.tight_layout()
 
-        plt.savefig(dir+'/misfits.pdf')
+        plt.savefig(dir + '/misfits.pdf')
         plt.close()
 
-    def full_moment_traces(self,filepath, savename, directory,skiprows, column_names,real_v, burnin):
+    def full_moment_traces(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -522,31 +521,30 @@ class Post_processing_sdr:
         R_length = int(data[0][-2])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
-        df = pd.DataFrame(data,columns=column_names)
-        strike,dip,rake = aux_plane(real_v[2],real_v[3],real_v[4])
+        df = pd.DataFrame(data, columns=column_names)
+        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
 
+        M_true = self.convert(real_v[2], real_v[3], real_v[4], real_v[5])
+        M_aux = self.convert(strike, dip, rake, real_v[5])
 
-        M_true = self.convert(real_v[2],real_v[3],real_v[4],real_v[5])
-        M_aux = self.convert(strike,dip,rake,real_v[5])
-
-        moment = self.convert(df['Strike'][burnin:],df['Dip'][burnin:],df['Rake'][burnin:],df['M0'][burnin:])
+        moment = self.convert(df['Strike'][burnin:], df['Dip'][burnin:], df['Rake'][burnin:], df['M0'][burnin:])
         # moment = self.convert(df['Strike'][burnin:],df['Dip'][burnin:],df['Rake'][burnin:],1e+16)
-        moment_names = np.array(["Mxx","Myy","Mzz","Mxy","Mxz","Myz"])
+        moment_names = np.array(["Mxx", "Myy", "Mzz", "Mxy", "Mxz", "Myz"])
 
         # beachball(moment, size=200, linewidth=2, facecolor='b', outfile=dir + '/beach.pdf')
         # beachball(M_true, size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true.pdf')
         Trace = np.mean(moment[0][burnin:]) + np.mean(moment[1][burnin:]) + np.mean(moment[2][burnin:])
-        print("Mxx %.2E" %np.mean(moment[0]))
-        print("Myy %.2E" %np.mean(moment[1]))
-        print("Mzz %.2E" %np.mean(moment[2]))
-        print("Trace %.2f" %Trace)
+        print("Mxx %.2E" % np.mean(moment[0]))
+        print("Myy %.2E" % np.mean(moment[1]))
+        print("Mzz %.2E" % np.mean(moment[2]))
+        print("Trace %.2f" % Trace)
         column = 0
 
         params = {'legend.fontsize': 'x-large',
@@ -558,21 +556,20 @@ class Post_processing_sdr:
         pylab.rcParams.update(params)
         #
 
-
         fig = plt.figure(figsize=(25, 4))
-        for i,v in enumerate(moment):
+        for i, v in enumerate(moment):
             ax1 = plt.subplot2grid((1, len(moment)), (0, column))
             plt.hist(v[burnin:], bins=100)
             ymin, ymax = ax1.get_ylim()
-            xmin,xmax= ax1.get_xlim()
-            plt.vlines(M_aux[i], ymin=ymin/1.2, ymax=ymax, colors='k', linewidth=3, label = 'True model')
+            xmin, xmax = ax1.get_xlim()
+            plt.vlines(M_aux[i], ymin=ymin / 1.2, ymax=ymax, colors='k', linewidth=3, label='True model')
             # plt.text(0,ymax,"SD: %.2E" % np.std(v),fontsize =12)
             # plt.vlines(v[0], ymin=ymin, ymax=ymax, colors='r', linewidth=2)
             # plt.vlines(M_aux[i], ymin=ymin, ymax=ymax, colors='g', linewidth=2)
             # ax1.set_title("Density %s" % moment_names[i], color='b', fontsize=20)
             ax1.title.set_text("  SD: %.2E" % np.std(v))
             ax1.title.set_fontsize(18)
-            ax1.set_xlabel("%s[Nm]" % moment_names[i], fontsize=18,color = 'b')
+            ax1.set_xlabel("%s[Nm]" % moment_names[i], fontsize=18, color='b')
             if i == 0:
                 ax1.set_ylabel("Posterior marginal", fontsize=20)
             ax1.tick_params(axis='x', labelsize=20)
@@ -582,11 +579,11 @@ class Post_processing_sdr:
             ax1.set_xlim(xmin, xmax)
             # plt.legend()
             plt.tight_layout()
-            column +=1
+            column += 1
 
         plt.savefig(dir + '/Full_moment_trace.pdf')
 
-    def convert(self,strike,dip,rake,M0):
+    def convert(self, strike, dip, rake, M0):
         rdip = np.deg2rad(strike)
         rstr = np.deg2rad(dip)
         rrake = np.deg2rad(rake)
@@ -613,7 +610,7 @@ class Post_processing_sdr:
         moment = np.array([Mxx, Myy, Mzz, Mxy, Mxz, Myz])
         return moment
 
-    def trace(self, filepath, savename, directory,skiprows, column_names,real_v,burnin):
+    def trace(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -659,43 +656,41 @@ class Post_processing_sdr:
         # df3 = pd.DataFrame(dat3,
         #                   columns=column_names)
         df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake"]]
-        strike,dip,rake = aux_plane(real_v[2],real_v[3],real_v[4])
+        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
         M0_true = real_v[5]
 
-
-
-        fig = plt.figure(figsize=(25,6))
+        fig = plt.figure(figsize=(25, 6))
         row = 0
 
-        ax1 = plt.subplot2grid((1,3),(0,0))
-        plt.hist(df_select['Strike'][burnin:],bins=100, alpha = 0.8)
+        ax1 = plt.subplot2grid((1, 3), (0, 0))
+        plt.hist(df_select['Strike'][burnin:], bins=100, alpha=0.8)
         # plt.hist(df_select['Strike'][burnin:],bins=100,alpha=0.5,color = 'b')
         # plt.hist(df3['Strike'][burnin:],bins=100,alpha=0.5,color = 'g')
         # plt.hist(df2['Strike'][burnin:],bins=100,alpha=0.5,color = 'r')
 
         ymin, ymax = ax1.get_ylim()
-        plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3,label = 'Auxiliary plane')
+        plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
         plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         # plt.vlines(df_select['Strike'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Start model')
         ax1.set_title("Density Strike", color='b', fontsize=25)
         ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
-        ax1.set_ylabel("Posterior marginal" , fontsize=25)
+        ax1.set_ylabel("Posterior marginal", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax1.set_xlim(0,360)
+        ax1.set_xlim(0, 360)
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax2 = plt.subplot2grid((1,3),(0,1))
-        plt.hist(df_select['Dip'][burnin:],bins=100, alpha = 0.8)
+        ax2 = plt.subplot2grid((1, 3), (0, 1))
+        plt.hist(df_select['Dip'][burnin:], bins=100, alpha=0.8)
         # plt.hist(df_select['Dip'][burnin:],bins=100,alpha=0.5,color = 'b')
         # plt.hist(df3['Dip'][burnin:], bins=100, alpha=0.5, color='g')
         # plt.hist(df2['Dip'][burnin:],bins=100,alpha=0.5,color = 'r')
 
         ymin, ymax = ax2.get_ylim()
         plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
-        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3,label='True model')
+        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
         # plt.vlines(df_select['Dip'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label='Start model')
         ax2.set_title("Density Dip", color='b', fontsize=25)
         ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
@@ -707,14 +702,14 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax3 = plt.subplot2grid((1,3),(0,2))
-        plt.hist(df_select['Rake'][burnin:],bins=100,alpha = 0.8)
+        ax3 = plt.subplot2grid((1, 3), (0, 2))
+        plt.hist(df_select['Rake'][burnin:], bins=100, alpha=0.8)
         # plt.hist(df_select['Rake'][burnin:],bins=100,alpha=0.5,color = 'b' ,label= 'MAAK')
         # plt.hist(df3['Rake'][burnin:],bins=100,alpha=0.5,color = 'g', label= 'Body waves')
         # plt.hist(df2['Rake'][burnin:],bins=100,alpha=0.5,color = 'r', label= 'EH45TcoldCrust_1b')
         ymin, ymax = ax3.get_ylim()
-        plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label = 'Auxiliary plane')
-        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3,label='Fault plane')
+        plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         # plt.vlines(df_select['Rake'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label= 'Start model')
         ax3.set_title("Density Rake", color='b', fontsize=25)
         ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
@@ -722,17 +717,17 @@ class Post_processing_sdr:
         ax3.tick_params(axis='y', labelsize=20)
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
-        plt.legend(loc = 'upper left',fontsize=20)
+        plt.legend(loc='upper left', fontsize=20)
         # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
         plt.tight_layout()
 
         # plt.show()
-        plt.savefig(dir+ '/Trace_fault.pdf')
+        plt.savefig(dir + '/Trace_fault.pdf')
 
         fig = plt.figure(figsize=(25, 6))
 
-        ax4 = plt.subplot2grid((1,3),(0,0))
-        plt.hist(df_select['Depth'][burnin:]/1000,bins=100,alpha=0.8)
+        ax4 = plt.subplot2grid((1, 3), (0, 0))
+        plt.hist(df_select['Depth'][burnin:] / 1000, bins=100, alpha=0.8)
         # plt.hist(df['Depth'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['Depth'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
         ymin, ymax = ax4.get_ylim()
@@ -753,8 +748,8 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax5 = plt.subplot2grid((1,3),(0,1))
-        plt.hist(df_select['Epi'][burnin:],bins=50,alpha=0.8)
+        ax5 = plt.subplot2grid((1, 3), (0, 1))
+        plt.hist(df_select['Epi'][burnin:], bins=50, alpha=0.8)
         # plt.hist(df['Epi'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['Epi'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
         ymin, ymax = ax5.get_ylim()
@@ -768,9 +763,9 @@ class Post_processing_sdr:
         # plt.legend(fontsize=20)
         plt.tight_layout()
 
-        ax6 = plt.subplot2grid((1,3),(0,2))
+        ax6 = plt.subplot2grid((1, 3), (0, 2))
         Mw = 2.0 / 3.0 * (np.log10(df['M0'][burnin:]) - 9.1)
-        plt.hist(Mw,bins=np.arange(4,7,0.05),alpha=0.8)
+        plt.hist(Mw, bins=np.arange(4, 7, 0.05), alpha=0.8)
         # plt.hist(df['M0'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['M0'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
         ymin, ymax = ax6.get_ylim()
@@ -784,13 +779,13 @@ class Post_processing_sdr:
         # ax6.set_xscale('log')
         # ax6.set_xlim(0e18, 0.5e18 )
         # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
-        plt.legend(loc='upper right',fontsize = 20)
+        plt.legend(loc='upper right', fontsize=20)
         plt.tight_layout()
 
         # plt.show()
-        plt.savefig(dir+ '/Trace_position.pdf')
+        plt.savefig(dir + '/Trace_position.pdf')
 
-    def trace_density(self, filepath, savename, directory,skiprows, column_names,real_v, burnin):
+    def trace_density(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -810,12 +805,12 @@ class Post_processing_sdr:
         R_length = int(data[0][-2])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
         params = {'legend.fontsize': 'x-large',
                   'figure.figsize': (15, 15),
@@ -828,41 +823,41 @@ class Post_processing_sdr:
         df = pd.DataFrame(data,
                           columns=column_names)
         df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake"]]
-        strike,dip,rake = aux_plane(real_v[2],real_v[3],real_v[4])
-        fig = plt.figure(figsize=(20,20))
+        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
+        fig = plt.figure(figsize=(20, 20))
         row = 0
 
         for i in df_select:
-            ax1 = plt.subplot2grid((5,2),(row,0))
-            ax1.plot(df_select[i],label=i)
+            ax1 = plt.subplot2grid((5, 2), (row, 0))
+            ax1.plot(df_select[i], label=i)
             # ax1.axhline(y=REAL[df_select], linewidth=0.3, linestyle=':')
-            ax1.set_title("Trace %s" %i ,color= 'b',fontsize = 20)
+            ax1.set_title("Trace %s" % i, color='b', fontsize=20)
             ax1.set_xlabel("Iteration")
             # ax1.set_ylabel("Epicentral ")
             plt.tight_layout()
-            ax2 = plt.subplot2grid((5,2), (row, 1))
-            plt.hist(df_select[i][burnin:],bins=100)
+            ax2 = plt.subplot2grid((5, 2), (row, 1))
+            plt.hist(df_select[i][burnin:], bins=100)
             ymin, ymax = ax2.get_ylim()
-            plt.vlines(df_select[i][1],ymin=ymin,ymax=ymax,colors='r',linewidth = 3)
-            plt.vlines(real_v[row],ymin=ymin,ymax=ymax,colors='k',linewidth = 3)
+            plt.vlines(df_select[i][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3)
+            plt.vlines(real_v[row], ymin=ymin, ymax=ymax, colors='k', linewidth=3)
             if i == 'Strike':
-                plt.vlines(strike,ymin=ymin,ymax=ymax,colors='g',linewidth = 3)
+                plt.vlines(strike, ymin=ymin, ymax=ymax, colors='g', linewidth=3)
             if i == 'Dip':
-                plt.vlines(dip,ymin=ymin,ymax=ymax,colors='g',linewidth = 3)
+                plt.vlines(dip, ymin=ymin, ymax=ymax, colors='g', linewidth=3)
             if i == 'Rake':
-                plt.vlines(rake,ymin=ymin,ymax=ymax,colors='g',linewidth = 3)
+                plt.vlines(rake, ymin=ymin, ymax=ymax, colors='g', linewidth=3)
 
             # y, binEdges = np.histogram(df_select[i], bins=100)
             # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
             # pylab.plot(bincenters, y, '-',label = "%s" % i)
-            ax2.set_title("Density %s"%i,color= 'b',fontsize = 20)
+            ax2.set_title("Density %s" % i, color='b', fontsize=20)
             ax2.set_xlabel("N=%i" % (len(df_select[i])))
             plt.tight_layout()
             row += 1
-        plt.savefig(dir+ '/Trace_density.pdf')
+        plt.savefig(dir + '/Trace_density.pdf')
         plt.close()
 
-    def get_pdf(self, filepath, savename, directory, skiprows, column_names,show=True):
+    def get_pdf(self, filepath, savename, directory, skiprows, column_names, show=True):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -885,12 +880,12 @@ class Post_processing_sdr:
         L_length = int(data[0][-1])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
         df = pd.DataFrame(data,
                           columns=column_names)
@@ -901,7 +896,7 @@ class Post_processing_sdr:
         for i in itertools.combinations(df_select, 2):
             pdf.marginal_2D(df_select[i[0]], i[0], df_select[i[1]], i[1], amount_bins=20, directory=dir_pdf, show=show)
 
-    def get_beachballs(self,strike,dip,rake,M0,savepath):
+    def get_beachballs(self, strike, dip, rake, M0, savepath):
         rdip = np.deg2rad(dip)
         rstr = np.deg2rad(strike)
         rrake = np.deg2rad(rake)
@@ -931,9 +926,9 @@ class Post_processing_sdr:
                     'takeoff_angle': np.array([30., 60., 45., 10.]),
                     'polarity': np.array([0.8, 0.5, 0.7, -0.9])}
         # MTplot(np.array([[1], [0], [-1], [0], [0], [0]]), 'beachball',  stations=stations, fault_plane=True)
-        beachball(moment, size=200, linewidth=2, facecolor='b', outfile=savepath )
+        beachball(moment, size=200, linewidth=2, facecolor='b', outfile=savepath)
 
-    def get_waveforms(self,filepath, savename, directory,skiprows, column_names,real_v,burnin,prior):
+    def get_waveforms(self, filepath, savename, directory, skiprows, column_names, real_v, burnin, prior):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -986,7 +981,6 @@ class Post_processing_sdr:
 
         stream = obspy.read(prior['Observed'])
 
-
         BW_obs = Cut_windows(prior['VELOC_taup'])
         BW_obs.Get_bw_windows(stream, prior['Real_epi'], prior['Real_depth'], prior['or_time'], prior['npts'])
         # tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
@@ -1016,22 +1010,23 @@ class Post_processing_sdr:
         # a = np.where(np.logical_and(epi>=88 -0.5  , epi <= 88 + 0.5))
 
         # for i in range(len(a[0])):
-        for i in np.arange(len(epi)-100,len(epi),1):
-            dict = geo.Geodesic(a=prior['radius'], f=prior['f']).ArcDirect(lat1=prior['la_r'],lon1=prior['lo_r'],azi1=prior['baz'],a12=epi[i], outmask=1929)
+        for i in np.arange(len(epi) - 100, len(epi), 1):
+            dict = geo.Geodesic(a=prior['radius'], f=prior['f']).ArcDirect(lat1=prior['la_r'], lon1=prior['lo_r'],
+                                                                           azi1=prior['baz'], a12=epi[i], outmask=1929)
 
             st_syn = seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth[i],
-                                               strike=strike[i], dip=dip[i], rake=rake[i],
-                                               time=prior['or_time'], M0=M0[i])
+                                          strike=strike[i], dip=dip[i], rake=rake[i],
+                                          time=prior['or_time'], M0=M0[i])
 
             BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], prior['or_time'], prior['npts'])
 
-            P_shift_array= self.shift(BW_syn.P_stream.traces[0].data, -int(P_shift[i]))
+            P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, -int(P_shift[i]))
             #
             # ax1.plot(p_time_array[start_P:end_P], BW_syn.P_stream.traces[0].data[start_P:end_P], 'g',
             #          label='Synthetic', linewidth = 0.1)
 
             ax1.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r',
-                     label='Synthetic', linewidth = 0.1)
+                     label='Synthetic', linewidth=0.1)
             # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
             ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax1.tick_params(axis='x', labelsize=18)
@@ -1042,7 +1037,7 @@ class Post_processing_sdr:
 
             P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, -int(P_shift[i]))
             ax2.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r',
-                     label='Synthetic', linewidth = 0.1)
+                     label='Synthetic', linewidth=0.1)
             # ax2.plot(P_shift_array, 'r',label='Synthetic', linewidth = 0.1)
             ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax2.tick_params(axis='x', labelsize=18)
@@ -1050,7 +1045,7 @@ class Post_processing_sdr:
             # plt.tight_layout()
 
             S_shift_array = self.shift(BW_syn.S_stream.traces[0].data, -int(S_shift[i]))
-            ax3.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth = 0.1)
+            ax3.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax3.plot(S_shift_array, 'r', linewidth = 0.1)
             ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax3.tick_params(axis='x', labelsize=18)
@@ -1058,7 +1053,7 @@ class Post_processing_sdr:
             # plt.tight_layout()
 
             S_shift_array = self.shift(BW_syn.S_stream.traces[1].data, -int(S_shift[i]))
-            ax4.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth = 0.1)
+            ax4.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax4.plot(S_shift_array, 'r', linewidth = 0.1)
             ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax4.tick_params(axis='x', labelsize=18)
@@ -1066,7 +1061,7 @@ class Post_processing_sdr:
             # plt.tight_layout()
 
             S_shift_array = self.shift(BW_syn.S_stream.traces[2].data, -int(S_shift[i]))
-            ax5.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth = 0.1)
+            ax5.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax5.plot( S_shift_array, 'r', linewidth = 0.1)
             ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax5.tick_params(axis='x', labelsize=18)
@@ -1091,7 +1086,6 @@ class Post_processing_sdr:
         xmin, xmax = ax3.get_xlim()
         ax3.text(xmax - 10, ymax / 1.5, "S-Z", fontsize=20, color='b')
 
-
         ax4.plot(s_time_array[start_S:end_S], BW_obs.S_stream.traces[1].data[start_S:end_S], 'b')
         # ax4.plot(BW_obs.S_stream.traces[1].data, 'b', linewidth = 0.1)
         ymin, ymax = ax4.get_ylim()
@@ -1111,7 +1105,7 @@ class Post_processing_sdr:
         # plt.show()
         plt.close()
 
-    def get_BBB(self,filepath, savename, directory,skiprows, column_names,real_v,burnin):
+    def get_BBB(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -1182,10 +1176,9 @@ class Post_processing_sdr:
         plt.savefig(dir + '/BBB.pdf')
         # plt.show()
 
-
         # beachball([strike,dip,rake], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true_aux.pdf')
 
-    def get_stereonets(self, filepath, savename, directory,skiprows, column_names,real_v,burnin):
+    def get_stereonets(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -1214,32 +1207,28 @@ class Post_processing_sdr:
 
         df = pd.DataFrame(data, columns=column_names)
         #
-        for i,v in enumerate(df['Strike'][burnin:]):
+        for i, v in enumerate(df['Strike'][burnin:]):
             if v < 200:
-                df['Strike'][i+burnin] = v+360
+                df['Strike'][i + burnin] = v + 360
 
-        for i,v in enumerate(df['Rake'][burnin:]):
+        for i, v in enumerate(df['Rake'][burnin:]):
             if v < -100:
-                df['Rake'][i+burnin] = -v
+                df['Rake'][i + burnin] = -v
 
         mean_strike = np.mean(df['Strike'][burnin:])
         mean_dip = np.mean(df['Dip'][burnin:])
-        mean_rake= np.mean(df['Rake'][burnin:])
-        strike,dip,rake = aux_plane(real_v[2],real_v[3],real_v[4])
+        mean_rake = np.mean(df['Rake'][burnin:])
+        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
 
         print("True solution strike: %.4f" % strike)
-        print("True solution dip: %.4f" %dip)
-        print("True solution rake: %.4f" %rake)
+        print("True solution dip: %.4f" % dip)
+        print("True solution rake: %.4f" % rake)
         # print("SD M0: %.4E" %np.std(df['M0'][burnin:]))
         # print("mean M0: %.4E" %np.mean(df['M0'][burnin:]))
         df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake"]]
         for i in df_select:
-
-            print("SD %s: %.4f" %(i,np.std(df_select[i][burnin:])))
-            print("mean %s: %.4f" %(i,np.mean(df_select[i][burnin:])))
-
-
-
+            print("SD %s: %.4f" % (i, np.std(df_select[i][burnin:])))
+            print("mean %s: %.4f" % (i, np.mean(df_select[i][burnin:])))
 
         # moment = self.convert(df['Strike'][burnin:], df['Dip'][burnin:], df['Rake'][burnin:], df['M0'][burnin:])
         # M = np.array([np.mean(moment[0]),np.mean(moment[1]),np.mean(moment[2]),np.mean(moment[3]),np.mean(moment[4]),np.mean(moment[5])])
@@ -1248,9 +1237,9 @@ class Post_processing_sdr:
         # M_true = self.convert(strike,dip,rake,real_v[5])
 
         # beachball([np.mean(df['Strike'][burnin:]), np.mean(df['Dip'][burnin:]), np.mean(df['Rake'][burnin:])], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach.pdf')
-        beachball([real_v[2],real_v[3],real_v[4]], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true.pdf')
-        beachball([strike,dip,rake], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true_aux.pdf')
-
+        beachball([real_v[2], real_v[3], real_v[4]], size=200, linewidth=2, facecolor='b',
+                  outfile=dir + '/beach_true.pdf')
+        beachball([strike, dip, rake], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true_aux.pdf')
 
         # SD_strike= np.std(df['Strike'][burnin:])
         # SD_dip=np.std(df['Dip'][burnin:])
@@ -1289,18 +1278,18 @@ class Post_processing_sdr:
         else:
             # parameters = open(filepath, "r").readlines()[:33]
             # file = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Final/Random_Result/Exploring.txt'
-            data = np.loadtxt(filepath , delimiter=',', skiprows=skiprows)
+            data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
         length = len(data[0]) - (len(column_names) + 3)
         R_length = int(data[0][-2])
         L_length = int(data[0][-1])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
         df = pd.DataFrame(data,
                           columns=column_names)
@@ -1332,10 +1321,6 @@ class Post_processing_sdr:
         scatter_matrix(df_select, diagonal='kde')
         plt.savefig(directory + '/correlations.pdf')
         # #
-
-
-
-
 
         #
         #
@@ -1375,7 +1360,7 @@ class Post_processing_sdr:
                 ax3.plot(v['trace_t'], alpha=0.2)
             plt.show()
 
-    def plot_streams(self,stream_filepath,filepath,savename, directory,skiprows ,column_names):
+    def plot_streams(self, stream_filepath, filepath, savename, directory, skiprows, column_names):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -1398,18 +1383,17 @@ class Post_processing_sdr:
         L_length = int(data[0][-1])
 
         for i in range(R_length):
-            column_names = np.append(column_names,"R_%i" % (i+1))
+            column_names = np.append(column_names, "R_%i" % (i + 1))
         for i in range(L_length):
-            column_names = np.append(column_names,"L_%i" % (i+1))
-        column_names = np.append(column_names,"Accepted")
-        column_names = np.append(column_names,"Rayleigh_length")
-        column_names = np.append(column_names,"Love_length")
+            column_names = np.append(column_names, "L_%i" % (i + 1))
+        column_names = np.append(column_names, "Accepted")
+        column_names = np.append(column_names, "Rayleigh_length")
+        column_names = np.append(column_names, "Love_length")
 
         st = obspy.read(stream_filepath)
         for i in st.traces:
             if "Z" in i.meta.channel:
-                a=1
-
+                a = 1
 
     def write_to_dict(self, list_of_parameters):
         parameters = {
@@ -1458,6 +1442,106 @@ class Post_processing_sdr:
         else:
             new_array[:-time_shift] = np_array[time_shift:]
         return new_array
+
+    def marginal_grid(
+            self,
+            samples: np.ndarray,
+            dimensions_list,
+            bins: int = 25,
+            show: bool = True,
+            colormap_2d=plt.get_cmap("Greys"),
+            color_1d="black",
+    ):
+        number_of_plots = len(dimensions_list)
+        import matplotlib.gridspec as _gridspec
+
+        plt.figure(figsize=(8, 8))
+        gs1 = _gridspec.GridSpec(number_of_plots, number_of_plots)
+        gs1.update(wspace=0.05, hspace=0.05)  # set the spacing between axes.
+
+        # Get extent of every set
+        dim_range = []
+        for i_dim in range(number_of_plots):
+            min = samples[:,dimensions_list[i_dim]].min()
+            max = samples[:,dimensions_list[i_dim]].max()
+            dim_range.append((min, max))
+
+        for i_plot in range(number_of_plots):
+            # print(i_plot, i_plot) # grid indices for diagonal
+            axis = plt.subplot(gs1[i_plot + (number_of_plots) * i_plot])
+
+            # Modify axes
+            if i_plot != number_of_plots - 1:
+                axis.set_xticklabels([])
+                axis.tick_params(axis="x", which="both", bottom=False, top=False)
+            else:
+                axis.set_xlabel(f"dimension {dimensions_list[number_of_plots - 1]}")
+
+            axis.set_yticklabels([])
+            axis.tick_params(axis="y", which="both", left=False, right=False)
+            if i_plot == 0:
+                axis.set_ylabel("relative density")
+
+            # Plot histogram on diagonal
+            axis.hist(
+                samples[:,dimensions_list[i_plot]],
+                bins=bins,
+                density=False,
+                range=dim_range[i_plot],
+                color=color_1d,
+            )
+
+            for j_plot in range(i_plot):
+                # print(i_plot, j_plot) # grid indices for lower left
+                axis = plt.subplot(gs1[j_plot + (number_of_plots) * i_plot])
+
+                # Modify axes
+                if i_plot != number_of_plots - 1:
+                    axis.set_xticklabels([])
+                    axis.tick_params(axis="x", which="both", bottom=False, top=False)
+                else:
+                    axis.set_xlabel(f"dimension {dimensions_list[j_plot]}")
+
+                if j_plot != 0:
+                    axis.set_yticklabels([])
+                    axis.tick_params(axis="y", which="both", left=False, right=False)
+                else:
+                    axis.set_ylabel(f"dimension {dimensions_list[i_plot]}")
+
+                # Plot 2d marginals
+                axis.hist2d(
+                    samples[:,dimensions_list[j_plot]],
+                    samples[:,dimensions_list[i_plot]],
+                    bins=bins,
+                    range=[dim_range[j_plot], dim_range[i_plot]],
+                    cmap=colormap_2d,
+                )
+
+                # print(i_plot, j_plot) # grid indices for lower left
+                axis = plt.subplot(gs1[i_plot + (number_of_plots) * j_plot])
+
+                axis.set_xticklabels([])
+                axis.tick_params(axis="x", which="both", bottom=False, top=False)
+                axis.set_yticklabels([])
+                axis.tick_params(axis="y", which="both", left=False, right=False)
+
+                axis.axis("off")
+
+                correlation = np.corrcoef(
+                    samples[:,dimensions_list[j_plot]], samples[:,dimensions_list[i_plot]]
+                )[1][0]
+                axis.text(
+                    0.5,
+                    0.5,
+                    f"{correlation:.2f}",
+                    horizontalalignment="center",
+                    verticalalignment="center",
+                    fontsize=40 * np.abs(correlation),
+                    transform=axis.transAxes,
+                )
+
+        if show:
+            plt.show()
 
 
 if __name__ == '__main__':

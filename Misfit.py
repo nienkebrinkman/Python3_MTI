@@ -6,52 +6,52 @@ from obspy.core.stream import Stream
 
 class Misfit:
     def CC_BW(self,BW_obs,BW_syn,or_time,plot = False):
-        fig = plt.figure(figsize=(12, 10))
-        # ax1 = plt.subplot2grid((2, 1), (0, 0))
-        ax1 = plt.subplot(511)
-        ymin, ymax = ax1.get_ylim()
-        ax1.plot(BW_obs.P_stream.traces[0], alpha = 0.5,c = 'r', label = 'Observed')
-        ax1.plot(BW_syn.P_stream.traces[0], alpha = 0.5,c= 'g', label = 'Synthetic')
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-        plt.legend(loc='upper right')
-
-        # ax2 = plt.subplot2grid((2, 1), (1, 0))
-        ax2 = plt.subplot(512)
-        ax2.plot(BW_obs.P_stream.traces[1], alpha = 0.5,c = 'r', label = 'Observed')
-        ax2.plot(BW_syn.P_stream.traces[1], alpha = 0.5,c= 'g', label = 'Synthetic')
-        ax2.tick_params(axis='x', labelsize=20)
-        ax2.tick_params(axis='y', labelsize=20)
-        plt.legend(loc ='upper right')
-        plt.xlabel(or_time.strftime('Time : %Y-%m-%dT%H:%M:%S + [sec]'),fontsize = 20)
-
-        ax3 = plt.subplot(513)
-        ymin, ymax = ax3.get_ylim()
-        ax3.plot(BW_obs.S_stream.traces[0], alpha = 0.5,c = 'r', label = 'Observed')
-        ax3.plot(BW_syn.S_stream.traces[0], alpha = 0.5,c= 'g', label = 'Synthetic')
-        ax3.tick_params(axis='x', labelsize=20)
-        ax3.tick_params(axis='y', labelsize=20)
-        plt.legend(loc='upper right')
-
-        ax4 = plt.subplot(514)
-        ymin, ymax = ax1.get_ylim()
-        ax4.plot(BW_obs.S_stream.traces[1], alpha = 0.5,c = 'r', label = 'Observed')
-        ax4.plot(BW_syn.S_stream.traces[1], alpha = 0.5,c= 'g', label = 'Synthetic')
-        ax4.tick_params(axis='x', labelsize=20)
-        ax4.tick_params(axis='y', labelsize=20)
-        plt.legend(loc='upper right')
-
-        ax5 = plt.subplot(515)
-        ymin, ymax = ax1.get_ylim()
-        ax5.plot(BW_obs.S_stream.traces[2], alpha = 0.5,c = 'r', label = 'Observed')
-        ax5.plot(BW_syn.S_stream.traces[2], alpha = 0.5,c= 'g', label = 'Synthetic')
-        ax5.tick_params(axis='x', labelsize=20)
-        ax5.tick_params(axis='y', labelsize=20)
-        plt.legend(loc='upper right')
-
-
-        plt.tight_layout()
-        plt.show()
+        # fig = plt.figure(figsize=(12, 10))
+        # # ax1 = plt.subplot2grid((2, 1), (0, 0))
+        # ax1 = plt.subplot(511)
+        # ymin, ymax = ax1.get_ylim()
+        # ax1.plot(BW_obs.P_stream.traces[0], alpha = 0.5,c = 'r', label = 'Observed')
+        # ax1.plot(BW_syn.P_stream.traces[0], alpha = 0.5,c= 'g', label = 'Synthetic')
+        # ax1.tick_params(axis='x', labelsize=20)
+        # ax1.tick_params(axis='y', labelsize=20)
+        # plt.legend(loc='upper right')
+        #
+        # # ax2 = plt.subplot2grid((2, 1), (1, 0))
+        # ax2 = plt.subplot(512)
+        # ax2.plot(BW_obs.P_stream.traces[1], alpha = 0.5,c = 'r', label = 'Observed')
+        # ax2.plot(BW_syn.P_stream.traces[1], alpha = 0.5,c= 'g', label = 'Synthetic')
+        # ax2.tick_params(axis='x', labelsize=20)
+        # ax2.tick_params(axis='y', labelsize=20)
+        # plt.legend(loc ='upper right')
+        # plt.xlabel(or_time.strftime('Time : %Y-%m-%dT%H:%M:%S + [sec]'),fontsize = 20)
+        #
+        # ax3 = plt.subplot(513)
+        # ymin, ymax = ax3.get_ylim()
+        # ax3.plot(BW_obs.S_stream.traces[0], alpha = 0.5,c = 'r', label = 'Observed')
+        # ax3.plot(BW_syn.S_stream.traces[0], alpha = 0.5,c= 'g', label = 'Synthetic')
+        # ax3.tick_params(axis='x', labelsize=20)
+        # ax3.tick_params(axis='y', labelsize=20)
+        # plt.legend(loc='upper right')
+        #
+        # ax4 = plt.subplot(514)
+        # ymin, ymax = ax1.get_ylim()
+        # ax4.plot(BW_obs.S_stream.traces[1], alpha = 0.5,c = 'r', label = 'Observed')
+        # ax4.plot(BW_syn.S_stream.traces[1], alpha = 0.5,c= 'g', label = 'Synthetic')
+        # ax4.tick_params(axis='x', labelsize=20)
+        # ax4.tick_params(axis='y', labelsize=20)
+        # plt.legend(loc='upper right')
+        #
+        # ax5 = plt.subplot(515)
+        # ymin, ymax = ax1.get_ylim()
+        # ax5.plot(BW_obs.S_stream.traces[2], alpha = 0.5,c = 'r', label = 'Observed')
+        # ax5.plot(BW_syn.S_stream.traces[2], alpha = 0.5,c= 'g', label = 'Synthetic')
+        # ax5.tick_params(axis='x', labelsize=20)
+        # ax5.tick_params(axis='y', labelsize=20)
+        # plt.legend(loc='upper right')
+        #
+        #
+        # plt.tight_layout()
+        # plt.show()
 
         p_obs = BW_obs.P_stream
         p_syn = BW_syn.P_stream
