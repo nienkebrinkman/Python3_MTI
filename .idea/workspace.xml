@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/Get_Parameters_MSS_Euler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/BBB_project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BBB_project.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Code working for MSS again!!">
+      <change afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235_Euler.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main_MSS.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Obspy_Trim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cut_windows.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cut_windows.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Get_Parameters_MSS.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_MSS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Get_Seismogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Seismogram.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Parameters_MSS_Euler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_MSS_Euler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MCMC.py" beforeDir="false" afterPath="$PROJECT_DIR$/MCMC.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main_Marsquakes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main_Marsquakes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misfit.py" afterDir="false" />
@@ -58,12 +58,6 @@
       </list>
     </option>
   </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>depth</find>
-      <find>BW_st</find>
-    </findStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -104,7 +98,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Post_processing">
+  <component name="RunManager" selected="Python.Main_MSS">
     <configuration name="BFO_2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="BBB_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -127,7 +121,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="BFO_5 (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="Main_MSS" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="BBB_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -135,34 +129,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Extra/Paper_events" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Extra/Paper_events/BFO_5.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="BFO_7 (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="BBB_project" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Extra/Paper_events" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Extra/Paper_events/BFO_7.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main_MSS.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -185,6 +157,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main_Marsquakes.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Obspy_Trim" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="BBB_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Obspy_Trim.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -217,18 +211,18 @@
     </configuration>
     <list>
       <item itemvalue="Python.BFO_2" />
-      <item itemvalue="Python.BFO_5 (1)" />
-      <item itemvalue="Python.BFO_7 (1)" />
       <item itemvalue="Python.Main_Marsquakes" />
       <item itemvalue="Python.Post_processing" />
+      <item itemvalue="Python.Obspy_Trim" />
+      <item itemvalue="Python.Main_MSS" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Main_MSS" />
         <item itemvalue="Python.Post_processing" />
         <item itemvalue="Python.Main_Marsquakes" />
+        <item itemvalue="Python.Obspy_Trim" />
         <item itemvalue="Python.BFO_2" />
-        <item itemvalue="Python.BFO_7 (1)" />
-        <item itemvalue="Python.BFO_5 (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -255,6 +249,13 @@
       <workItem from="1570638562165" duration="314000" />
       <workItem from="1570862024640" duration="21761000" />
       <workItem from="1570956386600" duration="8287000" />
+      <workItem from="1571034892503" duration="716000" />
+      <workItem from="1571065916610" duration="3246000" />
+      <workItem from="1571075484517" duration="2626000" />
+      <workItem from="1571135438312" duration="1087000" />
+      <workItem from="1571212912294" duration="4915000" />
+      <workItem from="1571253503238" duration="1165000" />
+      <workItem from="1571294576192" duration="6282000" />
     </task>
     <task id="LOCAL-00001" summary="Updates: waveform fitting and weighting function">
       <created>1542368829661</created>
@@ -270,7 +271,14 @@
       <option name="project" value="LOCAL" />
       <updated>1546850622076</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Code working for MSS again!!">
+      <created>1571034981435</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1571034981435</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -306,7 +314,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updates: waveform fitting and weighting function" />
     <MESSAGE value="Updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updates" />
+    <MESSAGE value="Code working for MSS again!!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Code working for MSS again!!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -342,19 +351,29 @@
           <option name="timeStamp" value="302" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Post_processing.py</url>
-          <line>1114</line>
-          <option name="timeStamp" value="324" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Plot_waveforms.py</url>
           <line>459</line>
           <option name="timeStamp" value="326" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>71</line>
-          <option name="timeStamp" value="366" />
+          <line>175</line>
+          <option name="timeStamp" value="377" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Obspy_Trim.py</url>
+          <line>18</line>
+          <option name="timeStamp" value="385" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Misfit.py</url>
+          <line>250</line>
+          <option name="timeStamp" value="386" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Misfit.py</url>
+          <line>84</line>
+          <option name="timeStamp" value="387" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -367,7 +386,9 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1570996573551" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1570990148760" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1571299284412" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Obspy_Trim.coverage" NAME="Obspy_Trim Coverage Results" MODIFIED="1571136057669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1571298919832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_MSS.coverage" NAME="Main_MSS Coverage Results" MODIFIED="1571299479695" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

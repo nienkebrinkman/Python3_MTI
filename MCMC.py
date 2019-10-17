@@ -19,7 +19,7 @@ class MCMC:
         self.sample_path = sample_path
 
         self.model = Model_samples(self.prior)
-        self.BW_syn = Cut_windows(self.prior['VELOC_taup'])
+        self.BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = PRIOR['P_HP'], P_LP= PRIOR['P_LP'], S_HP =  PRIOR['S_HP'], S_LP= PRIOR['S_LP'])
         self.seis = Get_Seismogram(self.prior)
         self.mis = Misfit()
 

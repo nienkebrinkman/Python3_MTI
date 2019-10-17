@@ -15,16 +15,16 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
-        self.inv = None # self.directory + 'mss_event.xml'
-        mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
+        self.inv = None #
+        mSEED_file = 'waveforms_VBB_ZRT.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
         # mSEED_file = 'waveforms_VBB.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
         mSEED_path = self.directory + mSEED_file
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path = '/home/nienke/MARSQUAKES/start_sample.txt'
+        start_sample_path =  None # '/home/nienke/Documents/Master/Data/MSS/start_sample.txt'
 
 
         if start_sample_path == None:
@@ -48,8 +48,8 @@ class Get_Parameters:
 
         trace = stream.traces[0]
         PRIOR = {}
-        PRIOR['PLOT'] = True
-        PRIOR['save_name'] = 'MSS_MAAK_' + trace.id.replace('.','_')
+        PRIOR['PLOT'] = False
+        PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
@@ -78,25 +78,25 @@ class Get_Parameters:
         # = Source =
         ## Catalogue:
         if inventory == False:
-            PRIOR['origin_time'] = obspy.UTCDateTime(2019, 1, 3, 15, 00, 30)
-            PRIOR['depth_s'] = 38438
-            PRIOR['la_s'] = - 26.443
-            PRIOR['lo_s'] = 50.920
-            Mw = 4.46
+            PRIOR['origin_time'] = obspy.UTCDateTime(2019, 7, 26, 12, 16, 15)
+            PRIOR['depth_s'] = 45000
+            PRIOR['la_s'] = 10.99
+            PRIOR['lo_s'] = 160.95
+            Mw = 3.3
 
         else:
             PRIOR['la_s'] = inv.events[0].origins[0].latitude
             PRIOR['lo_s'] = inv.events[0].origins[0].longitude
             PRIOR['depth_s'] = inv.events[0].origins[0].depth
             PRIOR['origin_time'] = inv.events[0].origins[0].time
-            Mw = 4.46
+            Mw = None
 
 
         PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw)  # Scalar Moment
         exp = mtm.magnitude_to_moment(Mw) # Using Pyrocko package....
         # self.M0 = PRIOR['M0']
         PRIOR['components'] = ["Z", "R", "T"]
-        PRIOR['kind'] = 'velocity'
+        PRIOR['kind'] = 'displacement'
 
 
         dist, az, baz = gps2dist_azimuth(lat1=PRIOR['la_s'], lon1=PRIOR['lo_s'],
@@ -108,22 +108,16 @@ class Get_Parameters:
         # PRIOR['baz'] = 243
         # PRIOR['epi_s'] = 86
 
-
-
-
-
         # = Velocity model =
 
         #   -Mars-
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
-        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/DWAK_1s/'
-        PRIOR['VELOC'] = '/opt/databases/Mars/MAAK_1s'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/DWAK.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/maak.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/maak.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -135,17 +129,17 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 5000
+        PRIOR['sample_number'] = 50000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
         PRIOR['directory'] = self.directory
 
         # = Filter information =
-        PRIOR['P_LP'] = 0.75
-        PRIOR['P_HP'] = 1.0 / 10.0
-        PRIOR['S_LP'] = 1.0 / 7.0
-        PRIOR['S_HP'] = 1.0 / 30.0
+        PRIOR['P_LP'] = 1.0/1.0
+        PRIOR['P_HP'] = 1.0 / 15.0 # could also be 1.0/10.0
+        PRIOR['S_LP'] = 1.0/1.0
+        PRIOR['S_HP'] = 1.0 / 15
         return PRIOR
 
     def Get_ranges(self,PRIOR):

@@ -33,11 +33,11 @@ def main():
     ## Post - Processing [processing the results from inversion]
     result = Post_processing_sdr()
 
-    strike, dip, rake = aux_plane(139, 23, 65)
+    strike, dip, rake = aux_plane(238, 80, 143)
 
-    directory = '/home/nienke/Documents/Master/Data/MSS/Output'
-    path_to_file = '/home/nienke/Documents/Master/Data/MSS/Output/MAAK_7J_SYNT4_02_MHZ_Random.txt'
-    # path_to_file_BBB = '/home/nienke/Documents/Master/Data/MSS/Output/output1.txt'
+    directory = '/home/nienke/Documents/Master/Data/MSS/Output/'
+    path_to_file = '/home/nienke/Documents/Master/Data/MSS/Output/MSS_MAAK_7J_SYNT4_02_MHZ_EULER.txt'
+    path_to_file_BBB = '/home/nienke/Documents/Master/Data/MSS/Output/MSS_Euler_BBB.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
     # par = Get_Parameters()
@@ -90,7 +90,8 @@ def main():
         s2, d2, r2))  # strike2=120.19814045454422, dip2=27.62588224193955, rake2=142.29811781206305
     real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
     # beachball([s1,d1,r1], size=200, linewidth=2, facecolor='b')
-    # real_v = np.array([86,36000,270,60,-40,316227766016837.94]) # MSS event 5.0
+
+    # real_v = None # Real Marsquakes
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
@@ -108,11 +109,11 @@ def main():
     # result.get_beachballs(REAL['strike'], REAL['dip'],REAL['rake'],PRIOR['M0'],directory+'/beachball.pdf')
     # result.trace_density(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                 column_names=column_names, real_v=real_v, burnin=burnin)
+                 column_names=column_names,burnin=burnin ,real_v=real_v)
     # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
-    #                column_names=column_names, real_v=real_v, burnin=burnin)
+    #                column_names=column_names,  burnin=burnin,real_v=real_v)
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
-    result.marginal_grid(File, [0,1,2,3,4,5])
+    result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
     # result.full_moment_traces(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     # result.get_accepted_samples(filepath=path_to_file,savename=savename,directory=directory, column_names,skiprows=skiprows)
     # result.get_convergence(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,show=show)
@@ -610,7 +611,7 @@ class Post_processing_sdr:
         moment = np.array([Mxx, Myy, Mzz, Mxy, Mxz, Myz])
         return moment
 
-    def trace(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
+    def trace(self, filepath, savename, directory, skiprows, column_names,  burnin, real_v = None,):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -620,26 +621,9 @@ class Post_processing_sdr:
                 data_file = yaml.load(stream)
                 stream.close()
                 data = data_file['data']
-                # parameters = data_file['parameters']
         else:
-            # parameters = open(filepath, "r").readlines()[:33]
-            filepath2 = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Report_data/Test_5/Blindtest_trialrun_combined.txt'
-            # filepath3 = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Report_data/Test_3/Body_waves/Test_3.txt'
             data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
-            # dat2 = np.loadtxt(filepath2, delimiter=',', skiprows=skiprows)
-            # dat3 = np.loadtxt(filepath3, delimiter=',', skiprows=skiprows)
 
-        # length = len(data[0]) - (len(column_names) + 3)
-        # L_length = int(data[0][-1])
-        # R_length = int(data[0][-2])
-        #
-        # for i in range(R_length):
-        #     column_names = np.append(column_names,"R_%i" % (i+1))
-        # for i in range(L_length):
-        #     column_names = np.append(column_names,"L_%i" % (i+1))
-        # column_names = np.append(column_names,"Accepted")
-        # column_names = np.append(column_names,"Rayleigh_length")
-        # column_names = np.append(column_names,"Love_length")
 
         params = {'legend.fontsize': 'x-large',
                   'figure.figsize': (15, 15),
@@ -651,27 +635,21 @@ class Post_processing_sdr:
         #
         df = pd.DataFrame(data,
                           columns=column_names)
-        # df2 = pd.DataFrame(dat2,
-        #                   columns=column_names)
-        # df3 = pd.DataFrame(dat3,
-        #                   columns=column_names)
         df_select = df[["Epi", "Depth", "Strike", "Dip", "Rake"]]
-        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
-        M0_true = real_v[5]
+        if real_v is not None:
+            strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
+            M0_true = real_v[5]
 
         fig = plt.figure(figsize=(25, 6))
         row = 0
 
         ax1 = plt.subplot2grid((1, 3), (0, 0))
         plt.hist(df_select['Strike'][burnin:], bins=100, alpha=0.8)
-        # plt.hist(df_select['Strike'][burnin:],bins=100,alpha=0.5,color = 'b')
-        # plt.hist(df3['Strike'][burnin:],bins=100,alpha=0.5,color = 'g')
-        # plt.hist(df2['Strike'][burnin:],bins=100,alpha=0.5,color = 'r')
 
         ymin, ymax = ax1.get_ylim()
-        plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
-        plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
-        # plt.vlines(df_select['Strike'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Start model')
+        if real_v is not None:
+            plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+            plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         ax1.set_title("Density Strike", color='b', fontsize=25)
         ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
         ax1.set_ylabel("Posterior marginal", fontsize=25)
@@ -684,13 +662,11 @@ class Post_processing_sdr:
 
         ax2 = plt.subplot2grid((1, 3), (0, 1))
         plt.hist(df_select['Dip'][burnin:], bins=100, alpha=0.8)
-        # plt.hist(df_select['Dip'][burnin:],bins=100,alpha=0.5,color = 'b')
-        # plt.hist(df3['Dip'][burnin:], bins=100, alpha=0.5, color='g')
-        # plt.hist(df2['Dip'][burnin:],bins=100,alpha=0.5,color = 'r')
 
         ymin, ymax = ax2.get_ylim()
-        plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
-        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+        if real_v is not None:
+            plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
+            plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
         # plt.vlines(df_select['Dip'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label='Start model')
         ax2.set_title("Density Dip", color='b', fontsize=25)
         ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
@@ -704,21 +680,18 @@ class Post_processing_sdr:
 
         ax3 = plt.subplot2grid((1, 3), (0, 2))
         plt.hist(df_select['Rake'][burnin:], bins=100, alpha=0.8)
-        # plt.hist(df_select['Rake'][burnin:],bins=100,alpha=0.5,color = 'b' ,label= 'MAAK')
-        # plt.hist(df3['Rake'][burnin:],bins=100,alpha=0.5,color = 'g', label= 'Body waves')
-        # plt.hist(df2['Rake'][burnin:],bins=100,alpha=0.5,color = 'r', label= 'EH45TcoldCrust_1b')
         ymin, ymax = ax3.get_ylim()
-        plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
-        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
-        # plt.vlines(df_select['Rake'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label= 'Start model')
+        if real_v is not None:
+            plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+            plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
+            plt.legend(loc='upper left', fontsize=20)
+            # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
         ax3.set_title("Density Rake", color='b', fontsize=25)
         ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
         ax3.tick_params(axis='x', labelsize=20)
         ax3.tick_params(axis='y', labelsize=20)
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
-        plt.legend(loc='upper left', fontsize=20)
-        # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
         plt.tight_layout()
 
         # plt.show()
@@ -728,13 +701,12 @@ class Post_processing_sdr:
 
         ax4 = plt.subplot2grid((1, 3), (0, 0))
         plt.hist(df_select['Depth'][burnin:] / 1000, bins=100, alpha=0.8)
-        # plt.hist(df['Depth'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
-        # plt.hist(df2['Depth'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
         ymin, ymax = ax4.get_ylim()
         xmin, xmax = ax4.get_xlim()
-        plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
-        # plt.vlines(df_select['Depth'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Start model')
-        # ax4.set_title("Density Depth", color='b', fontsize=20)
+        if real_v is not None:
+            plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+
+        ax4.set_title("Density Depth", color='b', fontsize=20)
         # ax4.set_xlabel("N=%i" % (len(df_select['Depth'])), fontsize=20)
         ax4.set_xlabel("Depth [km]", fontsize=20)
         ax4.set_ylabel("Posterior marginal", fontsize=20)
@@ -752,9 +724,11 @@ class Post_processing_sdr:
         plt.hist(df_select['Epi'][burnin:], bins=50, alpha=0.8)
         # plt.hist(df['Epi'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['Epi'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
-        ymin, ymax = ax5.get_ylim()
+        if real_v is not None:
+            ymin, ymax = ax5.get_ylim()
+
         # plt.vlines(df_select['Epi'][0], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Start model')
-        # plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3,label = 'True model')
+            plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3,label = 'True model')
         ax5.set_title("Density Epicentral Distance", color='b', fontsize=20)
         ax5.set_xlabel("N=%i" % (len(df_select['Epi'])), fontsize=20)
         ax5.tick_params(axis='x', labelsize=20)
@@ -765,11 +739,12 @@ class Post_processing_sdr:
 
         ax6 = plt.subplot2grid((1, 3), (0, 2))
         Mw = 2.0 / 3.0 * (np.log10(df['M0'][burnin:]) - 9.1)
-        plt.hist(Mw, bins=np.arange(4, 7, 0.05), alpha=0.8)
+        plt.hist(Mw, bins=np.arange(3, 5, 0.05), alpha=0.8)
         # plt.hist(df['M0'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['M0'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
-        ymin, ymax = ax6.get_ylim()
-        # plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
+        if real_v is not None:
+            ymin, ymax = ax6.get_ylim()
+            plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
         # plt.vlines(df['M0'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label = 'Start model')
         ax6.set_title("Density Moment Magnitude", color='b', fontsize=20)
         ax6.set_xlabel("N=%i" % (len(df['M0'])), fontsize=18)
@@ -1105,34 +1080,22 @@ class Post_processing_sdr:
         # plt.show()
         plt.close()
 
-    def get_BBB(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
+    def get_BBB(self, filepath, savename, directory, skiprows, column_names, burnin, real_v = None):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
-        beachball([real_v[2], real_v[3], real_v[4]], size=200, linewidth=2, facecolor='b',
-                  outfile=dir + '/beach_true.pdf')
+        if real_v is not None:
+            beachball([real_v[2], real_v[3], real_v[4]], size=200, linewidth=2, facecolor='b',
+                      outfile=dir + '/beach_true.pdf')
 
         if filepath.endswith('.yaml') == True:
             with open(filepath, 'r') as stream:
                 data_file = yaml.load(stream)
                 stream.close()
                 data = data_file['data']
-                # parameters = data_file['parameters']
         else:
-            # parameters = open(filepath, "r").readlines()[:33]
             data = np.loadtxt(filepath, delimiter=',', skiprows=0)
 
-        # length = len(data[0]) - (len(column_names) + 3)
-        # L_length = int(data[0][-1])
-        # R_length = int(data[0][-2])
-        #
-        # for i in range(R_length):
-        #     column_names = np.append(column_names, "R_%i" % (i + 1))
-        # for i in range(L_length):
-        #     column_names = np.append(column_names, "L_%i" % (i + 1))
-        # column_names = np.append(column_names, "Accepted")
-        # column_names = np.append(column_names, "Rayleigh_length")
-        # column_names = np.append(column_names, "Love_length")
 
         df = pd.DataFrame(data, columns=column_names)
 
@@ -1444,17 +1407,17 @@ class Post_processing_sdr:
         return new_array
 
     def marginal_grid(
-            self,
+            self, savename, directory,
             samples: np.ndarray,
             dimensions_list,
             bins: int = 25,
             show: bool = True,
             colormap_2d=plt.get_cmap("Greys"),
-            color_1d="black",
+            color_1d="black"
     ):
         number_of_plots = len(dimensions_list)
         import matplotlib.gridspec as _gridspec
-
+        dir = directory + '/%s' % (savename.strip('.yaml'))
         plt.figure(figsize=(8, 8))
         gs1 = _gridspec.GridSpec(number_of_plots, number_of_plots)
         gs1.update(wspace=0.05, hspace=0.05)  # set the spacing between axes.
@@ -1542,6 +1505,9 @@ class Post_processing_sdr:
 
         if show:
             plt.show()
+        else:
+            plt.savefig(dir + '/Marginals.pdf')
+
 
 
 if __name__ == '__main__':

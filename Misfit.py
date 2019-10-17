@@ -170,8 +170,10 @@ class Misfit:
             end = int((p_start_obs.timestamp - or_time.timestamp + 260) / delta)
 
             # A = (np.dot(amp_obs.traces[i],amp_syn.traces[i]) / np.dot(amp_obs.traces[i],amp_obs.traces[i]))
-            A = (np.dot(p_obs[i].data[start:end], p_syn_shift_obspy[start:end]) /
-                 np.dot(p_obs[i].data[start:end], p_obs[i].data[start:end]))
+            # A = (np.dot(p_obs[i].data[start:end], p_syn_shift_obspy[start:end]) /
+            #      np.dot(p_obs[i].data[start:end], p_obs[i].data[start:end]))
+
+            A = (np.dot(p_obs[i].data, p_syn_shift_obspy) / np.dot(p_obs[i].data, p_obs[i].data))
             amplitude = np.append(amplitude,abs(A))
 
             if plot:

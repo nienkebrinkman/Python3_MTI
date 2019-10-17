@@ -26,7 +26,6 @@ class Get_Parameters:
     def Start_sample_path(self,PRIOR):
         start_sample_path =  None # '/home/nienke/Documents/Master/Data/MSS/start_sample.txt'
 
-
         if start_sample_path == None:
             create = create_starting_sample()
             strike = np.random.uniform(PRIOR['strike']['range_min'], PRIOR['strike']['range_max'])
@@ -105,23 +104,15 @@ class Get_Parameters:
         PRIOR['az'] = az
         PRIOR['epi_s'] = kilometer2degrees(dist, radius=PRIOR['radius'])
 
-        # PRIOR['baz'] = 243
-        # PRIOR['epi_s'] = 86
-
-
-
-
-
         # = Velocity model =
-
         #   -Mars-
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/DWAK_1s/'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/DWAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/MAAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -136,8 +127,13 @@ class Get_Parameters:
         PRIOR['sample_number'] = 50000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
-
         PRIOR['directory'] = self.directory
+
+        # = Filter information =
+        PRIOR['P_LP'] = 0.75
+        PRIOR['P_HP'] = 1.0 / 10.0
+        PRIOR['S_LP'] = 1.0 / 7.0
+        PRIOR['S_HP'] = 1.0 / 30.0
         return PRIOR
 
     def Get_ranges(self,PRIOR):
