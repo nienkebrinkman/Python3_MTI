@@ -164,7 +164,6 @@ class MCMC:
             save_file.close()
 
     def G_function(self, epi, depth, M0, strike, dip, rake ):
-
         dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
                                                                                  lon1=self.prior['lo_r'],
                                                                                  azi1=self.prior['baz'],
@@ -177,15 +176,26 @@ class MCMC:
                                                                time=self.or_time, M0=M0)
 
         self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['npts'])
+
+        # self.BW_obs.original.filter('highpass', freq = 1.0/8.0 , zerophase = True)
+        # self.BW_syn.original.filter('highpass', freq = 1.0/8.0 , zerophase = True)
+        #
+        # self.BW_obs.original.filter('lowpass', freq = 1.0/2.0 , zerophase = True)
+        # self.BW_syn.original.filter('lowpass', freq = 1.0/2.0 , zerophase = True)
+        #
+        # self.BW_obs.original.trim(self.prior['origin_time'])
+        # self.BW_syn.original.trim(self.prior['origin_time'])
+        #
         # ax1 = plt.subplot(111)
-        # plt.plot(self.BW_obs.original.traces[0], 'b')
-        # plt.plot(self.BW_syn.original.traces[0], 'r')
+        # plt.plot(self.BW_obs.original.traces[2], 'b')
+        # plt.plot(self.BW_syn.original.traces[2], 'r')
         # ymin, ymax = ax1.get_ylim()
         # plt.vlines(self.BW_obs.or_P_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_P')
         # plt.vlines(self.BW_syn.or_P_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P')
         # plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
         # plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
         # plt.show()
+        # a=1
 
     def write_par(self,file_name,BW,SW):
         if BW == True and SW == True:

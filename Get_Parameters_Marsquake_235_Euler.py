@@ -105,13 +105,6 @@ class Get_Parameters:
         PRIOR['az'] = az
         PRIOR['epi_s'] = kilometer2degrees(dist, radius=PRIOR['radius'])
 
-        # PRIOR['baz'] = 243
-        # PRIOR['epi_s'] = 86
-
-
-
-
-
         # = Velocity model =
 
         #   -Mars-
@@ -134,7 +127,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 50000
+        PRIOR['sample_number'] = 100000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 

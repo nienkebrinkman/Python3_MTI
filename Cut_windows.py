@@ -34,7 +34,7 @@ class Cut_windows:
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
 
-        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 40)
+        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 20)
         end_S = obspy.UTCDateTime(or_time_sec + tt_S + 50)
 
 
@@ -43,8 +43,6 @@ class Cut_windows:
         # BW_stream = Stream()
 
         for i,trace in enumerate(stream.traces):
-            trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
-
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
             npts_p = self.P_len + 2 * self.or_P_len
@@ -52,15 +50,11 @@ class Cut_windows:
             self.S_len = len(S_trace)
             npts_s = self.S_len + 2 * self.or_S_len
 
-            zero_trace = Trace(np.zeros(npts),
-                               header={"starttime": or_time, 'delta': trace.stats.delta,
-                                       "station": trace.stats.station,
-                                       "network": trace.stats.network, "location": trace.stats.location,
-                                       "channel": trace.stats.channel})
+            P_trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
+            S_trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+
 
             if 'T' in trace.stats.channel:
-                # total_trace = zero_trace.__add__(S_trace, method=0, interpolation_samples=0, fill_value=S_trace.data,
-                #                                  sanity_checks=True)
                 total_s_trace = Trace(np.zeros(npts),
                       header={"starttime": or_time, 'delta': trace.stats.delta,
                               "station": trace.stats.station,
@@ -69,9 +63,6 @@ class Cut_windows:
                                                                        fill_value=S_trace.data,
                                                                        sanity_checks=True)
             else:
-                # P_and_S = P_trace.__add__(S_trace, fill_value=0, sanity_checks=True)
-                # total_trace = zero_trace.__add__(P_and_S, method=0, interpolation_samples=0,
-                #                                  fill_value=P_and_S.data, sanity_checks=True)
                 total_p_trace = Trace(np.zeros(npts),
                       header={"starttime": or_time, 'delta': trace.stats.delta,
                               "station": trace.stats.station,
@@ -109,7 +100,7 @@ class Cut_windows:
 
         self.dt = stream.traces[0].stats.delta
 
-        end_P = obspy.UTCDateTime(tt_P.timestamp + 40)
+        end_P = obspy.UTCDateTime(tt_P.timestamp + 20)
         end_S = obspy.UTCDateTime(tt_S.timestamp + 50)
         # end_S = obspy.UTCDateTime(tt_S.timestamp + 35)
 
@@ -119,6 +110,7 @@ class Cut_windows:
 
         for i, trace in enumerate(stream.traces):
             trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
+            # Apply a filter with the length of the window
 
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
@@ -127,15 +119,10 @@ class Cut_windows:
             self.S_len = len(S_trace)
             npts_s = self.S_len + 2 * self.or_S_len
 
-            zero_trace = Trace(np.zeros(npts),
-                               header={"starttime": or_time, 'delta': trace.stats.delta,
-                                       "station": trace.stats.station,
-                                       "network": trace.stats.network, "location": trace.stats.location,
-                                       "channel": trace.stats.channel})
+            P_trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
+            S_trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
 
             if 'T' in trace.stats.channel:
-                # total_trace = zero_trace.__add__(S_trace, method=0, interpolation_samples=0, fill_value=S_trace.data,
-                #                                  sanity_checks=True)
                 total_s_trace = Trace(np.zeros(npts),
                                       header={"starttime": or_time, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
@@ -145,9 +132,6 @@ class Cut_windows:
                                                                                        fill_value=S_trace.data,
                                                                                        sanity_checks=True)
             else:
-                # P_and_S = P_trace.__add__(S_trace, fill_value=0, sanity_checks=True)
-                # total_trace = zero_trace.__add__(P_and_S, method=0, interpolation_samples=0,
-                #                                  fill_value=P_and_S.data, sanity_checks=True)
                 total_p_trace = Trace(np.zeros(npts),
                                       header={"starttime": or_time, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
@@ -166,16 +150,14 @@ class Cut_windows:
                                                                                        sanity_checks=True)
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
-            # BW_stream.append(total_trace)
 
             # === Apply filters ===
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
-            # self.BW_stream = self.Filter(BW_stream)
 
     def Filter(self, stream, HP, LP):
         stream.filter('highpass', freq= HP, zerophase=True)
-        stream.filter('lowpass', freq=LP, zerophase=True)
+        stream.filter('lowpass' , freq=LP, zerophase=True)
         return stream
 
 

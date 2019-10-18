@@ -39,12 +39,13 @@ def main():
     sample_path = get_parameters.Start_sample_path(PRIOR)
 
     # === Cut the BW windows (P&S) ===
-    BW_obs = Cut_windows(PRIOR['VELOC_taup'])
+    BW_obs = Cut_windows(PRIOR['VELOC_taup'],P_HP = PRIOR['P_HP'], P_LP= PRIOR['P_LP'], S_HP =  PRIOR['S_HP'], S_LP= PRIOR['S_LP'])
 
     npts = stream.traces[0].stats.npts
     # BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts = npts)
     tt_P = obspy.UTCDateTime(2019, 7, 26, 12, 19, 19.3)
-    tt_S = obspy.UTCDateTime(2019, 7, 26, 12, 21, 56.1)
+    # tt_S = obspy.UTCDateTime(2019, 7, 26, 12, 21, 56.1) # OLD
+    tt_S = obspy.UTCDateTime(2019, 7, 26, 12, 22, 3) # Add 10 or 15 seconds.
     BW_obs.Get_bw_windows_MANUAL(stream, tt_P, tt_S, PRIOR['origin_time'], npts=PRIOR['npts'])
 
     # === Start the MCMC ===
@@ -53,7 +54,7 @@ def main():
 
     # === Plot waveforms from a previous run ===
     PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/MAAK_XB_ELYSE_02_BHZ_1.txt'
+    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAKXB_ELYSE_02_BHZ_1.txt'
     savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
     plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,PRIOR['origin_time'])
     plot.get_waveforms()

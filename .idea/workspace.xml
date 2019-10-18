@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Code working for MSS again!!">
-      <change afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235_Euler.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Main_MSS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Obspy_Trim.py" afterDir="false" />
+    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Highpass and Lowpass filters are now in PRIOR information">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cut_windows.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cut_windows.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Get_Parameters_MSS.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_MSS.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Get_Parameters_MSS_Euler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_MSS_Euler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Parameters_Marsquake_235.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Parameters_Marsquake_235_Euler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters_Marsquake_235_Euler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Seismogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Seismogram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MCMC.py" beforeDir="false" afterPath="$PROJECT_DIR$/MCMC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main_MSS.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main_MSS.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main_Marsquakes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main_Marsquakes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misfit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Plot_waveforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/Plot_waveforms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Post_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Post_processing.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -98,7 +99,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Main_MSS">
+  <component name="RunManager" selected="Python.Post_processing">
     <configuration name="BFO_2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="BBB_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -218,9 +219,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Main_MSS" />
         <item itemvalue="Python.Post_processing" />
         <item itemvalue="Python.Main_Marsquakes" />
+        <item itemvalue="Python.Main_MSS" />
         <item itemvalue="Python.Obspy_Trim" />
         <item itemvalue="Python.BFO_2" />
       </list>
@@ -255,7 +256,9 @@
       <workItem from="1571135438312" duration="1087000" />
       <workItem from="1571212912294" duration="4915000" />
       <workItem from="1571253503238" duration="1165000" />
-      <workItem from="1571294576192" duration="6282000" />
+      <workItem from="1571294576192" duration="15976000" />
+      <workItem from="1571332553597" duration="9238000" />
+      <workItem from="1571384239855" duration="7502000" />
     </task>
     <task id="LOCAL-00001" summary="Updates: waveform fitting and weighting function">
       <created>1542368829661</created>
@@ -278,7 +281,14 @@
       <option name="project" value="LOCAL" />
       <updated>1571034981435</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Highpass and Lowpass filters are now in PRIOR information">
+      <created>1571301019097</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1571301019097</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -315,7 +325,8 @@
     <MESSAGE value="Updates: waveform fitting and weighting function" />
     <MESSAGE value="Updates" />
     <MESSAGE value="Code working for MSS again!!" />
-    <option name="LAST_COMMIT_MESSAGE" value="Code working for MSS again!!" />
+    <MESSAGE value="Highpass and Lowpass filters are now in PRIOR information" />
+    <option name="LAST_COMMIT_MESSAGE" value="Highpass and Lowpass filters are now in PRIOR information" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -327,7 +338,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/MCMC.py</url>
-          <line>231</line>
+          <line>241</line>
           <option name="timeStamp" value="227" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -356,23 +367,13 @@
           <option name="timeStamp" value="326" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>175</line>
-          <option name="timeStamp" value="377" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Obspy_Trim.py</url>
           <line>18</line>
           <option name="timeStamp" value="385" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>250</line>
-          <option name="timeStamp" value="386" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>84</line>
+          <url>file://$PROJECT_DIR$/Cut_windows.py</url>
+          <line>52</line>
           <option name="timeStamp" value="387" />
         </line-breakpoint>
       </breakpoints>
@@ -386,9 +387,9 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1571299284412" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1571415132013" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Obspy_Trim.coverage" NAME="Obspy_Trim Coverage Results" MODIFIED="1571136057669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1571298919832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Main_MSS.coverage" NAME="Main_MSS Coverage Results" MODIFIED="1571299479695" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1571414921338" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_MSS.coverage" NAME="Main_MSS Coverage Results" MODIFIED="1571369160113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

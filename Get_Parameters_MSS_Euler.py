@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/MSS/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = None # self.directory + 'mss_event.xml'
         mSEED_file = 'mss_event.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -24,7 +24,7 @@ class Get_Parameters:
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path = '/home/nienke/MARSQUAKES/start_sample.txt'
+        start_sample_path = None # '/home/nienke/MARSQUAKES/start_sample.txt'
 
 
         if start_sample_path == None:
@@ -104,14 +104,6 @@ class Get_Parameters:
         PRIOR['baz'] = baz
         PRIOR['az'] = az
         PRIOR['epi_s'] = kilometer2degrees(dist, radius=PRIOR['radius'])
-
-        # PRIOR['baz'] = 243
-        # PRIOR['epi_s'] = 86
-
-
-
-
-
         # = Velocity model =
 
         #   -Mars-
@@ -123,7 +115,7 @@ class Get_Parameters:
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
         # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/DWAK.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/maak.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/MAAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'

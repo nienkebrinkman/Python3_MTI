@@ -49,7 +49,7 @@ class Plot_waveforms:
 
 
         seis = Get_Seismogram(self.prior)
-        BW_syn = Cut_windows(self.prior['VELOC_taup'])
+        BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = self.prior['P_HP'], P_LP= self.prior['P_LP'], S_HP =  self.prior['S_HP'], S_LP= self.prior['S_LP'])
 
 
         fig = plt.figure(figsize=(10, 10))
@@ -74,7 +74,7 @@ class Plot_waveforms:
 
         # for i in range(len(a[0])):
         for i in np.arange(len(epi) - 100, len(epi), 1):
-        # for i in np.arange(10):
+        # for i in np.arange(100):
             dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
                                                                            azi1=self.prior['baz'], a12=epi[i],
                                                                            outmask=1929)
@@ -85,7 +85,7 @@ class Plot_waveforms:
 
             BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime, self.prior['npts'])
 
-            P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, -int(P_shift[i]))
+            P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, int(P_shift[i]))
             #
             # ax1.plot(p_time_array[start_P:end_P], BW_syn.P_stream.traces[0].data[start_P:end_P], 'g',
             #          label='Synthetic', linewidth = 0.1)
@@ -100,7 +100,7 @@ class Plot_waveforms:
             # plt.tight_layout()
             # plt.legend(loc='lower left', fontsize=15)
 
-            P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, -int(P_shift[i]))
+            P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, int(P_shift[i]))
             ax2.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r',
                      label='Synthetic', linewidth=0.1)
             # ax2.plot(P_shift_array, 'r',label='Synthetic', linewidth = 0.1)
@@ -109,7 +109,7 @@ class Plot_waveforms:
             ax2.tick_params(axis='y', labelsize=18)
             # plt.tight_layout()
 
-            S_shift_array = self.shift(BW_syn.S_stream.traces[0].data, -int(S_shift[i]))
+            S_shift_array = self.shift(BW_syn.S_stream.traces[0].data, int(S_shift[i]))
             ax3.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax3.plot(S_shift_array, 'r', linewidth = 0.1)
             ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
@@ -117,7 +117,7 @@ class Plot_waveforms:
             ax3.tick_params(axis='y', labelsize=18)
             # plt.tight_layout()
 
-            S_shift_array = self.shift(BW_syn.S_stream.traces[1].data, -int(S_shift[i]))
+            S_shift_array = self.shift(BW_syn.S_stream.traces[1].data, int(S_shift[i]))
             ax4.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax4.plot(S_shift_array, 'r', linewidth = 0.1)
             ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
@@ -125,7 +125,7 @@ class Plot_waveforms:
             ax4.tick_params(axis='y', labelsize=18)
             # plt.tight_layout()
 
-            S_shift_array = self.shift(BW_syn.S_stream.traces[2].data, -int(S_shift[i]))
+            S_shift_array = self.shift(BW_syn.S_stream.traces[2].data, int(S_shift[i]))
             ax5.plot(s_time_array[start_S:end_S], S_shift_array[start_S:end_S], 'r', linewidth=0.1)
             # ax5.plot( S_shift_array, 'r', linewidth = 0.1)
             ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))

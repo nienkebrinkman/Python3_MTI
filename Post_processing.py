@@ -14,7 +14,7 @@ from obspy.imaging.beachball import beachball
 from pandas.plotting import scatter_matrix
 import pylab
 import obspy
-
+# from mpl_toolkits.basemap import Basemap
 import geographiclib.geodesic as geo
 # import mplstereonet
 import numpy as np
@@ -35,9 +35,9 @@ def main():
 
     strike, dip, rake = aux_plane(238, 80, 143)
 
-    directory = '/home/nienke/Documents/Master/Data/MSS/Output/'
-    path_to_file = '/home/nienke/Documents/Master/Data/MSS/Output/MSS_MAAK_7J_SYNT4_02_MHZ_EULER.txt'
-    path_to_file_BBB = '/home/nienke/Documents/Master/Data/MSS/Output/MSS_Euler_BBB.txt'
+    directory = '/home/nienke/Documents/Master/Data/MSS/Output'
+    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAKXB_ELYSE_02_BHZ_1.txt'
+    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
     # par = Get_Parameters()
@@ -88,10 +88,10 @@ def main():
         s1, d1, r1))  # strike1=244.6022883548614, dip1=73.52631851233593, rake1=67.50622085517007
     print('strike2=%s, dip2=%s, rake2=%s' % (
         s2, d2, r2))  # strike2=120.19814045454422, dip2=27.62588224193955, rake2=142.29811781206305
-    real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
+    # real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
     # beachball([s1,d1,r1], size=200, linewidth=2, facecolor='b')
 
-    # real_v = None # Real Marsquakes
+    real_v = None # Real Marsquakes
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
@@ -110,100 +110,12 @@ def main():
     # result.trace_density(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
-    #                column_names=column_names,  burnin=burnin,real_v=real_v)
+    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+                   column_names=column_names,  burnin=burnin,real_v=real_v)
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
     result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    # result.full_moment_traces(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
-    # result.get_accepted_samples(filepath=path_to_file,savename=savename,directory=directory, column_names,skiprows=skiprows)
-    # result.get_convergence(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,show=show)
-    # result.Seaborn_plots(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names= column_names,show=show)
-    # result.combine_all(filepath=path_to_file, savename=savename, directory=directory,skiprows=skiprows, column_names=column_names,real_v=real_v)
-    # result.Misfits(filepath=path_to_file, savename=savename, directory=directory,skiprows=skiprows, column_names=column_names)
-    # result.get_pdf(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,burnin=burnin)
-    # result.get_stereonets(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
 
-    #
-    # PRIOR = {}
-    # PRIOR['Observed'] ='/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/Earth/2018-09-05-mww66-hokkaido-japan-region.miniseed'
-    #
-    # PRIOR['Real_epi'] =80.25
-    # PRIOR['Real_depth'] =35000
-    #
-    # PRIOR['radius'] = 6378137.0  # Earth
-    # PRIOR['f'] = 1 / 298.257223563  # Earth
-    #
-    # stream = obspy.read(PRIOR['Observed'])
-    # from obspy.clients.fdsn.client import Client
-    # client = Client("IRIS")
-    # inv = client.get_stations(network=stream.traces[0].stats.network, station=stream.traces[0].stats.station,
-    #                                level='response')
-    #
-    # # = Receiver =
-    # PRIOR['la_r'] = inv._networks[0].stations[0]._latitude  # 4.5 # InSight
-    # PRIOR['lo_r'] = inv._networks[0].stations[0]._longitude  # 136 # InSight
-    #
-    # PRIOR['network'] = '7J'
-    # PRIOR['station'] = "SYNT1"
-    # PRIOR['location'] = u'02'
-    #
-    # # = Source =
-    #
-    # PRIOR['components'] = ["Z", "R", "T"]
-    # PRIOR['kind'] = 'velocity'
-    #
-    # # = Velocity model =
-    #
-    # #   -Mars-
-    # # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/EH45TcoldCrust1b_1s'
-    # # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-    #
-    # #   -Earth-
-    # PRIOR['VELOC'] = 'syngine://iasp91_2s'  # '/opt/iasp91'
-    # PRIOR['VELOC_taup'] = 'iasp91'
-    #
-    # PRIOR['npts'] = 30000
-    # PRIOR['sampling_rate'] = 20  # [Hz]
-    # PRIOR['baz']= 67330.7672 - 180
-    # PRIOR['or_time'] = obspy.UTCDateTime(2018,9,5,18,7,59)
-
-    # PRIOR = {}
-    # # PRIOR['Observed'] = '/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Database/data_Nienke/M5.0_3914855_deg_2019-09-22.mseed'
-    # PRIOR['Observed'] = '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/mss_event.mseed'
-    # PRIOR['Real_epi'] =real_v[0]
-    # PRIOR['Real_depth'] =real_v[1]
-    #
-    # PRIOR['radius'] = 3389.5#6378137.0  # Earth
-    # PRIOR['f'] = 0#1 / 298.257223563  # Earth
-    #
-    # # = Receiver =
-    # PRIOR['la_r'] =  4.5 # InSight
-    # PRIOR['lo_r'] =  136 # InSight
-    # PRIOR['network'] = '7J'
-    # PRIOR['station'] = "SYNT4"
-    # PRIOR['location'] = '02'
-    #
-    # # = Source =
-    #
-    # PRIOR['components'] = ["Z", "R", "T"]
-    # PRIOR['kind'] = 'velocity'
-    #
-    # # = Velocity model =
-    #
-    # #   -Mars-
-    # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s'
-    # PRIOR['VELOC_taup'] = 'MAAK.npz'
-    #
-    # #   -Earth-
-    # # PRIOR['VELOC'] = 'syngine://iasp91_2s'  # '/opt/iasp91'
-    #
-    # PRIOR['npts'] = 30000
-    # PRIOR['sampling_rate'] = 2  # [Hz]
-    # PRIOR['baz']= 243
-    # # PRIOR['or_time'] = obspy.UTCDateTime(2019,1,3,15,00,28)
-    # PRIOR['or_time'] = obspy.UTCDateTime(2019,1,3,15,00,54)
-
-    # result.get_waveforms(path_to_file, savename, directory, skiprows, column_names, real_v, burnin, PRIOR)
+    # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
 
 class Post_processing_sdr:
@@ -742,9 +654,9 @@ class Post_processing_sdr:
         plt.hist(Mw, bins=np.arange(3, 5, 0.05), alpha=0.8)
         # plt.hist(df['M0'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
         # plt.hist(df2['M0'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
-        if real_v is not None:
-            ymin, ymax = ax6.get_ylim()
-            plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
+        # if real_v is not None:
+        #     ymin, ymax = ax6.get_ylim()
+        #     plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
         # plt.vlines(df['M0'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label = 'Start model')
         ax6.set_title("Density Moment Magnitude", color='b', fontsize=20)
         ax6.set_xlabel("N=%i" % (len(df['M0'])), fontsize=18)
@@ -1298,13 +1210,38 @@ class Post_processing_sdr:
         ## Pair Grid approximation
         # plot.Pair_Grid(data=df_select,directory=dir_seaborn,savename=savename,show=show)
 
-    def event_plot(self, la_receiver, lo_receiver, la_source, lo_source):
+    def event_plot(self, savename,directory,la_receiver, lo_receiver, la_source, lo_source):
+        dir = directory + '/%s' % (savename.strip('.yaml'))
         la_r = la_receiver
         lo_r = lo_receiver
         la_s = la_source
         lo_s = lo_source
-        plots = Plots()
-        plots.plot_real_event(la_r, lo_r, la_s, lo_s)
+
+
+        mars_dir = '/home/nienke/Documents/Master/Data/mars_pictures/Mars_lightgray.jpg'
+
+        fig = plt.figure()
+
+        m= Basemap(projection='moll',lon_0=round(0.0))
+
+        # draw parallels and meridians.
+        par = np.arange(-90, 90, 30)
+        label_par = np.full(len(par), True, dtype=bool)
+        meridians = np.arange(-180, 180, 30)
+        label_meri = np.full(len(meridians), True, dtype=bool)
+
+        m.drawmeridians(np.arange(-180, 180, 30),labels=label_meri)
+        m.drawparallels(np.arange(-90, 90, 30),label=label_par)
+
+
+        m.warpimage(mars_dir)
+        mstatlon, mstatlat = m(lo_r, la_r)
+        m.plot(mstatlon, mstatlat, 'k^', markersize=8)
+
+        EQlon, EQlat = m(lo_s, la_s)
+        m.plot(EQlon, EQlat, 'r*', markersize=10, zorder=10)
+        plt.savefig(dir + '/Location_Event.pdf')
+
 
     def get_seismogram_plots(self, directory, sdr=False):
         if sdr == True:

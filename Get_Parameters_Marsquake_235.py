@@ -49,7 +49,7 @@ class Get_Parameters:
         trace = stream.traces[0]
         PRIOR = {}
         PRIOR['PLOT'] = False
-        PRIOR['save_name'] = 'MAAK_' + trace.id.replace('.','_')
+        PRIOR['save_name'] = 'TAYAK' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
@@ -83,7 +83,6 @@ class Get_Parameters:
             PRIOR['la_s'] = 10.99
             PRIOR['lo_s'] = 160.95
             Mw = 3.3
-
         else:
             PRIOR['la_s'] = inv.events[0].origins[0].latitude
             PRIOR['lo_s'] = inv.events[0].origins[0].longitude
@@ -112,12 +111,13 @@ class Get_Parameters:
 
         #   -Mars-
         # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
-        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/TAYAK_1s/'
 
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/maak.npz'
+        # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/MAAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -168,8 +168,8 @@ class Get_Parameters:
             PRIOR['depth']['spread'] = 1000
         else:
             PRIOR['depth'] = {}
-            PRIOR['depth']['range_min'] = PRIOR['depth_s'] - 10000
-            PRIOR['depth']['range_max'] = PRIOR['depth_s'] + 10000
+            PRIOR['depth']['range_min'] = 20000# PRIOR['depth_s'] - 10000
+            PRIOR['depth']['range_max'] = 46000# PRIOR['depth_s'] + 10000
             PRIOR['depth']['spread'] = 1000
 
         return PRIOR

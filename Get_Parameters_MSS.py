@@ -91,8 +91,8 @@ class Get_Parameters:
             Mw = 4.46
 
 
-        PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw)  # Scalar Moment
-        exp = mtm.magnitude_to_moment(Mw) # Using Pyrocko package....
+        PRIOR['M0'] = self.Magnitude2Scalarmoment(Mw)  # Scalar Moment -->  6165950018614810.0
+        exp = mtm.magnitude_to_moment(Mw) # Using Pyrocko package.... --> 5495408738576270.0
         # self.M0 = PRIOR['M0']
         PRIOR['components'] = ["Z", "R", "T"]
         PRIOR['kind'] = 'velocity'
@@ -112,7 +112,7 @@ class Get_Parameters:
         # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
         # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
         # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/MAAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/maak.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -144,27 +144,27 @@ class Get_Parameters:
         PRIOR['dip']={}
         PRIOR['dip']['range_min'] = 0
         PRIOR['dip']['range_max'] = 89.9
-        PRIOR['angle_spread'] = 5
+        PRIOR['angle_spread'] = 2
         PRIOR['rake']={}
         PRIOR['rake']['range_min'] = -180
         PRIOR['rake']['range_max'] = 179.9
-        PRIOR['rake']['spread'] = 5
+        PRIOR['rake']['spread'] = 2
 
         # = Range epi and depth =
         PRIOR['epi']={}
         PRIOR['epi']['range_min'] = PRIOR['epi_s'] - 1
         PRIOR['epi']['range_max'] = PRIOR['epi_s']  + 1
-        PRIOR['epi']['spread'] = 1
+        PRIOR['epi']['spread'] = 0.1
         if PRIOR['depth_s'] == None:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = 0
             PRIOR['depth']['range_max'] = 50000
-            PRIOR['depth']['spread'] = 1000
+            PRIOR['depth']['spread'] = 500
         else:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = PRIOR['depth_s'] - 10000
             PRIOR['depth']['range_max'] = PRIOR['depth_s'] + 10000
-            PRIOR['depth']['spread'] = 1000
+            PRIOR['depth']['spread'] = 500
 
         return PRIOR
 

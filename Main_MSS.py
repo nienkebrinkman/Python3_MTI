@@ -42,7 +42,7 @@ def main():
     BW_obs = Cut_windows(PRIOR['VELOC_taup'],P_HP = PRIOR['P_HP'], P_LP= PRIOR['P_LP'], S_HP =  PRIOR['S_HP'], S_LP= PRIOR['S_LP'])
 
     npts = stream.traces[0].stats.npts
-    BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts = npts)
+    BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts = PRIOR['npts'])
     # tt_P = obspy.UTCDateTime(2019, 1, 3, 15, 9, 54.9)
     # tt_S = obspy.UTCDateTime(2019, 1, 3, 15, 18, 34.6)
     # BW_obs.Get_bw_windows_MANUAL_OLD(stream, tt_P, tt_S, PRIOR['origin_time'], npts=npts)
@@ -53,7 +53,7 @@ def main():
 
     # === Plot waveforms from a previous run ===
     PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/MSS/Output/MSS_MAAK_7J_SYNT4_02_MHZ_EULER.txt'
+    path_txt = '/home/nienke/Documents/Master/Data/MSS/Output/MAAK_7J_SYNT4_02_MHZ.txt'
     savedir = '/home/nienke/Documents/Master/Data/MSS/Output/'
     plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,PRIOR['origin_time'])
     plot.get_waveforms()
