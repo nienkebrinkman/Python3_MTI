@@ -195,6 +195,16 @@ class MCMC:
         # plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
         # plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
         # plt.show()
+
+        # plt.figure()
+        # ax1 = plt.subplot(121)
+        # plt.plot(self.BW_obs.P_stream.traces[0], 'b')
+        # plt.plot(self.BW_syn.P_stream.traces[0], 'r')
+        # ax1 = plt.subplot(122)
+        # plt.plot(self.BW_obs.S_stream.traces[2], 'b')
+        # plt.plot(self.BW_syn.S_stream.traces[2], 'r')
+        #
+        # plt.show()
         # a=1
 
     def write_par(self,file_name,BW,SW):

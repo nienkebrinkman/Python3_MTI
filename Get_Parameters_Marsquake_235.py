@@ -110,14 +110,12 @@ class Get_Parameters:
         # = Velocity model =
 
         #   -Mars-
-        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/MAAK_1s/'
         PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/TAYAK_1s/'
+        # PRIOR['VELOC'] = '/opt/databases/Mars/TAYAK_1s'
 
-        # PRIOR['VELOC'] = '/home/nienke/mnt_databases/databases/blindtestmodels_1s/MAAK_1s'
-        # PRIOR['VELOC'] = 'mnt_databases/databases/blindtestmodels_1s/EH45TcoldCrust1'
-        # PRIOR['VELOC_taup'] = 'EH45TcoldCrust1b.npz'
-        # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/MAAK.npz'
+
         PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
+        # PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/TAYAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'
@@ -129,7 +127,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 50000
+        PRIOR['sample_number'] = 100000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -137,9 +135,9 @@ class Get_Parameters:
 
         # = Filter information =
         PRIOR['P_LP'] = 1.0/1.0
-        PRIOR['P_HP'] = 1.0 / 15.0 # could also be 1.0/10.0
+        PRIOR['P_HP'] = 1.0 / 8.0 # could also be 1.0/10.0
         PRIOR['S_LP'] = 1.0/1.0
-        PRIOR['S_HP'] = 1.0 / 15
+        PRIOR['S_HP'] = 1.0 / 10.
         return PRIOR
 
     def Get_ranges(self,PRIOR):
@@ -173,41 +171,6 @@ class Get_Parameters:
             PRIOR['depth']['spread'] = 1000
 
         return PRIOR
-
-
-    def Get_Unknown(self):
-        # PARAMETERS = {}
-        # # event = obspy.read_events('/home/nienke/mss_event.xml')
-        #
-        # event = obspy.read_events(
-        #     '/home/nienke/Documents/Applied_geophysics/Thesis/BBB_project/Database/MSS/mss_event.xml')
-        #
-        # magnitude = Event.preferred_magnitude(event.events[0])
-        # # Mw = magnitude.mag
-        # source = Event.preferred_origin(event.events[0])
-        # depth = source.depth
-        # la_s = source.latitude
-        # lo_s = source.longitude
-        # time = source.time
-        #
-        # # Source parameters
-        # PARAMETERS['la_s'] = -26
-        # PARAMETERS['lo_s'] = 53
-        #
-        # PARAMETERS['depth_s'] = 36000  # [m]
-        # PARAMETERS['strike'] = 333  # 79
-        # PARAMETERS['dip'] = 61  # 50
-        # PARAMETERS['rake'] = 83  # 20
-        #
-        # m_pp = -214996686134000.0
-        # m_rp = 247303763622000.0
-        # m_rr = 3531870796970000.0
-        # m_rt = -3487091494290000.0
-        # m_tp = 1008979372750000.0
-        # m_tt =-3316874110840000.0
-        #
-        # PARAMETERS['origin_time'] = obspy.UTCDateTime(2019,1,3,15,00,53)#obspy.UTCDateTime(2018,9,5,18,7,59)
-        return PARAMETERS
 
     def Magnitude2Scalarmoment(self,Mw):
         M = 10.0 ** ((Mw / 2.0 * 3.0 + 9.1))

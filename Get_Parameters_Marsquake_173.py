@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/'# '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = None #
         mSEED_file = 'waveforms_VBB_ZRT.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -48,8 +48,8 @@ class Get_Parameters:
 
         trace = stream.traces[0]
         PRIOR = {}
-        PRIOR['PLOT'] = False
-        PRIOR['save_name'] = 'TAYAK' + trace.id.replace('.','_')
+        PRIOR['PLOT'] = True
+        PRIOR['save_name'] = 'TAYAK_' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
@@ -78,11 +78,11 @@ class Get_Parameters:
         # = Source =
         ## Catalogue:
         if inventory == False:
-            PRIOR['origin_time'] = obspy.UTCDateTime(2019, 7, 26, 12, 16, 15)
+            PRIOR['origin_time'] = obspy.UTCDateTime(2019, 5, 23, 2, 19, 33)
             PRIOR['depth_s'] = 45000
-            PRIOR['la_s'] = 10.99
-            PRIOR['lo_s'] = 160.95
-            Mw = 3.3
+            PRIOR['la_s'] = 3.45
+            PRIOR['lo_s'] = 164.68
+            Mw = 2.7
         else:
             PRIOR['la_s'] = inv.events[0].origins[0].latitude
             PRIOR['lo_s'] = inv.events[0].origins[0].longitude
@@ -110,12 +110,12 @@ class Get_Parameters:
         # = Velocity model =
 
         #   -Mars-
-        # PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/TAYAK_1s/'
-        PRIOR['VELOC'] = '/opt/databases/Mars/TAYAK_1s'
+        PRIOR['VELOC'] = 'http://instaseis.ethz.ch/blindtest_1s/TAYAK_1s/'
+        # PRIOR['VELOC'] = '/opt/databases/Mars/TAYAK_1s'
 
 
-        # PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
-        PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/TAYAK.npz'
+        PRIOR['VELOC_taup'] = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
+        # PRIOR['VELOC_taup'] = '/home/nienke/MARSQUAKES/TAYAK.npz'
 
         #   -Earth-
         # PRIOR['VELOC'] = 'syngine://iasp91_2s'

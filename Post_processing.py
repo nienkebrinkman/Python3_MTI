@@ -35,9 +35,9 @@ def main():
 
     strike, dip, rake = aux_plane(238, 80, 143)
 
-    directory = '/home/nienke/Documents/Master/Data/MSS/Output'
-    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAKXB_ELYSE_02_BHZ_1.txt'
-    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB.txt'
+    directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAKXB_ELYSE_02_BHZ_2.txt'
+    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB_2.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
     # par = Get_Parameters()
@@ -106,14 +106,14 @@ def main():
     # result.plot_streams(stream_filepath=path_to_stream,filepath=path_to_file,savename=savename, directory=directory,skiprows=skiprows ,column_names=column_names)
     burnin = 0
 
-    # result.get_beachballs(REAL['strike'], REAL['dip'],REAL['rake'],PRIOR['M0'],directory+'/beachball.pdf')
-    # result.trace_density(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows, column_names=column_names,real_v=real_v,burnin=burnin)
+
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
     result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
                    column_names=column_names,  burnin=burnin,real_v=real_v)
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
     result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
+    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
@@ -212,28 +212,14 @@ class Post_processing_sdr:
             # parameters = open(filepath, "r").readlines()[:33]
             data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
 
-        # length = len(data[0]) - (len(column_names) + 3)
-        # R_length = int(data[0][-2])
-        # L_length = int(data[0][-1])
-        #
-        # for i in range(R_length):
-        #     column_names = np.append(column_names,"R_%i" % (i+1))
-        # for i in range(L_length):
-        #     column_names = np.append(column_names,"L_%i" % (i+1))
-        # column_names = np.append(column_names,"Accepted")
-        # column_names = np.append(column_names,"Rayleigh_length")
-        # column_names = np.append(column_names,"Love_length")
-        #
         df = pd.DataFrame(data,
                           columns=column_names)
-        # df = pd.DataFrame(data,
-        #                   columns=["Epicentral_distance", "Depth", "Strike", "Dip", "Rake", "Total_misfit","BW_misfit","R_misfit","L_misfit"])
         plt.figure(1)
         ax = plt.subplot(111)
         ax.plot(np.arange(0, len(df['Total_misfit'])), df['Total_misfit'])
         # ax.plot(np.arange(0, len(df['Total_misfit'])), df['p_z'],c='r')
         # ax.plot(np.arange(0, len(df['Total_misfit'])), df['s_t'],c='g')
-        # plt.yscale('log')
+        plt.yscale('log')
         plt.xlabel('Iteration')
         plt.ylabel('-Log(likelihood)')
         ax.invert_yaxis()
@@ -244,6 +230,95 @@ class Post_processing_sdr:
             plt.show()
         else:
             plt.savefig(dir + '/Convergence.pdf')
+            plt.close()
+
+
+        amount_of_samples = len(df['Total_misfit'])
+        loop_length = int(amount_of_samples/10 -1)
+        epi_mean    = np.zeros(loop_length)
+        depth_mean  = np.zeros(loop_length)
+        strike_mean = np.zeros(loop_length)
+        dip_mean    = np.zeros(loop_length)
+        rake_mean   = np.zeros(loop_length)
+        M0_mean     = np.zeros(loop_length)
+
+
+        for i in range(loop_length):
+            epi_mean[i] = np.mean(df['Epi'].values[0:int(i * 10 + 1)])
+            depth_mean[i] = np.mean(df['Depth'].values[0:int(i * 10 + 1)])
+            strike_mean[i] = np.mean(df['Strike'].values[0:int(i * 10 + 1)])
+            dip_mean[i] = np.mean(df['Dip'].values[0:int(i * 10 + 1)])
+            rake_mean[i] = np.mean(df['Rake'].values[0:int(i * 10 + 1)])
+            M0_mean[i] = np.mean(df['M0'].values[0:int(i * 10 + 1)])
+
+
+        plt.figure(figsize=(20,10))
+        ax1 = plt.subplot(231)
+        ax1.plot(np.arange(0, len(epi_mean[1::10])), epi_mean[1::10] , label = 'Epicentral distance')
+        ax1.set_ylabel("Mean", fontsize=25)
+        ax1.set_xlabel("Sample", fontsize=25)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+
+        ax2 = plt.subplot(232)
+        ax2.plot(np.arange(0, len(depth_mean)), depth_mean , label = 'Depth')
+        ax2.set_ylabel("Mean", fontsize=25)
+        ax2.set_xlabel("Sample", fontsize=25)
+        ax2.tick_params(axis='x', labelsize=20)
+        ax2.tick_params(axis='y', labelsize=20)
+        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+
+        ax3 = plt.subplot(233)
+        ax3.plot(np.arange(0, len(M0_mean)), M0_mean , label = 'M0')
+        ax3.set_ylabel("Mean", fontsize=25)
+        ax3.set_xlabel("Sample", fontsize=25)
+        ax3.tick_params(axis='x', labelsize=20)
+        ax3.tick_params(axis='y', labelsize=20)
+        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+        ax4 = plt.subplot(234)
+        ax4.plot(np.arange(0, len(strike_mean)), strike_mean , label = 'Strike')
+        ax4.set_ylabel("Mean", fontsize=25)
+        ax4.set_xlabel("Sample", fontsize=25)
+        ax4.tick_params(axis='x', labelsize=20)
+        ax4.tick_params(axis='y', labelsize=20)
+        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+        ax5 = plt.subplot(235)
+        ax5.plot(np.arange(0, len(dip_mean)), dip_mean , label = 'Dip')
+        ax5.set_ylabel("Mean", fontsize=25)
+        ax5.set_xlabel("Sample", fontsize=25)
+        ax5.tick_params(axis='x', labelsize=20)
+        ax5.tick_params(axis='y', labelsize=20)
+        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+        ax6 = plt.subplot(236)
+        ax6.plot(np.arange(0, len(rake_mean)), rake_mean , label = 'Rake')
+        ax6.set_ylabel("Mean", fontsize=25)
+        ax6.set_xlabel("Sample", fontsize=25)
+        ax6.tick_params(axis='x', labelsize=20)
+        ax6.tick_params(axis='y', labelsize=20)
+        ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+
+        if show == True:
+            plt.show()
+        else:
+            plt.savefig(dir + '/Parameter_convergence.pdf')
             plt.close()
 
     def combine_all(self, filepath, savename, directory, skiprows, column_names, real_v):
