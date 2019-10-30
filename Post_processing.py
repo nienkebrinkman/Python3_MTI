@@ -36,8 +36,8 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143)
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAKXB_ELYSE_02_BHZ_2.txt'
-    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB_2.txt'
+    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_NEW_3_temp_high.txt'
+    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB_NEW_3.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
     # par = Get_Parameters()
@@ -106,14 +106,15 @@ def main():
     # result.plot_streams(stream_filepath=path_to_stream,filepath=path_to_file,savename=savename, directory=directory,skiprows=skiprows ,column_names=column_names)
     burnin = 0
 
+    File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
 
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
-                   column_names=column_names,  burnin=burnin,real_v=real_v)
-    File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
-    result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, column_names = column_names, show=False)
+    # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names,  burnin=burnin,real_v=real_v)
+    #
+    # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
+    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
@@ -222,7 +223,7 @@ class Post_processing_sdr:
         plt.yscale('log')
         plt.xlabel('Iteration')
         plt.ylabel('-Log(likelihood)')
-        ax.invert_yaxis()
+        # ax.invert_yaxis()
         ax.xaxis.tick_top()
 
         plt.tight_layout()
@@ -254,7 +255,7 @@ class Post_processing_sdr:
 
         plt.figure(figsize=(20,10))
         ax1 = plt.subplot(231)
-        ax1.plot(np.arange(0, len(epi_mean[1::10])), epi_mean[1::10] , label = 'Epicentral distance')
+        ax1.plot(np.arange(loop_length) * 10, epi_mean , label = 'Epicentral distance')
         ax1.set_ylabel("Mean", fontsize=25)
         ax1.set_xlabel("Sample", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
@@ -262,10 +263,11 @@ class Post_processing_sdr:
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
 
         ax2 = plt.subplot(232)
-        ax2.plot(np.arange(0, len(depth_mean)), depth_mean , label = 'Depth')
+        ax2.plot(np.arange(loop_length) * 10, depth_mean , label = 'Depth')
         ax2.set_ylabel("Mean", fontsize=25)
         ax2.set_xlabel("Sample", fontsize=25)
         ax2.tick_params(axis='x', labelsize=20)
@@ -273,10 +275,11 @@ class Post_processing_sdr:
         ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
 
         ax3 = plt.subplot(233)
-        ax3.plot(np.arange(0, len(M0_mean)), M0_mean , label = 'M0')
+        ax3.plot(np.arange(loop_length) * 10, M0_mean , label = 'M0')
         ax3.set_ylabel("Mean", fontsize=25)
         ax3.set_xlabel("Sample", fontsize=25)
         ax3.tick_params(axis='x', labelsize=20)
@@ -284,9 +287,10 @@ class Post_processing_sdr:
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
         ax4 = plt.subplot(234)
-        ax4.plot(np.arange(0, len(strike_mean)), strike_mean , label = 'Strike')
+        ax4.plot(np.arange(loop_length) * 10, strike_mean , label = 'Strike')
         ax4.set_ylabel("Mean", fontsize=25)
         ax4.set_xlabel("Sample", fontsize=25)
         ax4.tick_params(axis='x', labelsize=20)
@@ -294,9 +298,10 @@ class Post_processing_sdr:
         ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
         ax5 = plt.subplot(235)
-        ax5.plot(np.arange(0, len(dip_mean)), dip_mean , label = 'Dip')
+        ax5.plot(np.arange(loop_length) * 10, dip_mean , label = 'Dip')
         ax5.set_ylabel("Mean", fontsize=25)
         ax5.set_xlabel("Sample", fontsize=25)
         ax5.tick_params(axis='x', labelsize=20)
@@ -304,9 +309,10 @@ class Post_processing_sdr:
         ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
         ax6 = plt.subplot(236)
-        ax6.plot(np.arange(0, len(rake_mean)), rake_mean , label = 'Rake')
+        ax6.plot(np.arange(loop_length) * 10, rake_mean , label = 'Rake')
         ax6.set_ylabel("Mean", fontsize=25)
         ax6.set_xlabel("Sample", fontsize=25)
         ax6.tick_params(axis='x', labelsize=20)
@@ -314,6 +320,7 @@ class Post_processing_sdr:
         ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
+        # plt.yscale('log')
 
         if show == True:
             plt.show()
@@ -746,6 +753,70 @@ class Post_processing_sdr:
 
         # plt.show()
         plt.savefig(dir + '/Trace_position.pdf')
+
+        n_lowest = 1000
+        # pos = np.argmin(df['Total_misfit'].values)
+        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+        lowest_misfits = df['Total_misfit'].values[lowest_indices]
+        lowest_strike = df['Strike'].values[lowest_indices]
+        lowest_dip = df['Dip'].values[lowest_indices]
+        lowest_rake = df['Rake'].values[lowest_indices]
+
+        fig = plt.figure(figsize=(25, 6))
+        row = 0
+
+        ax1 = plt.subplot2grid((1, 3), (0, 0))
+        plt.plot(lowest_strike,lowest_misfits,'bo')
+
+        ymin, ymax = ax1.get_ylim()
+        if real_v is not None:
+            plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+            plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
+        ax1.set_title("Strike", color='b', fontsize=25)
+        ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
+        ax1.set_ylabel("Misfit", fontsize=25)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax1.set_xlim(0, 360)
+        # plt.legend( fontsize=20)
+        plt.tight_layout()
+
+        ax2 = plt.subplot2grid((1, 3), (0, 1))
+        plt.plot(lowest_dip,lowest_misfits,'bo')
+
+        ymin, ymax = ax2.get_ylim()
+        if real_v is not None:
+            plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
+            plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+        # plt.vlines(df_select['Dip'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label='Start model')
+        ax2.set_title("Dip", color='b', fontsize=25)
+        ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
+        ax2.xaxis.set_ticks(np.arange(0, 90, 10))
+        ax2.tick_params(axis='x', labelsize=20)
+        ax2.tick_params(axis='y', labelsize=20)
+        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax2.set_xlim(0, 90)
+        # plt.legend( fontsize=20)
+        plt.tight_layout()
+
+        ax3 = plt.subplot2grid((1, 3), (0, 2))
+        plt.plot(lowest_rake,lowest_misfits,'bo')
+        ymin, ymax = ax3.get_ylim()
+        if real_v is not None:
+            plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+            plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
+            plt.legend(loc='upper left', fontsize=20)
+            # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
+        ax3.set_title("Rake", color='b', fontsize=25)
+        ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        ax3.tick_params(axis='x', labelsize=20)
+        ax3.tick_params(axis='y', labelsize=20)
+        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax3.set_xlim(-180, 180)
+        plt.tight_layout()
+        # plt.show()
+        plt.savefig(dir + '/Misfit_vs_Moment.pdf')
 
     def trace_density(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))

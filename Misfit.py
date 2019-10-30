@@ -85,7 +85,8 @@ class Misfit:
         time_shift = np.append(time_shift, shift_centered)
 
 
-        mu_s = np.array([0.6, 0.6, 0.9])
+        # mu_s = np.array([0.6, 0.6, 0.9])
+        mu_s = np.array([0.7, 0.7, 0.9])
         sigma_s = np.array([0.3, 0.3, 0.1])
 
 

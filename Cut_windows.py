@@ -30,12 +30,12 @@ class Cut_windows:
 
         self.start_P = obspy.UTCDateTime(or_time_sec + tt_P - 10)
         self.or_P_len = int((self.start_P - or_time)/ stream.traces[0].stats.delta)
-        self.start_S = obspy.UTCDateTime(or_time_sec + tt_S - 15)
+        self.start_S = obspy.UTCDateTime(or_time_sec + tt_S - 5)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
 
-        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 20)
-        end_S = obspy.UTCDateTime(or_time_sec + tt_S + 50)
+        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 10)
+        end_S = obspy.UTCDateTime(or_time_sec + tt_S + 40)
 
 
         P_stream = Stream()
@@ -43,6 +43,10 @@ class Cut_windows:
         # BW_stream = Stream()
 
         for i,trace in enumerate(stream.traces):
+            # Filter entire trace for P- and S separately.
+            trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
+            trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
             npts_p = self.P_len + 2 * self.or_P_len
@@ -50,8 +54,9 @@ class Cut_windows:
             self.S_len = len(S_trace)
             npts_s = self.S_len + 2 * self.or_S_len
 
-            P_trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
-            S_trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+            # === Taper the data ===
+            S_trace.taper(0.05,'hann')
+            P_trace.taper(0.05,'hann')
 
 
             if 'T' in trace.stats.channel:
@@ -79,37 +84,32 @@ class Cut_windows:
                                                                        sanity_checks=True)
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
-            # BW_stream.append(total_trace)
             # === Apply filters ===
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
-            # self.BW_stream = self.BW_filter(BW_stream)
 
-            # === Taper the data ===
-            # self.S_stream.taper(10,'cosine')
-            # self.P_stream.taper(10,'cosine')
+
 
 
     def Get_bw_windows_MANUAL(self, stream, tt_P, tt_S, or_time, npts):
         self.original = stream
         self.start_P = obspy.UTCDateTime(tt_P.timestamp - 10)
-        # self.start_P = obspy.UTCDateTime(tt_P.timestamp - 5)
         self.or_P_len = int((self.start_P - or_time) / stream.traces[0].stats.delta)
-        self.start_S = obspy.UTCDateTime(tt_S.timestamp - 15)
+        self.start_S = obspy.UTCDateTime(tt_S.timestamp - 5)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
         self.dt = stream.traces[0].stats.delta
 
-        end_P = obspy.UTCDateTime(tt_P.timestamp + 20)
-        end_S = obspy.UTCDateTime(tt_S.timestamp + 50)
-        # end_S = obspy.UTCDateTime(tt_S.timestamp + 35)
+        end_P = obspy.UTCDateTime(tt_P.timestamp + 10)
+        end_S = obspy.UTCDateTime(tt_S.timestamp + 40)
 
         P_stream = Stream()
         S_stream = Stream()
-        # BW_stream = Stream()
 
         for i, trace in enumerate(stream.traces):
-            trace.filter('highpass', freq=1.0 / 50.0, zerophase=True)
+            trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
+            trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+
             # Apply a filter with the length of the window
 
             P_trace = Trace.slice(trace, self.start_P, end_P)
@@ -119,8 +119,9 @@ class Cut_windows:
             self.S_len = len(S_trace)
             npts_s = self.S_len + 2 * self.or_S_len
 
-            P_trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
-            S_trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+            # === Taper the data ===
+            S_trace.taper(0.05,'hann')
+            P_trace.taper(0.05,'hann')
 
             if 'T' in trace.stats.channel:
                 total_s_trace = Trace(np.zeros(npts),

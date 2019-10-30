@@ -79,6 +79,8 @@ class Get_Parameters:
         ## Catalogue:
         if inventory == False:
             PRIOR['origin_time'] = obspy.UTCDateTime(2019, 7, 26, 12, 16, 15)
+            PRIOR['P_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 19, 19.3) # If not know: None
+            PRIOR['S_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 22, 3) # If not know: None
             PRIOR['depth_s'] = 45000
             PRIOR['la_s'] = 10.99
             PRIOR['lo_s'] = 160.95

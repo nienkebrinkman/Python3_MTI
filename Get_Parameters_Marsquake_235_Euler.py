@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = None #
         mSEED_file = 'waveforms_VBB_ZRT.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -79,6 +79,8 @@ class Get_Parameters:
         ## Catalogue:
         if inventory == False:
             PRIOR['origin_time'] = obspy.UTCDateTime(2019, 7, 26, 12, 16, 15)
+            PRIOR['P_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 19, 19.3) # If not know: None
+            PRIOR['S_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 22, 3) # If not know: None
             PRIOR['depth_s'] = 45000
             PRIOR['la_s'] = 10.99
             PRIOR['lo_s'] = 160.95
