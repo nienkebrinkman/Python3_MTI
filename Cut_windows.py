@@ -5,12 +5,16 @@ import numpy as np
 import obspy
 
 class Cut_windows:
-    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP):
+    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP,Pre_P,Pre_S,Post_P,Post_S):
         self.veloc_model = veloc_model_taup
         self.P_HP = P_HP
         self.P_LP = P_LP
         self.S_HP = S_HP
         self.S_LP = S_LP
+        self.Pre_P = Pre_P
+        self.Pre_S = Pre_S
+        self.Post_P = Post_P
+        self.Post_S = Post_S
 
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
@@ -28,14 +32,14 @@ class Cut_windows:
         tt_P = self.get_P(epi, depth)
         tt_S = self.get_S(epi, depth)
 
-        self.start_P = obspy.UTCDateTime(or_time_sec + tt_P - 10)
+        self.start_P = obspy.UTCDateTime(or_time_sec + tt_P - self.Pre_P)
         self.or_P_len = int((self.start_P - or_time)/ stream.traces[0].stats.delta)
-        self.start_S = obspy.UTCDateTime(or_time_sec + tt_S - 5)
+        self.start_S = obspy.UTCDateTime(or_time_sec + tt_S - self.Pre_S)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
 
-        end_P = obspy.UTCDateTime(or_time_sec + tt_P + 10)
-        end_S = obspy.UTCDateTime(or_time_sec + tt_S + 40)
+        end_P = obspy.UTCDateTime(or_time_sec + tt_P + self.Post_P)
+        end_S = obspy.UTCDateTime(or_time_sec + tt_S + self.Post_S)
 
 
         P_stream = Stream()
@@ -88,20 +92,17 @@ class Cut_windows:
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
 
-
-
-
     def Get_bw_windows_MANUAL(self, stream, tt_P, tt_S, or_time, npts):
         self.original = stream
-        self.start_P = obspy.UTCDateTime(tt_P.timestamp - 10)
+        self.start_P = obspy.UTCDateTime(tt_P.timestamp - self.Pre_P)
         self.or_P_len = int((self.start_P - or_time) / stream.traces[0].stats.delta)
-        self.start_S = obspy.UTCDateTime(tt_S.timestamp - 5)
+        self.start_S = obspy.UTCDateTime(tt_S.timestamp - self.Pre_S)
         self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
 
         self.dt = stream.traces[0].stats.delta
 
-        end_P = obspy.UTCDateTime(tt_P.timestamp + 10)
-        end_S = obspy.UTCDateTime(tt_S.timestamp + 40)
+        end_P = obspy.UTCDateTime(tt_P.timestamp + self.Post_P)
+        end_S = obspy.UTCDateTime(tt_S.timestamp + self.Post_S)
 
         P_stream = Stream()
         S_stream = Stream()

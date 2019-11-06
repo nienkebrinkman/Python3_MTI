@@ -6,7 +6,7 @@ import os
 import itertools
 import glob
 import pandas as pd
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import yaml
 from obspy.imaging.beachball import aux_plane
 from pandas.plotting import autocorrelation_plot
@@ -36,8 +36,8 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143)
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_NEW_3_temp_high.txt'
-    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB_NEW_3.txt'
+    path_to_file = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_NEW_5.txt'
+    path_to_file_BBB = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_BBB_NEW_5.txt'
     # path_to_file ='/home/nienke/Documents/Applied_geophysics/Thesis/anaconda/Earth/python3/Events/new-trials/7_BBB.txt'
 
     # par = Get_Parameters()
@@ -104,17 +104,20 @@ def main():
     # result.get_stereonets(filepath=path_to_file, savename=savename, directory=directory, show=show)
 
     # result.plot_streams(stream_filepath=path_to_stream,filepath=path_to_file,savename=savename, directory=directory,skiprows=skiprows ,column_names=column_names)
-    burnin = 0
+    burnin = 2000
 
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
+    strike, dip, rake = aux_plane(np.mean(File[:,2]), np.mean(File[:,3]), np.mean(File[:,4]))
+    # real_v = np.array([None,None, strike, dip, rake, None])
+    real_v = None
 
-    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                 column_names=column_names,burnin=burnin ,real_v=real_v)
+    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #              column_names=column_names,burnin=burnin ,real_v=real_v)
     # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
     #
     # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, column_names = column_names, show=False)
+    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
@@ -252,7 +255,7 @@ class Post_processing_sdr:
             rake_mean[i] = np.mean(df['Rake'].values[0:int(i * 10 + 1)])
             M0_mean[i] = np.mean(df['M0'].values[0:int(i * 10 + 1)])
 
-
+        plt.close()
         plt.figure(figsize=(20,10))
         ax1 = plt.subplot(231)
         ax1.plot(np.arange(loop_length) * 10, epi_mean , label = 'Epicentral distance')
@@ -322,12 +325,78 @@ class Post_processing_sdr:
         plt.tight_layout()
         # plt.yscale('log')
 
+
         if show == True:
+
             plt.show()
         else:
             plt.savefig(dir + '/Parameter_convergence.pdf')
             plt.close()
 
+
+        plt.figure(figsize=(20,10))
+        ax1 = plt.subplot(511)
+        ax1.plot(df['p_z'], label = 'Epicentral distance')
+        ax1.set_ylabel("Mean", fontsize=25)
+        ax1.set_xlabel("Sample", fontsize=25)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+        # plt.yscale('log')
+
+
+        ax2 = plt.subplot(512)
+        ax2.plot( df['p_r'] , label = 'Depth')
+        ax2.set_ylabel("Mean", fontsize=25)
+        ax2.set_xlabel("Sample", fontsize=25)
+        ax2.tick_params(axis='x', labelsize=20)
+        ax2.tick_params(axis='y', labelsize=20)
+        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+        # plt.yscale('log')
+
+
+        ax3 = plt.subplot(513)
+        ax3.plot( df['s_z']  , label = 'M0')
+        ax3.set_ylabel("Mean", fontsize=25)
+        ax3.set_xlabel("Sample", fontsize=25)
+        ax3.tick_params(axis='x', labelsize=20)
+        ax3.tick_params(axis='y', labelsize=20)
+        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+        # plt.yscale('log')
+
+        ax4 = plt.subplot(514)
+        ax4.plot( df['s_r'] , label = 'Strike')
+        ax4.set_ylabel("Mean", fontsize=25)
+        ax4.set_xlabel("Sample", fontsize=25)
+        ax4.tick_params(axis='x', labelsize=20)
+        ax4.tick_params(axis='y', labelsize=20)
+        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+        # plt.yscale('log')
+
+        ax5 = plt.subplot(515)
+        ax5.plot( df['s_t'] , label = 'Dip')
+        ax5.set_ylabel("Mean", fontsize=25)
+        ax5.set_xlabel("Sample", fontsize=25)
+        ax5.tick_params(axis='x', labelsize=20)
+        ax5.tick_params(axis='y', labelsize=20)
+        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        plt.legend(fontsize=20)
+        plt.tight_layout()
+        # plt.yscale('log')
+        plt.show()
+        if show == True:
+            plt.show()
+        else:
+            plt.savefig(dir + '/misfits.pdf')
+            plt.close()
     def combine_all(self, filepath, savename, directory, skiprows, column_names, real_v):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
@@ -637,8 +706,11 @@ class Post_processing_sdr:
         fig = plt.figure(figsize=(25, 6))
         row = 0
 
+
+
         ax1 = plt.subplot2grid((1, 3), (0, 0))
-        plt.hist(df_select['Strike'][burnin:], bins=100, alpha=0.8)
+        bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
+        plt.hist(df_select['Strike'][burnin:], bins= 80, alpha=0.8)
 
         ymin, ymax = ax1.get_ylim()
         if real_v is not None:
@@ -655,7 +727,8 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax2 = plt.subplot2grid((1, 3), (0, 1))
-        plt.hist(df_select['Dip'][burnin:], bins=100, alpha=0.8)
+        bin = int(90 * (len(df_select['Dip'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Dip'][burnin:]))))
+        plt.hist(df_select['Dip'][burnin:], bins=80, alpha=0.8)
 
         ymin, ymax = ax2.get_ylim()
         if real_v is not None:
@@ -673,7 +746,8 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax3 = plt.subplot2grid((1, 3), (0, 2))
-        plt.hist(df_select['Rake'][burnin:], bins=100, alpha=0.8)
+        bin = int(360 * (len(df_select['Rake'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Rake'][burnin:]))))
+        plt.hist(df_select['Rake'][burnin:], bins=80, alpha=0.8)
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
@@ -694,7 +768,7 @@ class Post_processing_sdr:
         fig = plt.figure(figsize=(25, 6))
 
         ax4 = plt.subplot2grid((1, 3), (0, 0))
-        plt.hist(df_select['Depth'][burnin:] / 1000, bins=100, alpha=0.8)
+        plt.hist(df_select['Depth'][burnin:] / 1000, bins=50, alpha=0.8)
         ymin, ymax = ax4.get_ylim()
         xmin, xmax = ax4.get_xlim()
         if real_v is not None:
@@ -817,6 +891,51 @@ class Post_processing_sdr:
         plt.tight_layout()
         # plt.show()
         plt.savefig(dir + '/Misfit_vs_Moment.pdf')
+
+
+        fig = plt.figure(figsize=(10, 6))
+        row = 0
+
+        ax1 = plt.subplot2grid((3,1), (0, 0))
+        plt.plot(df_select['Strike'])
+        ax1.set_title("Strike", color='b', fontsize=25)
+        ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
+        ax1.set_ylabel("Misfit", fontsize=25)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax1.set_ylim(0, 360)
+        # plt.legend( fontsize=20)
+        plt.tight_layout()
+
+        ax2 = plt.subplot2grid((3,1), (1,0))
+        plt.plot(df_select['Dip'])
+
+        ax2.set_title("Dip", color='b', fontsize=25)
+        ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
+        ax2.xaxis.set_ticks(np.arange(0, 90, 10))
+        ax2.tick_params(axis='x', labelsize=20)
+        ax2.tick_params(axis='y', labelsize=20)
+        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax2.set_ylim(0, 90)
+        # plt.legend( fontsize=20)
+        plt.tight_layout()
+
+        ax3 = plt.subplot2grid((3, 1), (2,0))
+        plt.plot(df_select['Rake'])
+        ax3.set_title("Rake", color='b', fontsize=25)
+        ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        ax3.tick_params(axis='x', labelsize=20)
+        ax3.tick_params(axis='y', labelsize=20)
+        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax3.set_ylim(-180, 180)
+        plt.tight_layout()
+        # plt.show()
+        plt.savefig(dir + '/Trace_plot.pdf')
+
+
+
+
 
     def trace_density(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))

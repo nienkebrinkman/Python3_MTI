@@ -11,7 +11,7 @@ from Get_Parameters_Marsquake_235 import Get_Parameters
 from Process_mSEED import Process_mSEED
 from Cut_windows import Cut_windows
 from MCMC import MCMC
-from Plot_waveforms import Plot_waveforms
+# from Plot_waveforms import Plot_waveforms
 
 def main():
     # === Read the mSEED file ===
@@ -40,7 +40,7 @@ def main():
 
     # === Cut the BW windows (P&S) ===
     BW_obs = Cut_windows(PRIOR['VELOC_taup'], P_HP=PRIOR['P_HP'], P_LP=PRIOR['P_LP'], S_HP=PRIOR['S_HP'],
-                         S_LP=PRIOR['S_LP'])
+                         S_LP=PRIOR['S_LP'],Pre_P= PRIOR['Pre_P'],Pre_S = PRIOR['Pre_S'],Post_P = PRIOR['Post_P'],Post_S = PRIOR['Post_S'])
     if PRIOR['P_pick'] == None or PRIOR['S_pick'] == None:
         BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], npts=PRIOR['npts'])
     else:
@@ -55,15 +55,16 @@ def main():
 
 
     # === Start the MCMC ===
-    # mcmc = MCMC(PRIOR['origin_time'], PRIOR, sample_path=sample_path)
-    # mcmc.start_BW(BW_obs)
+    mcmc = MCMC(PRIOR['origin_time'], PRIOR, sample_path=sample_path)
+    mcmc.start_BW(BW_obs)
 
     # === Plot waveforms from a previous run ===
-    PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_NEW_3_temp_high.txt'
-    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,PRIOR['origin_time'])
-    plot.get_waveforms()
+    # PRIOR['VELOC'] = PRIOR['VELOC']
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_NEW_5.txt'
+    # savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    # plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,PRIOR['origin_time'])
+    # # plot.get_Cut_waveforms()
+    # plot.get_waveforms()
 
 if __name__ == '__main__':
     main()

@@ -19,7 +19,7 @@ class MCMC:
         self.sample_path = sample_path
 
         self.model = Model_samples(self.prior)
-        self.BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = PRIOR['P_HP'], P_LP= PRIOR['P_LP'], S_HP =  PRIOR['S_HP'], S_LP= PRIOR['S_LP'])
+        self.BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = PRIOR['P_HP'], P_LP= PRIOR['P_LP'], S_HP =  PRIOR['S_HP'], S_LP= PRIOR['S_LP'],Pre_P= PRIOR['Pre_P'],Pre_S = PRIOR['Pre_S'],Post_P = PRIOR['Post_P'],Post_S = PRIOR['Post_S'])
         self.seis = Get_Seismogram(self.prior)
         self.mis = Misfit()
 
@@ -218,7 +218,14 @@ class MCMC:
             file_name.write("la_r:%.4f\n\r" % self.prior['la_r'])
             file_name.write("lo_r:%.4f\n\r" % self.prior['lo_r'])
             file_name.write("kind:%s\n\r" % self.prior['kind'])  #
-            file_name.write("network:%s\n\r" % self.prior['network'])  #
+            file_name.write("Pre_P:%.2f\n\r" % self.prior['Pre_P'])  #
+            file_name.write("Pre_S:%.2f\n\r" % self.prior['Pre_S'])  #
+            file_name.write("Post_P:%.2f\n\r" % self.prior['Post_P'])  #
+            file_name.write("Post_S:%.2f\n\r" % self.prior['Post_S'])  #
+            file_name.write("P_LP:%.2f\n\r" % self.prior['P_LP'])  #
+            file_name.write("P_HP:%.2f\n\r" % self.prior['P_HP'])  #
+            file_name.write("S_LP:%.2f\n\r" % self.prior['S_LP'])  #
+            file_name.write("S_HP:%.2f\n\r" % self.prior['S_HP'])  #
             file_name.write("amount samples:%i\n\r" % self.prior['sample_number'])  #
             file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
             file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #
