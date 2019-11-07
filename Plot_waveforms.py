@@ -18,12 +18,12 @@ from Get_Seismogram import Get_Seismogram
 from Cut_windows import Cut_windows
 
 class Plot_waveforms:
-    def __init__(self,BW_obs,path_txt_inversion,save_directory,PRIOR,otime):
+    def __init__(self,BW_obs,path_txt_inversion,save_directory,PRIOR,otime,skiprows=26):
         self.dir = save_directory
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
 
-        skiprows = 26
+
         self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake","M0","Total_misfit","p_z","p_r","s_z","s_r","s_t",'bw_tot','Shift_S','Shift_P','accept']
         data = np.loadtxt(path_txt_inversion, delimiter=',', skiprows=skiprows)
         self.df = pd.DataFrame(data,columns=self.column_names)

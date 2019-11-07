@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/Event_173/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = None #
         mSEED_file = 'waveforms_VBB_ZRT.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'
@@ -48,8 +48,8 @@ class Get_Parameters:
 
         trace = stream.traces[0]
         PRIOR = {}
-        PRIOR['PLOT'] = True
-        PRIOR['save_name'] = 'TAYAK_' + trace.id.replace('.','_')
+        PRIOR['PLOT'] = False
+        PRIOR['save_name'] = 'TAYAK' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
@@ -129,7 +129,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 30000
         PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 100000
+        PRIOR['sample_number'] = 300000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -140,6 +140,13 @@ class Get_Parameters:
         PRIOR['P_HP'] = 1.0 / 8.0 # could also be 1.0/10.0
         PRIOR['S_LP'] = 1.0/1.0
         PRIOR['S_HP'] = 1.0 / 10.
+
+        # = Pick information in seconds =
+        PRIOR['Pre_P'] = 4#10
+        PRIOR['Pre_S'] = 5
+        PRIOR['Post_P'] = 20
+        PRIOR['Post_S'] = 20#40
+
         return PRIOR
 
     def Get_ranges(self,PRIOR):
@@ -150,11 +157,11 @@ class Get_Parameters:
         PRIOR['dip']={}
         PRIOR['dip']['range_min'] = 0
         PRIOR['dip']['range_max'] = 89.9
-        PRIOR['angle_spread'] = 5
+        PRIOR['angle_spread'] =10
         PRIOR['rake']={}
         PRIOR['rake']['range_min'] = -180
         PRIOR['rake']['range_max'] = 179.9
-        PRIOR['rake']['spread'] = 5
+        PRIOR['rake']['spread'] = 10
 
         # = Range epi and depth =
         PRIOR['epi']={}
@@ -164,13 +171,13 @@ class Get_Parameters:
         if PRIOR['depth_s'] == None:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = 0
-            PRIOR['depth']['range_max'] = 50000
-            PRIOR['depth']['spread'] = 1000
+            PRIOR['depth']['range_max'] = 100000
+            PRIOR['depth']['spread'] = 5000
         else:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = 20000# PRIOR['depth_s'] - 10000
-            PRIOR['depth']['range_max'] = 46000# PRIOR['depth_s'] + 10000
-            PRIOR['depth']['spread'] = 1000
+            PRIOR['depth']['range_max'] = 100000# PRIOR['depth_s'] + 10000
+            PRIOR['depth']['spread'] = 5000
 
         return PRIOR
 
