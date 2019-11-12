@@ -19,10 +19,10 @@ class Get_Seismogram():
                                                        strike=strike, dip=dip,
                                                        rake=rake, M0=M0,
                                                        origin_time=time) # strike = 20, dip = 2, rake = 10, depth_m = 35000 seemed to fit quite welll
-        # source = instaseis.Source.from_strike_dip_rake(latitude=-26.443, longitude=50.920,
-        #                                                depth_in_m=38438,
-        #                                                strike=277.8411362453696, dip=67.32189723358671,
-        #                                                rake=83.12557942378862, M0=6165950018614810.0,
+        # source = instaseis.Source.from_strike_dip_rake(latitude=10.99, longitude=160.95,
+        #                                                depth_in_m=90000,
+        #                                                strike=70, dip=55,
+        #                                                rake=120, M0=112201845430196.06,
         #                                                origin_time=time)
 
         # m_pp = -214996686134000.0

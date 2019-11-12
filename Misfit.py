@@ -99,21 +99,22 @@ class Misfit:
 
             if plot:
                 time_array = np.arange(len(s_obs[i].data)) * delta
-                start = int((s_start_obs.timestamp - or_time.timestamp - 100) / delta)
-                end =int((s_start_obs.timestamp - or_time.timestamp + 400) / delta)
+                start = int((s_start_obs.timestamp - or_time.timestamp - 10) / delta)
+                end =int((s_start_obs.timestamp - or_time.timestamp + 30) / delta)
 
-                ax1 = plt.subplot2grid((5, 1), (i, 0))
-                plt.plot(time_array[start:end],s_obs[i][start:end],'b', label = 'Observed')
-                plt.plot(time_array[start:end],s_syn[i][start:end],'r', linewidth = 0.3, label = 'Synthetic')
-                plt.plot(time_array[start:end],s_syn_shift_obspy[start:end],'g', label = 'Shifted')
+                ax1 = plt.subplot2grid((5, 1), (i+2, 0))
+
+                plt.plot(time_array[start:end],self.normalize(s_obs[i][start:end]),'b', label = 'Observed')
+                # plt.plot(time_array[start:end],self.normalize(s_syn[i][start:end]),'r', linewidth = 0.3, label = 'Synthetic')
+                plt.plot(time_array[start:end],self.normalize(s_syn_shift_obspy[start:end]),'g', label = 'Shifted')
                 ymin, ymax = ax1.get_ylim()
                 xmin, xmax = ax1.get_xlim()
-                if i == 0:
-                    plt.text(xmax - 30, ymax / 1.7, "S-Z - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
-                elif i == 1:
-                    plt.text(xmax - 30, ymax / 1.7, "S-R - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
-                elif i == 2:
-                    plt.text(xmax - 30, ymax / 1.7, "S-T - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                # if i == 0:
+                #     plt.text(xmax - 30, ymax / 1.7, "S-Z - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                # elif i == 1:
+                #     plt.text(xmax - 30, ymax / 1.7, "S-R - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
+                # elif i == 2:
+                #     plt.text(xmax - 30, ymax / 1.7, "S-T - %.4f, %.4f " % (misfit[i] , CC_s), fontsize=20, color='b')
                 ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
                 ax1.tick_params(axis='x', labelsize=18)
                 ax1.tick_params(axis='y', labelsize=18)
@@ -144,8 +145,8 @@ class Misfit:
             misfit = np.append(misfit, ((CC_p - mu_p[i] ) ** 2) / (2 * (sigma_p[i]) ** 2) )#+ np.abs(shift))
 
             p_syn_shift_obspy = self.shift(p_syn[i].data, shift_centered)
-            start = int((p_start_obs.timestamp - or_time.timestamp - 100) / delta)
-            end = int((p_start_obs.timestamp - or_time.timestamp + 260) / delta)
+            start = int((p_start_obs.timestamp - or_time.timestamp - 10) / delta)
+            end = int((p_start_obs.timestamp - or_time.timestamp + 30) / delta)
 
             A = (np.dot(p_obs[i].data, p_syn_shift_obspy) / np.dot(p_obs[i].data, p_obs[i].data))
             amplitude = np.append(amplitude,abs(A))
@@ -154,23 +155,26 @@ class Misfit:
                 delta = p_obs[i].stats.delta
                 time_array = np.arange(len_P_obs) * delta
 
-                ax1 = plt.subplot2grid((5, 1), (i+3, 0))
-                plt.plot(time_array[start:end],p_obs[i][start:end],'b', label = 'Observed')
-                plt.plot(time_array[start:end],p_syn[i][start:end],'r', linewidth = 0.3, label = 'Synthetic')
-                plt.plot(time_array[start:end],p_syn_shift_obspy[start:end],'g', label = 'Shifted')
+                ax1 = plt.subplot2grid((5, 1), (i, 0))
+                plt.plot(time_array[start:end],self.normalize(p_obs[i][start:end]),'b', label = 'Observed')
+                # plt.plot(time_array[start:end],self.normalize(p_syn[i][start:end]),'r', linewidth = 0.3, label = 'Synthetic')
+                plt.plot(time_array[start:end],self.normalize(p_syn_shift_obspy[start:end]),'g', label = 'Shifted')
                 ymin, ymax = ax1.get_ylim()
                 xmin, xmax = ax1.get_xlim()
-                if i == 0:
-                    plt.text(xmax - 30, ymax / 1.7, "P-Z - %.4f - %.4f " % (misfit[i+3] , CC_p), fontsize=20, color='b')
-                elif i == 1:
-                    plt.text(xmax - 30, ymax / 1.7, "P-R - %.4f - %.4f " % (misfit[i+3] , CC_p), fontsize=20, color='b')
+                # if i == 0:
+                #     plt.text(xmax - 30, ymax / 1.7, "P-Z - %.4f - %.4f " % (misfit[i+3] , CC_p), fontsize=20, color='b')
+                # elif i == 1:
+                #     plt.text(xmax - 30, ymax / 1.7, "P-R - %.4f - %.4f " % (misfit[i+3] , CC_p), fontsize=20, color='b')
                 ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
                 ax1.tick_params(axis='x', labelsize=18)
                 ax1.tick_params(axis='y', labelsize=18)
                 plt.tight_layout()
 
-            if i == 1 and plot == True:
+
+            if i == 0 and plot == True:
+                plt.title('Depth: 90000 (m)')
                 plt.legend(loc='lower left', fontsize=15)
+        # plt.show()
         sum_misfit = np.sum(misfit)
         return misfit, amplitude, time_shift,fig
 
@@ -188,4 +192,10 @@ class Misfit:
     def zero_to_nan(self,values):
         """Replace every 0 with 'nan' and return a copy."""
         return [float('nan') if x==0 else x for x in values]
+
+    def normalize(self, v):
+        """This function fails when division by zero"""
+        normalized_v = v / np.sqrt(np.sum(v ** 2))
+        return normalized_v
+
 

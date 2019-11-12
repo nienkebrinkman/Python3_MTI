@@ -194,6 +194,7 @@ class MCMC:
         # plt.vlines(self.BW_syn.or_P_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P')
         # plt.vlines(self.BW_obs.or_S_len , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
         # plt.vlines(self.BW_syn.or_S_len, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S')
+        # plt.title('Depth: %.2f' % depth)
         # plt.show()
 
         # plt.figure()

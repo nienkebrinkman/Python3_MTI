@@ -52,8 +52,8 @@ def main():
 
     # === Plot waveforms from a previous run ===
     PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_UPDATE_2.txt'
-    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/Trials/TAYAK_NEW/TAYAK_NEW_3_low_misfit.txt'
+    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/Trials/TAYAK_NEW/'
     skiprows = 40 # 26
     plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,PRIOR['origin_time'],skiprows)
     # plot.get_Cut_waveforms()

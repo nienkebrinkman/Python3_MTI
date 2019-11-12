@@ -30,21 +30,24 @@ from pyrocko import moment_tensor as mtm
 
 
 def main():
+    # NPZ_path = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
+    # file = np.load(NPZ_path)
+
     ## Post - Processing [processing the results from inversion]
     result = Post_processing_sdr()
 
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'TAYAK_UPDATE_1.txt'
-    path_to_file_BBB = directory+ 'TAYAK_BBB_Update_1.txt'
+    path_to_file = directory + 'TAYAK_Low_Misfit.txt'
+    path_to_file_BBB = directory+ 'Low_Misfit_TAYAK_BBB.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows = 26 # 40
+    skiprows = 40#26 # 40
     column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
                     'bw_tot', 'Shift_S', 'Shift_P', 'accept']
-    burnin = 0
+    burnin = 2000
 
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
     strike, dip, rake = aux_plane(np.mean(File[:,2]), np.mean(File[:,3]), np.mean(File[:,4]))
@@ -54,8 +57,8 @@ def main():
 
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
-                   column_names=column_names,  burnin=burnin,real_v=real_v)
+    # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names,  burnin=burnin,real_v=real_v)
 
     result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
     result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
@@ -112,12 +115,12 @@ class Post_processing_sdr:
 
 
         for i in range(loop_length):
-            epi_mean[i] = np.mean(df['Epi'].values[0:int(i * 10 + 1)])
-            depth_mean[i] = np.mean(df['Depth'].values[0:int(i * 10 + 1)])
-            strike_mean[i] = np.mean(df['Strike'].values[0:int(i * 10 + 1)])
-            dip_mean[i] = np.mean(df['Dip'].values[0:int(i * 10 + 1)])
-            rake_mean[i] = np.mean(df['Rake'].values[0:int(i * 10 + 1)])
-            M0_mean[i] = np.mean(df['M0'].values[0:int(i * 10 + 1)])
+            epi_mean[i] = np.mean(df['Epi'].values[burnin:int(i * 10 + 1)])
+            depth_mean[i] = np.mean(df['Depth'].values[burnin:int(i * 10 + 1)])
+            strike_mean[i] = np.mean(df['Strike'].values[burnin:int(i * 10 + 1)])
+            dip_mean[i] = np.mean(df['Dip'].values[burnin:int(i * 10 + 1)])
+            rake_mean[i] = np.mean(df['Rake'].values[burnin:int(i * 10 + 1)])
+            M0_mean[i] = np.mean(df['M0'].values[burnin:int(i * 10 + 1)])
 
         plt.close()
         plt.figure(figsize=(20,10))
@@ -532,11 +535,12 @@ class Post_processing_sdr:
         lowest_strike = df['Strike'].values[lowest_indices]
         lowest_dip = df['Dip'].values[lowest_indices]
         lowest_rake = df['Rake'].values[lowest_indices]
+        lowest_depth = df['Depth'].values[lowest_indices]
 
         fig = plt.figure(figsize=(25, 6))
         row = 0
 
-        ax1 = plt.subplot2grid((1, 3), (0, 0))
+        ax1 = plt.subplot2grid((1, 4), (0, 0))
         plt.plot(lowest_strike,lowest_misfits,'bo')
 
         ymin, ymax = ax1.get_ylim()
@@ -553,7 +557,7 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax2 = plt.subplot2grid((1, 3), (0, 1))
+        ax2 = plt.subplot2grid((1, 4), (0, 1))
         plt.plot(lowest_dip,lowest_misfits,'bo')
 
         ymin, ymax = ax2.get_ylim()
@@ -571,7 +575,7 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax3 = plt.subplot2grid((1, 3), (0, 2))
+        ax3 = plt.subplot2grid((1, 4), (0, 2))
         plt.plot(lowest_rake,lowest_misfits,'bo')
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
@@ -585,6 +589,22 @@ class Post_processing_sdr:
         ax3.tick_params(axis='y', labelsize=20)
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
+        plt.tight_layout()
+
+
+        ax4 = plt.subplot2grid((1, 4), (0, 3))
+        plt.plot(lowest_depth,lowest_misfits,'bo')
+        ymin, ymax = ax3.get_ylim()
+        if real_v is not None:
+            plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Depth')
+            plt.legend(loc='upper left', fontsize=20)
+            # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
+        ax4.set_title("Depth", color='b', fontsize=25)
+        ax4.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        ax4.tick_params(axis='x', labelsize=20)
+        ax4.tick_params(axis='y', labelsize=20)
+        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax4.set_xlim(20000, 100000)
         plt.tight_layout()
         # plt.show()
         plt.savefig(dir + '/Misfit_vs_Moment.pdf')

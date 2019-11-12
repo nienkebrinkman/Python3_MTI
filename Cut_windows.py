@@ -26,6 +26,16 @@ class Cut_windows:
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['S'])
         return tt[0].time
 
+    def get_pp(self, epi, depth_m):
+        model = TauPyModel(model=self.veloc_model)
+        tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['pP'])
+        return tt[0].time
+
+    def get_sp(self, epi, depth_m):
+        model = TauPyModel(model=self.veloc_model)
+        tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['sP'])
+        return tt[0].time
+
     def Get_bw_windows(self, stream, epi, depth, or_time, npts):
         self.original = stream
         or_time_sec = or_time.timestamp

@@ -15,7 +15,7 @@ from Create_starting_sample import create_starting_sample
 
 class Get_Parameters:
     def Get_Path(self):
-        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0173/waveforms/'# '/home/nienke/MARSQUAKES/'
+        self.directory = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/'# '/home/nienke/MARSQUAKES/'
         # self.directory = '/home/nienke/Documents/Master/Applied_geophysics/Thesis/Data/Mars/S0235b/waveforms/'# '/home/nienke/MARSQUAKES/'
         self.inv = None #
         mSEED_file = 'waveforms_VBB_ZRT.mseed'#'2018-09-05-mww66-hokkaido-japan-region-5.miniseed'

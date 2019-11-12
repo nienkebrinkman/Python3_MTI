@@ -24,7 +24,7 @@ class Get_Parameters:
         return mSEED_path
 
     def Start_sample_path(self,PRIOR):
-        start_sample_path = '/home/nienke/MARSQUAKES/start_sample_1.txt'
+        start_sample_path =  None # '/home/nienke/Documents/Master/Data/MSS/start_sample.txt'
 
 
         if start_sample_path == None:
@@ -49,7 +49,7 @@ class Get_Parameters:
         trace = stream.traces[0]
         PRIOR = {}
         PRIOR['PLOT'] = False
-        PRIOR['save_name'] = '1_TAYAK_' + trace.id.replace('.','_')
+        PRIOR['save_name'] = 'TAYAK' + trace.id.replace('.','_')
         PRIOR['save_dir'] = self.directory + 'Output'  #'/home/nienke/MSS'
         if not os.path.exists(PRIOR['save_dir']):
             os.makedirs(PRIOR['save_dir'])
@@ -127,9 +127,9 @@ class Get_Parameters:
         # PRIOR['noise_model'] = 'Tcompact' #'STS2' #
 
         # = Sample information =
-        PRIOR['npts'] = 30000
-        PRIOR['Temperature'] = 1
-        PRIOR['sample_number'] = 100000
+        PRIOR['npts'] = 15000
+        PRIOR['Temperature'] = 10
+        PRIOR['sample_number'] = 50000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -144,8 +144,8 @@ class Get_Parameters:
         # = Pick information in seconds =
         PRIOR['Pre_P'] = 4#10
         PRIOR['Pre_S'] = 5
-        PRIOR['Post_P'] = 10
-        PRIOR['Post_S'] = 20#40
+        PRIOR['Post_P'] = 7
+        PRIOR['Post_S'] = 10#40
 
         return PRIOR
 
@@ -157,11 +157,11 @@ class Get_Parameters:
         PRIOR['dip']={}
         PRIOR['dip']['range_min'] = 0
         PRIOR['dip']['range_max'] = 89.9
-        PRIOR['angle_spread'] =10
+        PRIOR['angle_spread'] =8
         PRIOR['rake']={}
         PRIOR['rake']['range_min'] = -180
         PRIOR['rake']['range_max'] = 179.9
-        PRIOR['rake']['spread'] = 10
+        PRIOR['rake']['spread'] = 8
 
         # = Range epi and depth =
         PRIOR['epi']={}
@@ -170,14 +170,14 @@ class Get_Parameters:
         PRIOR['epi']['spread'] = 1
         if PRIOR['depth_s'] == None:
             PRIOR['depth'] = {}
-            PRIOR['depth']['range_min'] = 0
+            PRIOR['depth']['range_min'] = 20000
             PRIOR['depth']['range_max'] = 100000
-            PRIOR['depth']['spread'] = 5000
+            PRIOR['depth']['spread'] = 3000
         else:
             PRIOR['depth'] = {}
             PRIOR['depth']['range_min'] = 20000# PRIOR['depth_s'] - 10000
             PRIOR['depth']['range_max'] = 100000# PRIOR['depth_s'] + 10000
-            PRIOR['depth']['spread'] = 5000
+            PRIOR['depth']['spread'] = 3000
 
         return PRIOR
 

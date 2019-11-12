@@ -30,6 +30,20 @@ class Plot_waveforms:
         self.BW_obs = BW_obs
         self.prior = PRIOR
         self.otime = otime
+        with open(path_txt_inversion) as f:
+            content = f.readlines()
+        self.param = {}
+        self.param['P_HP'] = float(content[24].strip('\n').split(':')[-1])
+        self.param['P_LP'] = float(content[22].strip('\n').split(':')[-1])
+        self.param['S_HP'] = float(content[28].strip('\n').split(':')[-1])
+        self.param['S_LP'] = float(content[26].strip('\n').split(':')[-1])
+
+
+        self.param['Pre_P'] = float(content[14].strip('\n').split(':')[-1])
+        self.param['Pre_S'] =  float(content[16].strip('\n').split(':')[-1])
+        self.param['Post_P'] = float(content[18].strip('\n').split(':')[-1])
+        self.param['Post_S'] = float(content[20].strip('\n').split(':')[-1])
+
 
     def get_waveforms(self):
         # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
@@ -51,8 +65,8 @@ class Plot_waveforms:
 
 
         seis = Get_Seismogram(self.prior)
-        BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = self.prior['P_HP'], P_LP= self.prior['P_LP'], S_HP =  self.prior['S_HP'], S_LP= self.prior['S_LP'], Pre_P=self.prior['Pre_P'],
-                              Pre_S=self.prior['Pre_S'], Post_P=self.prior['Post_P'], Post_S=self.prior['Post_S'])
+        BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = self.prior['P_HP'], P_LP= self.prior['P_LP'], S_HP =  self.prior['S_HP'], S_LP= self.prior['S_LP'], Pre_P=self.param['Pre_P'],
+                              Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'])
 
 
         fig = plt.figure(figsize=(10, 10))
@@ -60,11 +74,11 @@ class Plot_waveforms:
         p_time_array = np.arange(len(self.BW_obs.P_stream.traces[0].data)) * delta
         s_time_array = np.arange(len(self.BW_obs.S_stream.traces[0].data)) * delta
 
-        start_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp - 50) / delta)
-        end_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp + 130) / delta)
+        start_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp - 5) / delta)
+        end_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp + 35) / delta)
 
-        start_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 50) / delta)
-        end_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 100) / delta)
+        start_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 20) / delta)
+        end_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 30) / delta)
 
         ax1 = plt.subplot2grid((5, 1), (0, 0))
         ax2 = plt.subplot2grid((5, 1), (1, 0))
@@ -72,16 +86,17 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 30
+        n_lowest = 100
         lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         lowest_misfits = self.df['Total_misfit'].values[lowest_indices]
-        depths_inds = self.df['Depth'].values.argsort()[-n_lowest:]
+        depths_inds = self.df['Depth'].values.argsort()
         depths = self.df['Depth'].values[depths_inds]
+        # depths_used = np.array([depths_inds[0],depths_inds[20],depths_inds[33],depths_inds[73],depths_inds[7000],15602,20010])
 
-
-        for i in np.arange(len(epi) - 100, len(epi), 1):
-        # for i,v in enumerate(lowest_indices):
-        # for i in np.arange(100):
+        # for i in np.arange(len(epi) - 100, len(epi), 1):
+        for v,i in enumerate(lowest_indices):
+        # for v,i in enumerate(depths_used):
+        # for i in np.arange(1):
             dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
                                                                            azi1=self.prior['baz'], a12=epi[i],
                                                                            outmask=1929)
@@ -97,8 +112,7 @@ class Plot_waveforms:
             # ax1.plot(p_time_array[start_P:end_P], BW_syn.P_stream.traces[0].data[start_P:end_P], 'g',
             #          label='Synthetic', linewidth = 0.1)
 
-            ax1.plot(p_time_array[start_P:end_P], self.normalize(P_shift_array[start_P:end_P]), 'r',
-                     label='Synthetic', linewidth=0.1)
+            ax1.plot(p_time_array[start_P:end_P], self.normalize(P_shift_array[start_P:end_P]), 'r', linewidth=0.1)
             # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
             ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax1.tick_params(axis='x', labelsize=18)
@@ -108,8 +122,7 @@ class Plot_waveforms:
             # plt.legend(loc='lower left', fontsize=15)
 
             P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, int(P_shift[i]))
-            ax2.plot(p_time_array[start_P:end_P], self.normalize(P_shift_array[start_P:end_P]), 'r',
-                     label='Synthetic', linewidth=0.1)
+            ax2.plot(p_time_array[start_P:end_P], self.normalize(P_shift_array[start_P:end_P]), 'r', linewidth=0.1)
             # ax2.plot(P_shift_array, 'r',label='Synthetic', linewidth = 0.1)
             ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             ax2.tick_params(axis='x', labelsize=18)
@@ -141,16 +154,29 @@ class Plot_waveforms:
             ax5.set_xlabel(self.BW_obs.start_P.strftime('From P arrival: %Y-%m-%dT%H:%M:%S + [sec]'), fontsize=18)
 
         ax1.plot(p_time_array[start_P:end_P], self.normalize(self.BW_obs.P_stream.traces[0].data[start_P:end_P]), 'b')
-        # ax1.plot( BW_obs.P_stream.traces[0].data, 'b', label='Observed', linewidth = 0.1)
         ymin, ymax = ax1.get_ylim()
         xmin, xmax = ax1.get_xlim()
-        ax1.text(xmax - 5, ymax / 1.7, "P-Z", fontsize=20, color='b')
+        ax1.text(xmax - 5, ymin / 1.7, "P-Z", fontsize=20, color='b')
+        ## Plot litte pp and sp
+        P_time =  BW_syn.get_P(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        ax1.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
+                   label='P in best fitting model')
+        sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
+        pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
+        ax1.legend()
 
         ax2.plot(p_time_array[start_P:end_P], self.normalize(self.BW_obs.P_stream.traces[1].data[start_P:end_P]), 'b')
         # ax2.plot(BW_obs.P_stream.traces[1].data, 'b', linewidth = 0.1)
         ymin, ymax = ax2.get_ylim()
         xmin, xmax = ax2.get_xlim()
-        ax2.text(xmax - 5, ymax / 1.7, "P-R", fontsize=20, color='b')
+        ax2.text(xmax - 5, ymin / 1.7, "P-R", fontsize=20, color='b')
+        ## Plot litte pp and sp
+        ax2.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
+                   label='P in best fitting model')
+        ax2.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
+        ax2.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
 
         ax3.plot(s_time_array[start_S:end_S], self.normalize(self.BW_obs.S_stream.traces[0].data[start_S:end_S]), 'b')
         # ax3.plot( BW_obs.S_stream.traces[0].data, 'b', linewidth = 0.1)
@@ -321,7 +347,6 @@ class Plot_waveforms:
             S_stream += S_trace
             S_stream = WINDOWS.Filter(S_stream, self.prior['P_HP'], self.prior['P_LP'])
         return P_stream,S_stream, or_P_len, or_S_len
-
 
 
     def normalize(self, v):
