@@ -18,7 +18,7 @@ from Get_Seismogram import Get_Seismogram
 from Cut_windows import Cut_windows
 
 class Plot_waveforms:
-    def __init__(self,BW_obs,path_txt_inversion,save_directory,PRIOR,otime,skiprows=26):
+    def __init__(self,BW_obs,path_txt_inversion,save_directory,PRIOR,skiprows=26):
         self.dir = save_directory
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
@@ -29,7 +29,7 @@ class Plot_waveforms:
         self.df = pd.DataFrame(data,columns=self.column_names)
         self.BW_obs = BW_obs
         self.prior = PRIOR
-        self.otime = otime
+        self.otime = PRIOR['origin_time']
         with open(path_txt_inversion) as f:
             content = f.readlines()
         self.param = {}

@@ -81,7 +81,7 @@ class Get_Parameters:
             PRIOR['origin_time'] = obspy.UTCDateTime(2019, 7, 26, 12, 16, 15)
             PRIOR['P_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 19, 19.3) # If not know: None
             PRIOR['S_pick'] = obspy.UTCDateTime(2019, 7, 26, 12, 22, 3) # If not know: None
-            PRIOR['depth_s'] = 45000
+            PRIOR['depth_s'] = 58691.9
             PRIOR['la_s'] = 10.99
             PRIOR['lo_s'] = 160.95
             Mw = 3.3
@@ -129,7 +129,7 @@ class Get_Parameters:
         # = Sample information =
         PRIOR['npts'] = 15000
         PRIOR['Temperature'] = 10
-        PRIOR['sample_number'] = 50000
+        PRIOR['sample_number'] = 300000
         # PRIOR['sampling_rate'] = 20 # [Hz]
         PRIOR['sampling_rate'] = trace.stats.sampling_rate # [Hz] InSight Mission
 
@@ -144,8 +144,8 @@ class Get_Parameters:
         # = Pick information in seconds =
         PRIOR['Pre_P'] = 4
         PRIOR['Pre_S'] = 5
-        PRIOR['Post_P'] = 20#7
-        PRIOR['Post_S'] = 20#10
+        PRIOR['Post_P'] = 7
+        PRIOR['Post_S'] = 10
 
         return PRIOR
 

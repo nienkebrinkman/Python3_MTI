@@ -36,7 +36,7 @@ class Cut_windows:
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['sP'])
         return tt[0].time
 
-    def Get_bw_windows(self, stream, epi, depth, or_time, npts):
+    def Get_bw_windows(self, stream, epi, depth, or_time):
         self.original = stream
         or_time_sec = or_time.timestamp
         tt_P = self.get_P(epi, depth)
@@ -56,53 +56,60 @@ class Cut_windows:
         S_stream = Stream()
         # BW_stream = Stream()
 
-        for i,trace in enumerate(stream.traces):
-            # Filter entire trace for P- and S separately.
+        for i, trace in enumerate(stream.traces):
+            dt = trace.meta.delta
             trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
             trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
 
+            # Apply a filter with the length of the window
+
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
-            npts_p = self.P_len + 2 * self.or_P_len
+            npts_p = self.P_len + 2 * 500
+            start_p = dt * 500
             S_trace = Trace.slice(trace, self.start_S, end_S)
             self.S_len = len(S_trace)
-            npts_s = self.S_len + 2 * self.or_S_len
+            npts_s = self.S_len + 2 * 500
+            start_s = dt * 500
 
             # === Taper the data ===
-            S_trace.taper(0.05,'hann')
-            P_trace.taper(0.05,'hann')
-
+            S_trace.taper(0.05, 'hann')
+            P_trace.taper(0.05, 'hann')
 
             if 'T' in trace.stats.channel:
-                total_s_trace = Trace(np.zeros(npts),
-                      header={"starttime": or_time, 'delta': trace.stats.delta,
-                              "station": trace.stats.station,
-                              "network": trace.stats.network, "location": trace.stats.location,
-                              "channel": trace.stats.channel}).__add__(S_trace, method=0, interpolation_samples=0,
-                                                                       fill_value=S_trace.data,
-                                                                       sanity_checks=True)
+                total_s_trace = Trace(np.zeros(npts_s),
+                                      header={"starttime": self.start_S - start_s, 'delta': trace.stats.delta,
+                                              "station": trace.stats.station,
+                                              "network": trace.stats.network, "location": trace.stats.location,
+                                              "channel": trace.stats.channel}).__add__(S_trace, method=0,
+                                                                                       interpolation_samples=0,
+                                                                                       fill_value=S_trace.data,
+                                                                                       sanity_checks=True)
+
             else:
-                total_p_trace = Trace(np.zeros(npts),
-                      header={"starttime": or_time, 'delta': trace.stats.delta,
-                              "station": trace.stats.station,
-                              "network": trace.stats.network, "location": trace.stats.location,
-                              "channel": trace.stats.channel}).__add__(P_trace, method=0, interpolation_samples=0,
-                                                                       fill_value=P_trace.data,
-                                                                       sanity_checks=True)
-                total_s_trace = Trace(np.zeros(npts),
-                      header={"starttime": or_time, 'delta': trace.stats.delta,
-                              "station": trace.stats.station,
-                              "network": trace.stats.network, "location": trace.stats.location,
-                              "channel": trace.stats.channel}).__add__(S_trace, method=0, interpolation_samples=0,
-                                                                       fill_value=S_trace.data,
-                                                                       sanity_checks=True)
+                total_p_trace = Trace(np.zeros(npts_p),
+                                      header={"starttime": self.start_P - start_p, 'delta': trace.stats.delta,
+                                              "station": trace.stats.station,
+                                              "network": trace.stats.network, "location": trace.stats.location,
+                                              "channel": trace.stats.channel}).__add__(P_trace, method=0,
+                                                                                       interpolation_samples=0,
+                                                                                       fill_value=P_trace.data,
+                                                                                       sanity_checks=True)
+                total_s_trace = Trace(np.zeros(npts_s),
+                                      header={"starttime": self.start_S - start_s, 'delta': trace.stats.delta,
+                                              "station": trace.stats.station,
+                                              "network": trace.stats.network, "location": trace.stats.location,
+                                              "channel": trace.stats.channel}).__add__(S_trace, method=0,
+                                                                                       interpolation_samples=0,
+                                                                                       fill_value=S_trace.data,
+                                                                                       sanity_checks=True)
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
             # === Apply filters ===
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
 
-    def Get_bw_windows_MANUAL(self, stream, tt_P, tt_S, or_time, npts):
+    def Get_bw_windows_MANUAL(self, stream, tt_P, tt_S, or_time):
         self.original = stream
         self.start_P = obspy.UTCDateTime(tt_P.timestamp - self.Pre_P)
         self.or_P_len = int((self.start_P - or_time) / stream.traces[0].stats.delta)
@@ -118,6 +125,7 @@ class Cut_windows:
         S_stream = Stream()
 
         for i, trace in enumerate(stream.traces):
+            dt = trace.meta.delta
             trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
             trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
 
@@ -125,35 +133,38 @@ class Cut_windows:
 
             P_trace = Trace.slice(trace, self.start_P, end_P)
             self.P_len = len(P_trace)
-            npts_p = self.P_len + 2 * self.or_P_len
+            npts_p = self.P_len + 2 * 500
+            start_p = dt * 500
             S_trace = Trace.slice(trace, self.start_S, end_S)
             self.S_len = len(S_trace)
-            npts_s = self.S_len + 2 * self.or_S_len
+            npts_s = self.S_len + 2 * 500
+            start_s = dt * 500
 
             # === Taper the data ===
             S_trace.taper(0.05,'hann')
             P_trace.taper(0.05,'hann')
 
             if 'T' in trace.stats.channel:
-                total_s_trace = Trace(np.zeros(npts),
-                                      header={"starttime": or_time, 'delta': trace.stats.delta,
+                total_s_trace = Trace(np.zeros(npts_s),
+                                      header={"starttime": self.start_S - start_s, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
                                               "network": trace.stats.network, "location": trace.stats.location,
                                               "channel": trace.stats.channel}).__add__(S_trace, method=0,
                                                                                        interpolation_samples=0,
                                                                                        fill_value=S_trace.data,
                                                                                        sanity_checks=True)
+
             else:
-                total_p_trace = Trace(np.zeros(npts),
-                                      header={"starttime": or_time, 'delta': trace.stats.delta,
+                total_p_trace = Trace(np.zeros(npts_p),
+                                      header={"starttime": self.start_P - start_p, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
                                               "network": trace.stats.network, "location": trace.stats.location,
                                               "channel": trace.stats.channel}).__add__(P_trace, method=0,
                                                                                        interpolation_samples=0,
                                                                                        fill_value=P_trace.data,
                                                                                        sanity_checks=True)
-                total_s_trace = Trace(np.zeros(npts),
-                                      header={"starttime": or_time, 'delta': trace.stats.delta,
+                total_s_trace = Trace(np.zeros(npts_s),
+                                      header={"starttime": self.start_S - start_s, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
                                               "network": trace.stats.network, "location": trace.stats.location,
                                               "channel": trace.stats.channel}).__add__(S_trace, method=0,

@@ -52,26 +52,34 @@ class MCMC:
                 if self.i == 0:
                     if self.sample_path == None:
                         update = None
-                        epi, depth = self.model.model_samples()
-                        M0_old = self.prior['M0']
+                        # epi, depth = self.model.model_samples()
+                        # M0_old = self.prior['M0']
+                        depth = 58691.9
+                        epi = 24.7437
+                        M0_old = 135943762646494.86
+
+
                         strike, dip, rake = self.model.model_samples_sdr()
                         moment_old = moment_old = np.array([strike, dip, rake])
                     else:
                         data = np.loadtxt(self.sample_path, delimiter=',')
-                        epi = data[0]
-                        depth = data[1]
+                        # epi = data[0]
+                        # depth = data[1]
                         strike = data[2]
                         dip = data[3]
                         rake = data[4]
-                        M0_old = data[5]
+                        # M0_old = data[5]
+                        depth = 58691.9
+                        epi = 24.7437
+                        M0_old = 135943762646494.86
 
                 else:
-                    update = np.random.choice(['epi', 'depth', 'moment'], 1)[0]
-                    epi, depth = self.model.model_samples(update, epi_old, depth_old)
-                    if epi < self.prior['epi']['range_min'] or epi > self.prior['epi']['range_max'] or depth < \
-                            self.prior['depth']['range_min'] or depth > self.prior['depth']['range_max']:
-                        continue
-
+                    # update = np.random.choice(['epi', 'depth', 'moment'], 1)[0]
+                    # epi, depth = self.model.model_samples(update, epi_old, depth_old)
+                    # if epi < self.prior['epi']['range_min'] or epi > self.prior['epi']['range_max'] or depth < \
+                    #         self.prior['depth']['range_min'] or depth > self.prior['depth']['range_max']:
+                    #     continue
+                    update = np.array(['moment'])
                     strike, dip, rake = self.model.model_samples_sdr(update,strike_old,dip_old,rake_old)
 
                 self.G_function(epi,depth,M0_old,strike,dip,rake)
@@ -91,9 +99,9 @@ class MCMC:
                     raise ValueError('Surface waves Not implemented yet')
                 if BW == True and SW ==True:
                     raise ValueError('Surface waves Not implemented yet')
-                    # Xi_new = bw_new + sw_new
 
-                M0 = M0_old / np.mean(amplitude)
+                # M0 = M0_old / np.mean(amplitude)
+                M0 = M0_old
 
                 if self.i == 0:
                     if self.prior['PLOT'] == True and self.i % 1 == 0:
@@ -169,13 +177,11 @@ class MCMC:
                                                                                  azi1=self.prior['baz'],
                                                                                  a12=epi, outmask=1929)
 
-
-
         st_syn = self.seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth,
                                                                strike=strike, dip=dip, rake=rake,
                                                                time=self.or_time, M0=M0)
 
-        self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['npts'])
+        self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time)
 
         # self.BW_obs.original.filter('highpass', freq = 1.0/8.0 , zerophase = True)
         # self.BW_syn.original.filter('highpass', freq = 1.0/8.0 , zerophase = True)

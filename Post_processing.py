@@ -39,8 +39,8 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'TAYAK_Low_Misfit.txt'
-    path_to_file_BBB = directory+ 'Low_Misfit_TAYAK_BBB.txt'
+    path_to_file = directory + 'Fixed_1.txt'
+    path_to_file_BBB = directory+ 'Fixed_1_BBB.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
@@ -57,8 +57,8 @@ def main():
 
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    # result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
-    #                column_names=column_names,  burnin=burnin,real_v=real_v)
+    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+                   column_names=column_names,  burnin=burnin,real_v=real_v)
 
     result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
     result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
