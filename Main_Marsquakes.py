@@ -12,7 +12,7 @@ from Get_Parameters import Get_Parameters
 # from Process_mSEED import Process_mSEED
 from Cut_windows import Cut_windows
 # from MCMC import MCMC
-# from Plot_waveforms import Plot_waveforms
+from Plot_waveforms import Plot_waveforms
 from Grid_Search import Grid_Search
 
 
@@ -48,21 +48,21 @@ def main():
         BW_obs.Get_bw_windows_MANUAL(stream, PRIOR['P_pick'], PRIOR['S_pick'], PRIOR['origin_time'])
 
     # === Start Grid Search ===
-    GS = Grid_Search(PRIOR)
-    GS.start_GS(BW_obs)
+    # GS = Grid_Search(PRIOR)
+    # GS.start_GS(BW_obs)
 
     # === Start the MCMC (Metropolis Hastings) ===
     # mcmc = MCMC(PRIOR['origin_time'], PRIOR, sample_path=sample_path)
     # mcmc.start_BW(BW_obs)
 
     # === Plot waveforms from a previous run ===
-    # PRIOR['VELOC'] = PRIOR['VELOC']
-    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/Trials/TAYAK_NEW/TAYAK_NEW_5.txt'
-    # savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/Trials/TAYAK_NEW/'
-    # skiprows = 40 # 26
-    # plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,skiprows)
-    # # plot.get_Cut_waveforms()
-    # plot.get_waveforms()
+    PRIOR['VELOC'] = PRIOR['VELOC']
+    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/GS_Trial_1.txt'
+    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    skiprows = 40 # 26
+    plot = Plot_waveforms(BW_obs,path_txt,savedir,PRIOR,skiprows)
+    # plot.get_Cut_waveforms()
+    plot.get_waveforms()
 
 if __name__ == '__main__':
     main()

@@ -74,11 +74,11 @@ class Plot_waveforms:
         p_time_array = np.arange(len(self.BW_obs.P_stream.traces[0].data)) * delta
         s_time_array = np.arange(len(self.BW_obs.S_stream.traces[0].data)) * delta
 
-        start_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp - 5) / delta)
-        end_P = int((self.BW_obs.start_P.timestamp - self.otime.timestamp + 35) / delta)
+        start_P = 0# int((self.BW_obs.start_P.timestamp - self.otime.timestamp - 5) / delta)
+        end_P = len(self.BW_obs.P_stream.traces[0].data)#int((self.BW_obs.start_P.timestamp - self.otime.timestamp + 35) / delta)
 
-        start_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 20) / delta)
-        end_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 30) / delta)
+        start_S = 0#int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 20) / delta)
+        end_S = len(self.BW_obs.S_stream.traces[0].data)#int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 30) / delta)
 
         ax1 = plt.subplot2grid((5, 1), (0, 0))
         ax2 = plt.subplot2grid((5, 1), (1, 0))
@@ -86,7 +86,7 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 100
+        n_lowest = 10
         lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         lowest_misfits = self.df['Total_misfit'].values[lowest_indices]
         depths_inds = self.df['Depth'].values.argsort()
@@ -105,7 +105,7 @@ class Plot_waveforms:
                                           strike=strike[i], dip=dip[i], rake=rake[i],
                                           time=self.otime, M0=M0[i])
 
-            BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime, self.prior['npts'])
+            BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime)
 
             P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, int(P_shift[i]))
             #
@@ -158,13 +158,13 @@ class Plot_waveforms:
         xmin, xmax = ax1.get_xlim()
         ax1.text(xmax - 5, ymin / 1.7, "P-Z", fontsize=20, color='b')
         ## Plot litte pp and sp
-        P_time =  BW_syn.get_P(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        ax1.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-                   label='P in best fitting model')
-        sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
-        pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
+        # P_time =  BW_syn.get_P(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        # ax1.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
+        #            label='P in best fitting model')
+        # sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        # ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
+        # pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        # ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
         ax1.legend()
 
         ax2.plot(p_time_array[start_P:end_P], self.normalize(self.BW_obs.P_stream.traces[1].data[start_P:end_P]), 'b')
@@ -173,10 +173,10 @@ class Plot_waveforms:
         xmin, xmax = ax2.get_xlim()
         ax2.text(xmax - 5, ymin / 1.7, "P-R", fontsize=20, color='b')
         ## Plot litte pp and sp
-        ax2.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-                   label='P in best fitting model')
-        ax2.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
-        ax2.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
+        # ax2.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
+        #            label='P in best fitting model')
+        # ax2.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
+        # ax2.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
 
         ax3.plot(s_time_array[start_S:end_S], self.normalize(self.BW_obs.S_stream.traces[0].data[start_S:end_S]), 'b')
         # ax3.plot( BW_obs.S_stream.traces[0].data, 'b', linewidth = 0.1)

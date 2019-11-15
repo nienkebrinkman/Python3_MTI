@@ -40,24 +40,26 @@ def main():
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
     path_to_file = directory + 'Fixed_1.txt'
-    path_to_file_BBB = directory+ 'Fixed_1_BBB.txt'
+    path_to_file_BBB = directory+ 'S.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
     skiprows = 40#26 # 40
     column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
                     'bw_tot', 'Shift_S', 'Shift_P', 'accept']
-    burnin = 2000
+    burnin = 0
 
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
     strike, dip, rake = aux_plane(np.mean(File[:,2]), np.mean(File[:,3]), np.mean(File[:,4]))
+
+    # strike, dip, rake = aux_plane(183, 55, -146)
     # real_v = np.array([None,None, strike, dip, rake, None])
     # real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
     real_v = None
 
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    result.get_BBB(filepath=path_to_file_BBB, savename=savename, directory=directory, skiprows=skiprows,
+    result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                    column_names=column_names,  burnin=burnin,real_v=real_v)
 
     result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
@@ -406,11 +408,13 @@ class Post_processing_sdr:
         fig = plt.figure(figsize=(25, 6))
         row = 0
 
-
+        n_lowest = 200
+        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
 
         ax1 = plt.subplot2grid((1, 3), (0, 0))
-        bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
-        plt.hist(df_select['Strike'][burnin:], bins= 80, alpha=0.8)
+        # bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
+        # plt.hist(df_select['Strike'][burnin:], bins= 80, alpha=0.8)
+        plt.hist(df_select['Strike'][lowest_indices], bins= 80, alpha=0.8, label='Lowest Misfit')
 
         ymin, ymax = ax1.get_ylim()
         if real_v is not None:
@@ -428,7 +432,8 @@ class Post_processing_sdr:
 
         ax2 = plt.subplot2grid((1, 3), (0, 1))
         bin = int(90 * (len(df_select['Dip'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Dip'][burnin:]))))
-        plt.hist(df_select['Dip'][burnin:], bins=80, alpha=0.8)
+        # plt.hist(df_select['Dip'][burnin:], bins=80, alpha=0.8)
+        plt.hist(df_select['Dip'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
 
         ymin, ymax = ax2.get_ylim()
         if real_v is not None:
@@ -447,7 +452,8 @@ class Post_processing_sdr:
 
         ax3 = plt.subplot2grid((1, 3), (0, 2))
         bin = int(360 * (len(df_select['Rake'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Rake'][burnin:]))))
-        plt.hist(df_select['Rake'][burnin:], bins=80, alpha=0.8)
+        # plt.hist(df_select['Rake'][burnin:], bins=80, alpha=0.8)
+        plt.hist(df_select['Rake'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
@@ -461,7 +467,7 @@ class Post_processing_sdr:
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
         plt.tight_layout()
-
+        # plt.legend(loc='upper right', fontsize=20)
         # plt.show()
         plt.savefig(dir + '/Trace_fault.pdf')
 
@@ -542,6 +548,7 @@ class Post_processing_sdr:
 
         ax1 = plt.subplot2grid((1, 4), (0, 0))
         plt.plot(lowest_strike,lowest_misfits,'bo')
+        # plt.plot(df['Strike'].values,df['Total_misfit'].values,'bo')
 
         ymin, ymax = ax1.get_ylim()
         if real_v is not None:
@@ -559,6 +566,7 @@ class Post_processing_sdr:
 
         ax2 = plt.subplot2grid((1, 4), (0, 1))
         plt.plot(lowest_dip,lowest_misfits,'bo')
+        # plt.plot(df['Dip'].values,df['Total_misfit'].values,'bo')
 
         ymin, ymax = ax2.get_ylim()
         if real_v is not None:
@@ -577,6 +585,7 @@ class Post_processing_sdr:
 
         ax3 = plt.subplot2grid((1, 4), (0, 2))
         plt.plot(lowest_rake,lowest_misfits,'bo')
+        # plt.plot(df['Rake'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
@@ -594,6 +603,7 @@ class Post_processing_sdr:
 
         ax4 = plt.subplot2grid((1, 4), (0, 3))
         plt.plot(lowest_depth,lowest_misfits,'bo')
+        # plt.plot(df['Depth'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Depth')
@@ -873,7 +883,7 @@ class Post_processing_sdr:
                 stream.close()
                 data = data_file['data']
         else:
-            data = np.loadtxt(filepath, delimiter=',', skiprows=0)
+            data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
 
 
         df = pd.DataFrame(data, columns=column_names)
@@ -890,7 +900,11 @@ class Post_processing_sdr:
         dip = df['Dip']
         rake = df['Rake']
 
-        for i in range(0, len(strike)):
+        n_lowest = 10
+        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+
+        for v,i in enumerate(lowest_indices):
+        # for i in range(0, len(strike)):
 
             b = beach(fm=[strike[i], dip[i], rake[i]],
                       width=200, linewidth=0, facecolor='b',
