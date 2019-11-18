@@ -44,6 +44,12 @@ class Plot_waveforms:
         self.param['Post_P'] = float(content[18].strip('\n').split(':')[-1])
         self.param['Post_S'] = float(content[20].strip('\n').split(':')[-1])
 
+        self.param['Taper_obs'] = bool(float(content[30].strip('\n').split(':')[-1]))
+        self.param['Taper_syn'] = bool(float(content[32].strip('\n').split(':')[-1]))
+        self.param['Zero_Phase'] = bool(float(content[34].strip('\n').split(':')[-1]))
+        # self.param['Zero_Phase'] = False
+        self.param['Order'] = int(content[36].strip('\n').split(':')[-1])
+
 
     def get_waveforms(self):
         # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
@@ -66,7 +72,7 @@ class Plot_waveforms:
 
         seis = Get_Seismogram(self.prior)
         BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = self.prior['P_HP'], P_LP= self.prior['P_LP'], S_HP =  self.prior['S_HP'], S_LP= self.prior['S_LP'], Pre_P=self.param['Pre_P'],
-                              Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'])
+                              Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'],zero_phase=self.param['Zero_Phase'],Order=self.param['Order'],Taper=self.param['Taper_syn'])
 
 
         fig = plt.figure(figsize=(10, 10))
@@ -86,17 +92,17 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 10
+        n_lowest = 100
         lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         lowest_misfits = self.df['Total_misfit'].values[lowest_indices]
         depths_inds = self.df['Depth'].values.argsort()
         depths = self.df['Depth'].values[depths_inds]
         # depths_used = np.array([depths_inds[0],depths_inds[20],depths_inds[33],depths_inds[73],depths_inds[7000],15602,20010])
 
-        # for i in np.arange(len(epi) - 100, len(epi), 1):
+        # for i in np.arange(len(epi) - 10, len(epi), 1):
         for v,i in enumerate(lowest_indices):
         # for v,i in enumerate(depths_used):
-        # for i in np.arange(1):
+        # for i in np.arange(0,2):
             dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
                                                                            azi1=self.prior['baz'], a12=epi[i],
                                                                            outmask=1929)

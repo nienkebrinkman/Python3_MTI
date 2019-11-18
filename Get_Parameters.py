@@ -115,6 +115,11 @@ class Get_Parameters:
         PRIOR['S_LP'] = 1.0/ Param['FILTER']['S_LP']
         PRIOR['S_HP'] = 1.0/ Param['FILTER']['S_HP']
 
+        PRIOR['Taper_obs'] = Param['FILTER']['Taper_obs']
+        PRIOR['Taper_syn'] = Param['FILTER']['Taper_syn']
+        PRIOR['Zero_Phase'] = Param['FILTER']['Zero_Phase']
+        PRIOR['Order'] = Param['FILTER']['Order']
+
         # = Pick information in seconds =
         PRIOR['Pre_P'] = Param['WINDOW']['Pre_P']
         PRIOR['Pre_S'] = Param['WINDOW']['Pre_S']

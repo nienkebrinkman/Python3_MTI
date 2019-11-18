@@ -39,12 +39,12 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'Fixed_1.txt'
+    path_to_file = directory + 'GS_Trial_1_No_ZP.txt'
     path_to_file_BBB = directory+ 'S.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows = 40#26 # 40
+    skiprows = 48#26 # 40
     column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
                     'bw_tot', 'Shift_S', 'Shift_P', 'accept']
     burnin = 0

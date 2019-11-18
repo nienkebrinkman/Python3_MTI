@@ -47,9 +47,10 @@ class Misfit:
 
             if plot:
                 s_syn_shift_obspy = self.shift(s_syn[i].data, shift_centered)
-                time_array = np.arange(len(s_obs[i].data)) * delta
+                if i == 0:
+                    time_array = np.arange(len(s_obs[i].data)) * delta
                 start = 0#500#int((p_start_obs.timestamp - or_time.timestamp - 10) / delta)
-                end = len(s_syn_shift_obspy) #int((p_start_obs.timestamp  - or_time.timestamp+ 30) / delta)
+                end = len(s_syn_shift_obspy) + 500#int((p_start_obs.timestamp  - or_time.timestamp+ 30) / delta)
 
                 ax1 = plt.subplot2grid((5, 1), (i+2, 0))
 
@@ -100,9 +101,11 @@ class Misfit:
             if plot:
                 p_syn_shift_obspy = self.shift(p_syn[i].data, shift_centered)
                 start = 0#500#int((p_start_obs.timestamp - or_time.timestamp - 10) / delta)
-                end = len(p_syn_shift_obspy) #int((p_start_obs.timestamp  - or_time.timestamp+ 30) / delta)
+                end = len(p_syn_shift_obspy) +500#int((p_start_obs.timestamp  - or_time.timestamp+ 30) / delta)
                 delta = p_obs[i].stats.delta
-                time_array = np.arange(len_P_obs) * delta
+                if i == 0:
+                    time_array = np.arange(len(p_obs[i].data)) * delta
+                # time_array = np.arange(len_P_obs) * delta
 
                 ax1 = plt.subplot2grid((5, 1), (i, 0))
                 plt.plot(time_array[start:end],self.normalize(p_obs[i][start:end]),'b', label = 'Observed')

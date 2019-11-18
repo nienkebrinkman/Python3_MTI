@@ -5,7 +5,7 @@ import numpy as np
 import obspy
 
 class Cut_windows:
-    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP,Pre_P,Pre_S,Post_P,Post_S):
+    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP,Pre_P,Pre_S,Post_P,Post_S, zero_phase = True,Order = 4, Taper = True):
         self.veloc_model = veloc_model_taup
         self.P_HP = P_HP
         self.P_LP = P_LP
@@ -15,6 +15,9 @@ class Cut_windows:
         self.Pre_S = Pre_S
         self.Post_P = Post_P
         self.Post_S = Post_S
+        self.zero_phase = zero_phase
+        self.Taper = Taper
+        self.Order = Order
 
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
@@ -58,8 +61,17 @@ class Cut_windows:
 
         for i, trace in enumerate(stream.traces):
             dt = trace.meta.delta
-            trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
-            trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+
+
+
+
+            if self.zero_phase:
+                trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True, corners = self.Order)
+                trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True, corners = self.Order)
+            else:
+                trace.filter('highpass', freq=1. / (end_P - self.start_P), corners = self.Order)
+                trace.filter('highpass', freq=1. / (end_S - self.start_S), corners = self.Order)
+
 
             # Apply a filter with the length of the window
 
@@ -73,10 +85,17 @@ class Cut_windows:
             start_s = dt * 500
 
             # === Taper the data ===
-            S_trace.taper(0.05, 'hann')
-            P_trace.taper(0.05, 'hann')
+            if self.Taper:
+                S_trace.taper(0.05, 'hann')
+                P_trace.taper(0.05, 'hann')
+
+
+            # # === Apply filters ===
+            # S_trace = self.Filter(S_trace, HP=self.S_HP, LP=self.S_LP)
+            # P_trace = self.Filter(P_trace, HP=self.P_HP, LP=self.P_LP)
 
             if 'T' in trace.stats.channel:
+
                 total_s_trace = Trace(np.zeros(npts_s),
                                       header={"starttime": self.start_S - start_s, 'delta': trace.stats.delta,
                                               "station": trace.stats.station,
@@ -105,7 +124,10 @@ class Cut_windows:
                                                                                        sanity_checks=True)
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
-            # === Apply filters ===
+            self.S_stream = S_stream
+            self.P_stream = P_stream
+
+            # # === Apply filters ===
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
 
@@ -126,8 +148,13 @@ class Cut_windows:
 
         for i, trace in enumerate(stream.traces):
             dt = trace.meta.delta
-            trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True)
-            trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True)
+
+            if self.zero_phase:
+                trace.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True, corners = self.Order)
+                trace.filter('highpass', freq=1. / (end_S - self.start_S), zerophase=True, corners = self.Order)
+            else:
+                trace.filter('highpass', freq=1. / (end_P - self.start_P), corners = self.Order)
+                trace.filter('highpass', freq=1. / (end_S - self.start_S), corners = self.Order)
 
             # Apply a filter with the length of the window
 
@@ -141,8 +168,14 @@ class Cut_windows:
             start_s = dt * 500
 
             # === Taper the data ===
-            S_trace.taper(0.05,'hann')
-            P_trace.taper(0.05,'hann')
+            if self.Taper:
+                S_trace.taper(0.05, 'hann')
+                P_trace.taper(0.05, 'hann')
+
+
+            # # === Apply filters ===
+            # S_trace = self.Filter(S_trace, HP=self.S_HP, LP=self.S_LP)
+            # P_trace = self.Filter(P_trace, HP=self.P_HP, LP=self.P_LP)
 
             if 'T' in trace.stats.channel:
                 total_s_trace = Trace(np.zeros(npts_s),
@@ -174,13 +207,20 @@ class Cut_windows:
                 P_stream.append(total_p_trace)
             S_stream.append(total_s_trace)
 
-            # === Apply filters ===
+            self.S_stream = S_stream
+            self.P_stream = P_stream
+
+            # # === Apply filters ===
             self.S_stream = self.Filter(S_stream, HP=self.S_HP, LP=self.S_LP)
             self.P_stream = self.Filter(P_stream, HP=self.P_HP, LP=self.P_LP)
 
     def Filter(self, stream, HP, LP):
-        stream.filter('highpass', freq= HP, zerophase=True)
-        stream.filter('lowpass' , freq=LP, zerophase=True)
+        if self.zero_phase:
+            stream.filter('highpass', freq= HP, zerophase=True, corners = self.Order)
+            stream.filter('lowpass' , freq=LP, zerophase=True, corners = self.Order)
+        else:
+            stream.filter('highpass', freq= HP, corners = self.Order)
+            stream.filter('lowpass' , freq=LP, corners = self.Order)
         return stream
 
 

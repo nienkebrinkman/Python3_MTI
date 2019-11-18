@@ -233,6 +233,10 @@ class MCMC:
             file_name.write("P_HP:%.2f\n\r" % self.prior['P_HP'])  #
             file_name.write("S_LP:%.2f\n\r" % self.prior['S_LP'])  #
             file_name.write("S_HP:%.2f\n\r" % self.prior['S_HP'])  #
+            file_name.write("Taper_obs:%5i\n\r" % self.prior['Taper_obs'])  #
+            file_name.write("Taper_syn:%5i\n\r" % self.prior['Taper_syn'])  #
+            file_name.write("Zero_phase:%%5i\n\r" % self.prior['Zero_phase'])  #
+            file_name.write("Order:%5i\n\r" % self.prior['Order'])  #
             file_name.write("amount samples:%i\n\r" % self.prior['sample_number'])  #
             file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
             file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #
