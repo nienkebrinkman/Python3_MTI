@@ -39,7 +39,7 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'GS_Trial_1_No_ZP.txt'
+    path_to_file = directory + 'GS_4.txt'
     path_to_file_BBB = directory+ 'S.txt'
 
     savename = 'Trials'
@@ -410,6 +410,9 @@ class Post_processing_sdr:
 
         n_lowest = 200
         lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+        strike, dip, rake = aux_plane(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
+        print(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
+        print(strike,dip,rake)
 
         ax1 = plt.subplot2grid((1, 3), (0, 0))
         # bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
@@ -417,6 +420,8 @@ class Post_processing_sdr:
         plt.hist(df_select['Strike'][lowest_indices], bins= 80, alpha=0.8, label='Lowest Misfit')
 
         ymin, ymax = ax1.get_ylim()
+        plt.vlines(df_select['Strike'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
             plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
@@ -436,6 +441,8 @@ class Post_processing_sdr:
         plt.hist(df_select['Dip'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
 
         ymin, ymax = ax2.get_ylim()
+        plt.vlines(df_select['Dip'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
             plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
@@ -455,6 +462,8 @@ class Post_processing_sdr:
         # plt.hist(df_select['Rake'][burnin:], bins=80, alpha=0.8)
         plt.hist(df_select['Rake'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
         ymin, ymax = ax3.get_ylim()
+        plt.vlines(df_select['Rake'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
             plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
@@ -467,7 +476,7 @@ class Post_processing_sdr:
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
         plt.tight_layout()
-        # plt.legend(loc='upper right', fontsize=20)
+        plt.legend(loc='upper right', fontsize=20)
         # plt.show()
         plt.savefig(dir + '/Trace_fault.pdf')
 
