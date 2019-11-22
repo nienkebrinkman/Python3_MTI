@@ -12,22 +12,24 @@ import matplotlib.image as mpimg
 import io
 import matplotlib.gridspec as gridspec
 import obspy
-from obspy.core.stream import Trace,Stream
+from obspy.core.stream import Trace, Stream
+from matplotlib.ticker import FuncFormatter
 
 from Get_Seismogram import Get_Seismogram
 from Cut_windows import Cut_windows
 from Misfit import Misfit
 
+
 class Plot_waveforms:
-    def __init__(self,BW_obs,path_txt_inversion,save_directory,PRIOR,skiprows=26):
+    def __init__(self, BW_obs, path_txt_inversion, save_directory, PRIOR, skiprows=26):
         self.dir = save_directory
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
 
-
-        self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake","M0","Total_misfit","p_z","p_r","s_z","s_r","s_t",'bw_tot','Shift_S','Shift_P','accept']
+        self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r",
+                             "s_t", 'bw_tot', 'Shift_S', 'Shift_P', 'accept']
         data = np.loadtxt(path_txt_inversion, delimiter=',', skiprows=skiprows)
-        self.df = pd.DataFrame(data,columns=self.column_names)
+        self.df = pd.DataFrame(data, columns=self.column_names)
         self.BW_obs = BW_obs
         self.prior = PRIOR
         self.otime = PRIOR['origin_time']
@@ -39,9 +41,8 @@ class Plot_waveforms:
         self.param['S_HP'] = float(content[28].strip('\n').split(':')[-1])
         self.param['S_LP'] = float(content[26].strip('\n').split(':')[-1])
 
-
         self.param['Pre_P'] = float(content[14].strip('\n').split(':')[-1])
-        self.param['Pre_S'] =  float(content[16].strip('\n').split(':')[-1])
+        self.param['Pre_S'] = float(content[16].strip('\n').split(':')[-1])
         self.param['Post_P'] = float(content[18].strip('\n').split(':')[-1])
         self.param['Post_S'] = float(content[20].strip('\n').split(':')[-1])
 
@@ -51,14 +52,12 @@ class Plot_waveforms:
         # self.param['Zero_Phase'] = False
         self.param['Order'] = int(content[36].strip('\n').split(':')[-1])
 
-
-    def get_waveforms(self, Norm = True):
+    def get_waveforms(self, Norm=True):
         # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
         #
         # ax_bb.set_xticks([])
         # ax_bb.set_yticks([])
         # ax_bb.axis('off')
-
 
         epi = self.df['Epi']
         depth = self.df['Depth']
@@ -70,31 +69,21 @@ class Plot_waveforms:
         P_shift = self.df['Shift_P']
         S_shift = self.df['Shift_S']
 
-
         seis = Get_Seismogram(self.prior)
-        BW_syn = Cut_windows(self.prior['VELOC_taup'],P_HP = self.prior['P_HP'], P_LP= self.prior['P_LP'], S_HP =  self.prior['S_HP'], S_LP= self.prior['S_LP'], Pre_P=self.param['Pre_P'],
-                              Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'],zero_phase=self.param['Zero_Phase'],Order=self.param['Order'],Taper=self.param['Taper_syn'])
-
+        BW_syn = Cut_windows(self.prior['VELOC_taup'], P_HP=self.prior['P_HP'], P_LP=self.prior['P_LP'],
+                             S_HP=self.prior['S_HP'], S_LP=self.prior['S_LP'], Pre_P=self.param['Pre_P'],
+                             Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'],
+                             zero_phase=self.param['Zero_Phase'], Order=self.param['Order'],
+                             Taper=self.param['Taper_syn'], Taper_len=self.param['Taper_len'],
+                             Zero_len=self.param['Zero_len'])
 
         self.BW_obs.original.trim(self.prior['origin_time'])
         self.BW_obs.P_original.trim(self.prior['origin_time'])
         self.BW_obs.S_original.trim(self.prior['origin_time'])
 
-
-        fig = plt.figure(figsize=(10, 10))
+        fig = plt.figure(figsize=(10, 13))
         delta = self.BW_obs.P_stream.traces[0].meta.delta
         dt = delta
-        p_time_array = np.arange(len(self.BW_obs.P_stream.traces[0].data)) * delta
-        s_time_array = np.arange(len(self.BW_obs.S_stream.traces[0].data)) * delta
-
-        start_P = 0# int((self.BW_obs.start_P.timestamp - self.otime.timestamp - 5) / delta)
-        end_P = len(self.BW_obs.P_stream.traces[0].data)#int((self.BW_obs.start_P.timestamp - self.otime.timestamp + 35) / delta)
-
-        start_S = 0#int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 20) / delta)
-        end_S = len(self.BW_obs.S_stream.traces[0].data)#int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 30) / delta)
-
-        xlim_min = 50
-        xlim_max = 300
 
         ax1 = plt.subplot2grid((5, 1), (0, 0))
         ax2 = plt.subplot2grid((5, 1), (1, 0))
@@ -102,7 +91,7 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 10
+        n_lowest = 1
         lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         lowest_misfits = self.df['Total_misfit'].values[lowest_indices]
         depths_inds = self.df['Depth'].values.argsort()
@@ -110,12 +99,13 @@ class Plot_waveforms:
         # depths_used = np.array([depths_inds[0],depths_inds[20],depths_inds[33],depths_inds[73],depths_inds[7000],15602,20010])
 
         # for i in np.arange(len(epi) - 10, len(epi), 1):
-        for v,i in enumerate(lowest_indices):
-        # for v,i in enumerate(depths_used):
-        # for i in np.arange(0,2):
-            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
-                                                                           azi1=self.prior['baz'], a12=epi[i],
-                                                                           outmask=1929)
+        for v, i in enumerate(lowest_indices):
+            # for v,i in enumerate(depths_used):
+            # for i in np.arange(0,2):
+            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
+                                                                                     lon1=self.prior['lo_r'],
+                                                                                     azi1=self.prior['baz'], a12=epi[i],
+                                                                                     outmask=1929)
 
             st_syn = seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth[i],
                                           strike=strike[i], dip=dip[i], rake=rake[i],
@@ -127,218 +117,52 @@ class Plot_waveforms:
             mis = Misfit()
             Xi_bw, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.otime, False)
 
+            ax1 = self.part_of_waveform(ax1, BW_syn.P_stream.traces[0].data, int(time_shift[1]), Norm=Norm)
+            ax2 = self.part_of_waveform(ax2, BW_syn.P_stream.traces[1].data, int(P_shift[i]), Norm=Norm)
+            ax3 = self.part_of_waveform(ax3, BW_syn.S_stream.traces[0].data, int(S_shift[i]), Norm=Norm)
+            ax4 = self.part_of_waveform(ax4, BW_syn.S_stream.traces[1].data, int(S_shift[i]), Norm=Norm)
+            ax5 = self.part_of_waveform(ax5, BW_syn.S_stream.traces[2].data, int(S_shift[i]), Norm=Norm)
 
+        def Time_Conv(x, pos):
+            'The two args are the value and tick position'
+            return t[int(x)]
 
-            ## PZ
+        formatter = FuncFormatter(Time_Conv)
 
-            x = np.arange(len(BW_syn.original.traces[0])) * BW_syn.original.traces[0].meta.delta
-            x_cut = x[BW_syn.or_P_len - 500:BW_syn.or_P_len + BW_syn.P_len + 500]
-            P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, int(P_shift[i]))
+        t = np.linspace(self.BW_obs.or_P_len * dt - self.BW_obs.Pre_P - self.param['Zero_len'] * dt,
+                        self.BW_obs.or_P_len * dt + self.BW_obs.Post_P + self.param['Zero_len'] * dt, len(self.BW_obs.P_stream.traces[0]))
+        P_time = BW_syn.get_P(epi[lowest_indices[0]], depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
 
-            P_shift_original = self.shift(BW_syn.original.traces[0].data, int(P_shift[i]))
-            P_shift_original = P_shift_original[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max]
+        ax1 = self.add_observed(ax1, self.BW_obs.P_original.traces[0].data, self.BW_obs.P_stream.traces[0].data,
+                                self.BW_obs.or_P_len, self.BW_obs.P_len, 'PZ', None, 'P', Norm)
+        ax1.set_xlim(400, 800)
+        ax1.xaxis.set_major_formatter(formatter)
 
-            if Norm == True:
-                # ax1.plot(x[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max], self.normalize(P_shift_original), 'g', alpha = 0.2, linewidth = 1)
-                ax1.plot(self.normalize(P_shift_array), 'r', linewidth=0.1)
-            else:
-                ax1.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
+        ax2 = self.add_observed(ax2, self.BW_obs.P_original.traces[1].data, self.BW_obs.P_stream.traces[1].data,
+                                self.BW_obs.or_P_len, self.BW_obs.P_len, 'PR', None, 'P', Norm)
+        ax2.set_xlim(400, 800)
+        ax2.xaxis.set_major_formatter(formatter)
 
-            # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
-            ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-            ax1.tick_params(axis='x', labelsize=18)
-            ax1.tick_params(axis='y', labelsize=18)
-            # ax1.set_xlim((BW_syn.or_P_len - xlim_min) * dt, (BW_syn.or_P_len + xlim_max) * dt)
-
-            ## PR:
-            x = np.arange(len(BW_syn.original.traces[1])) * BW_syn.original.traces[1].meta.delta
-            x_cut = x[BW_syn.or_P_len - 500:BW_syn.or_P_len + BW_syn.P_len + 500]
-            P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, int(P_shift[i]))
-
-            P_shift_original = self.shift(BW_syn.original.traces[1].data, int(P_shift[i]))
-            # P_shift_original = P_shift_original[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max]
-
-            if Norm == True:
-                # ax2.plot(x[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max], self.normalize(P_shift_original), 'g', alpha = 0.2, linewidth = 1)
-                ax2.plot(self.normalize(P_shift_array), 'r', linewidth=0.1)
-            else:
-                ax2.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
-
-            # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
-            ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-            ax2.tick_params(axis='x', labelsize=18)
-            ax2.tick_params(axis='y', labelsize=18)
-            ax2.set_xlim((BW_syn.or_P_len - xlim_min) * dt, (BW_syn.or_P_len + xlim_max) * dt)
-
-            ## SZ:
-            x = np.arange(len(BW_syn.original.traces[0])) * BW_syn.original.traces[0].meta.delta
-            x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + BW_syn.S_len + 500]
-            S_shift_array = self.shift(BW_syn.S_stream.traces[0].data, int(S_shift[i]))
-            S_shift_original = self.shift(BW_syn.original.traces[0].data, int(S_shift[i]))
-            # S_shift_original = S_shift_original[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max]
-
-            if Norm == True:
-                # ax3.plot(x[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max], self.normalize(S_shift_original), 'g', alpha = 0.2, linewidth = 1)
-                ax3.plot(self.normalize(S_shift_array), 'r', linewidth=0.1)
-            else:
-                ax3.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
-            # ax3.plot(S_shift_array, 'r', linewidth = 0.1)
-            ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-            ax3.tick_params(axis='x', labelsize=18)
-            ax3.tick_params(axis='y', labelsize=18)
-            # plt.tight_layout()
-            # ax3.set_xlim((BW_syn.or_S_len - xlim_min) * dt, (BW_syn.or_S_len + xlim_max) * dt)
-
-            ## SR:
-            x = np.arange(len(BW_syn.original.traces[1])) * BW_syn.original.traces[1].meta.delta
-            x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + BW_syn.S_len + 500]
-            S_shift_array = self.shift(BW_syn.S_stream.traces[1].data, int(S_shift[i]))
-            S_shift_original = self.shift(BW_syn.original.traces[1].data, int(S_shift[i]))
-            # S_shift_original = S_shift_original[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max]
-            if Norm == True:
-                # ax4.plot(x[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max], self.normalize(S_shift_original), 'g', alpha = 0.2, linewidth = 1)
-                ax4.plot(self.normalize(S_shift_array), 'r', linewidth=0.1)
-            else:
-                ax4.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
-            # ax3.plot(S_shift_array, 'r', linewidth = 0.1)
-            ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-            ax4.tick_params(axis='x', labelsize=18)
-            ax4.tick_params(axis='y', labelsize=18)
-            # plt.tight_layout()
-            # ax4.set_xlim((BW_syn.or_S_len - xlim_min) * dt, (BW_syn.or_S_len + xlim_max) * dt)
-
-            ## ST:
-            x = np.arange(len(BW_syn.original.traces[2])) * BW_syn.original.traces[2].meta.delta
-            x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + BW_syn.S_len + 500]
-            S_shift_array = self.shift(BW_syn.S_stream.traces[2].data, int(S_shift[i]))
-            S_shift_original = self.shift(BW_syn.original.traces[2].data, int(S_shift[i]))
-            # S_shift_original = S_shift_original[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max]
-
-            if Norm == True:
-                # ax5.plot(x[BW_syn.or_S_len - xlim_min:BW_syn.or_S_len + xlim_max], self.normalize(S_shift_original), 'g', alpha = 0.2, linewidth = 1)
-                ax5.plot(self.normalize(S_shift_array), 'r', linewidth=0.1)
-            else:
-                ax5.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
-            # ax3.plot(S_shift_array, 'r', linewidth = 0.1)
-            ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-            ax5.tick_params(axis='x', labelsize=18)
-            ax5.tick_params(axis='y', labelsize=18)
-            # plt.tight_layout()
-            # ax5.set_xlim((BW_syn.or_S_len - xlim_min) * dt, (BW_syn.or_S_len + xlim_max) * dt)
-
-        ## PZ Observed
-        x = np.arange(len(BW_syn.original.traces[0])) * dt
-        x_cut = x[BW_syn.or_P_len - 500:BW_syn.or_P_len + self.BW_obs.P_len + 500]
-        if Norm == True:
-            ax1.plot(self.normalize(self.BW_obs.P_original.traces[0].data[self.BW_obs.or_P_len - 500:self.BW_obs.or_P_len  + self.BW_obs.P_len + 500]), 'g',  linewidth = 0.5, alpha = 0.7)
-            ax1.plot(self.normalize(self.BW_obs.P_stream.traces[0].data), 'b')
-        else:
-            ax1.plot(x_cut,self.BW_obs.P_stream.traces[0].data,'b')
-        ymin, ymax = ax1.get_ylim()
-        xmin, xmax = ax1.get_xlim()
-        ax1.text(xmax - 5, ymin / 1.7, "P-Z", fontsize=20, color='b')
-        ## Plot litte pp and sp
-        P_time =  BW_syn.get_P(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        ax1.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-                   label='P in best fitting model')
-        # ax1.vlines(self.BW_obs.or_P_len * dt + self.BW_obs.Pre_P * dt, ymin=ymin, ymax=ymax, colors='b', linestyles='dashdot', linewidth=3,
-        #            label='P observed pick')
-        # sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        # ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
-        # pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        # ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
-        # ax1.legend()
-        ax1.set_xlim(400,800)
-
-
-
-        ## PR Observed
-        x = np.arange(len(BW_syn.original.traces[1])) * dt
-        x_cut = x[BW_syn.or_P_len - 500:BW_syn.or_P_len + self.BW_obs.P_len + 500]
-        if Norm == True:
-            ax2.plot(self.normalize(self.BW_obs.P_original.traces[1].data[self.BW_obs.or_P_len - 500:self.BW_obs.or_P_len  + self.BW_obs.P_len + 500]), 'g',  linewidth = 0.5, alpha = 0.7)
-            ax2.plot(self.normalize(self.BW_obs.P_stream.traces[1].data), 'b')
-        else:
-            ax2.plot(x_cut,self.BW_obs.P_stream.traces[1].data,'b')
-        ymin, ymax = ax2.get_ylim()
-        xmin, xmax = ax2.get_xlim()
-        ax2.text(xmax - 5, ymin / 1.7, "P-Z", fontsize=20, color='b')
-        ## Plot litte pp and sp
-        P_time =  BW_syn.get_P(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        ax2.vlines(P_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-                   label='P in best fitting model')
-        # ax1.vlines(self.BW_obs.or_P_len * dt + self.BW_obs.Pre_P * dt, ymin=ymin, ymax=ymax, colors='b', linestyles='dashdot', linewidth=3,
-        #            label='P observed pick')
-        # sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        # ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
-        # pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
-        # ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
-        # ax2.legend()
-        ax2.set_xlim(400,800)
-
-        ## SZ Observed
-        x = np.arange(len(BW_syn.original.traces[0])) * dt
-        x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + self.BW_obs.S_len + 500]
-        if Norm == True:
-            ax3.plot(self.normalize(self.BW_obs.S_original.traces[0].data[self.BW_obs.or_S_len - 500:self.BW_obs.or_S_len  + self.BW_obs.S_len + 500]),
-                     'g',  linewidth=0.5, alpha = 0.7)
-
-            ax3.plot(self.normalize(self.BW_obs.S_stream.traces[0].data), 'b')
-        else:
-            ax3.plot(x_cut, self.BW_obs.S_stream.traces[0].data,'b')
-        ymin, ymax = ax3.get_ylim()
-        xmin, xmax = ax3.get_xlim()
-        ax3.text(xmax - 5, ymin / 1.7, "S-Z", fontsize=20, color='b')
-        ## Plot litte pp and sp
-        S_time =  BW_syn.get_S(epi[lowest_indices[0]],depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
-        # ax3.vlines(S_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-        #            label='S in best fitting model')
-        # ax3.legend()
+        t = np.linspace(self.BW_obs.or_S_len * dt - self.BW_obs.Pre_S - self.param['Zero_len'] * dt,
+                        self.BW_obs.or_S_len * dt + self.BW_obs.Post_S + self.param['Zero_len'] * dt, len(self.BW_obs.S_stream.traces[0]))
+        S_time = BW_syn.get_S(epi[lowest_indices[0]], depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
+        ax3 = self.add_observed(ax3, self.BW_obs.S_original.traces[0].data, self.BW_obs.S_stream.traces[0].data,
+                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'SZ', None, 'S', Norm)
         ax3.set_xlim(300, 1000)
+        ax3.xaxis.set_major_formatter(formatter)
 
-
-        ## SR Observed
-        x = np.arange(len(BW_syn.original.traces[1])) * dt
-        x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + self.BW_obs.S_len + 500]
-        if Norm == True:
-            ax4.plot(self.normalize(self.BW_obs.S_original.traces[1].data[self.BW_obs.or_S_len - 500:self.BW_obs.or_S_len  + self.BW_obs.S_len + 500]),
-                     'g',  linewidth=0.5, alpha = 0.7)
-
-            ax4.plot(self.normalize(self.BW_obs.S_stream.traces[1].data), 'b')
-        else:
-            ax4.plot(x_cut, self.BW_obs.S_stream.traces[1].data,'b')
-        ymin, ymax = ax4.get_ylim()
-        xmin, xmax = ax4.get_xlim()
-        ax4.text(xmax - 5, ymin / 1.7, "S-R", fontsize=20, color='b')
-        ## Plot litte pp and sp
-        # S_time =  BW_syn.get_S(epi[lowest_indices[0]],depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
-        # ax4.vlines(S_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-        #            label='S in best fitting model')
-        # ax4.legend()
+        ax4 = self.add_observed(ax4, self.BW_obs.S_original.traces[1].data, self.BW_obs.S_stream.traces[1].data,
+                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'SR', None, 'S', Norm)
         ax4.set_xlim(300, 1000)
+        ax4.xaxis.set_major_formatter(formatter)
 
-
-        ## ST Observed
-        x = np.arange(len(BW_syn.original.traces[2])) * dt
-        x_cut = x[BW_syn.or_S_len - 500:BW_syn.or_S_len + self.BW_obs.S_len + 500]
-        if Norm == True:
-            ax5.plot(self.normalize(self.BW_obs.S_original.traces[2].data[self.BW_obs.or_S_len - 500:self.BW_obs.or_S_len  + self.BW_obs.S_len + 500]),
-                     'g',  linewidth=0.5, alpha = 0.7)
-
-            ax5.plot(self.normalize(self.BW_obs.S_stream.traces[2].data), 'b')
-        else:
-            ax5.plot(x_cut, self.BW_obs.S_stream.traces[2].data,'b')
-        ymin, ymax = ax5.get_ylim()
-        xmin, xmax = ax5.get_xlim()
-        ax5.text(xmax - 5, ymin / 1.7, "S-T", fontsize=20, color='b')
-        ## Plot litte pp and sp
-        # ax5.vlines(S_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
-        #            label='S in best fitting model')
-        # ax5.legend()
+        ax5 = self.add_observed(ax5, self.BW_obs.S_original.traces[2].data, self.BW_obs.S_stream.traces[2].data,
+                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'ST', None, 'S', Norm)
         ax5.set_xlim(300, 1000)
+        ax5.xaxis.set_major_formatter(formatter)
+        ax5.set_xlabel(self.otime.strftime('From Origin Time: %Y-%m-%dT%H:%M:%S + [sec]'), fontsize=18)
 
-
-        plt.tight_layout()
+        # plt.tight_layout()
 
         # plt.show()
         if Norm == True:
@@ -348,7 +172,7 @@ class Plot_waveforms:
         # plt.show()
         plt.close()
 
-    def part_of_waveform(self, ax,trace_wo_shift, Norm = True):
+    def part_of_waveform(self, ax, trace_wo_shift, Shift, Norm=True):
         """
         :param
         ax = axes
@@ -356,24 +180,52 @@ class Plot_waveforms:
         shift = the shift number
         Norm = True (Normalize) , False (Do not Normalize)
         """
-
-
-        P_shift_array = self.shift(BW_syn.P_stream.traces[0].data, int(P_shift[i]))
-
-        P_shift_original = self.shift(BW_syn.original.traces[0].data, int(P_shift[i]))
-        P_shift_original = P_shift_original[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max]
-
+        P_shift_array = self.shift(trace_wo_shift, int(Shift))
         if Norm == True:
-            # ax1.plot(x[BW_syn.or_P_len - xlim_min:BW_syn.or_P_len + xlim_max], self.normalize(P_shift_original), 'g', alpha = 0.2, linewidth = 1)
             ax.plot(self.normalize(P_shift_array), 'r', linewidth=0.1)
         else:
-            ax.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r', linewidth=0.1)
+            ax.plot(P_shift_array, 'r', linewidth=0.1)
+        ax.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax.tick_params(axis='x', labelsize=18)
+        ax.tick_params(axis='y', labelsize=18)
+        return ax
 
-        # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
-        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax1.tick_params(axis='x', labelsize=18)
-        ax1.tick_params(axis='y', labelsize=18)
-        # ax1.set_xlim((BW_syn.or_P_len - xlim_min) * dt, (BW_syn.or_P_len + xlim_max) * dt)
+    def add_observed(self, ax, original_trace_OBS, cut_trace_OBS, origin_phase_len, len_of_phase, label,
+                     Phase_pick=None, label_phase_pick=None, Norm=True):
+        """
+        :param
+        ax = axes
+        original_trace_OBS = Full observed trace without being cut into window
+        cut_trace_Obs = Cut version of the observed data
+        origin_phase_len = length from origin time to phase arrival minus the defined pre-time (samples)
+        len_of_phase cut = Length from pre to post phase cut (samples)
+        Norm = True (Normalize) , False (Do not Normalize)
+        """
+        start_cut = origin_phase_len - self.param['Zero_len']
+        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len']
+
+        if Norm == True:
+            ax.plot(self.normalize(original_trace_OBS[start_cut:end_cut]), 'g',
+                    linewidth=0.5, alpha=0.7)
+            ax.plot(self.normalize(cut_trace_OBS), 'b')
+        else:
+            ax.plot(original_trace_OBS[start_cut:end_cut], 'g', linewidth=0.5, alpha=0.7)
+            ax.plot(cut_trace_OBS, 'b')
+        ymin, ymax = ax.get_ylim()
+        xmin, xmax = ax.get_xlim()
+        ax.text(xmax - 5, ymin / 1.7, label, fontsize=20, color='b')
+        if Phase_pick is not None:
+            ax.vlines(Phase_pick, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot', linewidth=3,
+                      label='%s in best fitting model' % label_phase_pick)
+            ax.legend()
+        # ax1.vlines(self.BW_obs.or_P_len * dt + self.BW_obs.Pre_P * dt, ymin=ymin, ymax=ymax, colors='b', linestyles='dashdot', linewidth=3,
+        #            label='P observed pick')
+        # sp_time = BW_syn.get_sp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        # ax1.vlines(sp_time, ymin=ymin, ymax=ymax, colors='r', linestyles= 'dotted',linewidth=3, label='sp in best fitting model')
+        # pp_time = BW_syn.get_pp(epi[lowest_indices[0]],depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        # ax1.vlines(pp_time, ymin=ymin, ymax=ymax, colors='r', linestyles='dashed',linewidth=3, label='pp in best fitting model')
+
+        return ax
 
     def get_Cut_waveforms(self):
         epi = self.df['Epi']
@@ -386,12 +238,10 @@ class Plot_waveforms:
         P_shift = self.df['Shift_P']
         S_shift = self.df['Shift_S']
 
-
         seis = Get_Seismogram(self.prior)
 
         stream = self.BW_obs.original
-        BW_P_stream,BW_S_stream , BW_start_P, BW_start_S= self.cut_stream(stream, Manual= True)
-
+        BW_P_stream, BW_S_stream, BW_start_P, BW_start_S = self.cut_stream(stream, Manual=True)
 
         fig = plt.figure(figsize=(10, 10))
         delta = BW_P_stream.traces[0].meta.delta
@@ -411,24 +261,24 @@ class Plot_waveforms:
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
         for i in np.arange(len(epi) - 2, len(epi), 1):
-        # for i in np.arange(100):
-            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
-                                                                           azi1=self.prior['baz'], a12=epi[i],
-                                                                           outmask=1929)
+            # for i in np.arange(100):
+            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
+                                                                                     lon1=self.prior['lo_r'],
+                                                                                     azi1=self.prior['baz'], a12=epi[i],
+                                                                                     outmask=1929)
 
             st_syn = seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth[i],
                                           strike=strike[i], dip=dip[i], rake=rake[i],
                                           time=self.otime, M0=M0[i])
 
-            Syn_P_stream, Syn_S_stream ,  Syn_start_P, Syn_start_S= self.cut_stream(st_syn, epi = epi[i], depth = depth[i])
+            Syn_P_stream, Syn_S_stream, Syn_start_P, Syn_start_S = self.cut_stream(st_syn, epi=epi[i], depth=depth[i])
             # P_shift_array = self.shift(Syn_P_stream.traces[0].data, int(P_shift[i]))
 
-            ax1.plot(p_time_array, self.normalize(Syn_P_stream.traces[0].data), 'r', alpha = 0.2)
-            ax2.plot(p_time_array, self.normalize(Syn_P_stream.traces[1].data), 'r', alpha = 0.2)
-            ax3.plot(s_time_array, self.normalize(Syn_S_stream.traces[0].data), 'r', alpha = 0.2)
-            ax4.plot(s_time_array, self.normalize(Syn_S_stream.traces[1].data), 'r', alpha = 0.2)
-            ax5.plot(s_time_array, self.normalize(Syn_S_stream.traces[2].data), 'r', alpha = 0.2)
-
+            ax1.plot(p_time_array, self.normalize(Syn_P_stream.traces[0].data), 'r', alpha=0.2)
+            ax2.plot(p_time_array, self.normalize(Syn_P_stream.traces[1].data), 'r', alpha=0.2)
+            ax3.plot(s_time_array, self.normalize(Syn_S_stream.traces[0].data), 'r', alpha=0.2)
+            ax4.plot(s_time_array, self.normalize(Syn_S_stream.traces[1].data), 'r', alpha=0.2)
+            ax5.plot(s_time_array, self.normalize(Syn_S_stream.traces[2].data), 'r', alpha=0.2)
 
         ## PLOT OBSERVED
         ax1.plot(p_time_array, self.normalize(BW_P_stream.traces[0].data), 'b')
@@ -437,7 +287,6 @@ class Plot_waveforms:
         ax4.plot(s_time_array, self.normalize(BW_S_stream.traces[1].data), 'b')
         ax5.plot(s_time_array, self.normalize(BW_S_stream.traces[2].data), 'b')
 
-
         plt.tight_layout()
 
         plt.show()
@@ -445,12 +294,11 @@ class Plot_waveforms:
         # plt.show()
         plt.close()
 
-        stream.filter('highpass', freq = self.prior['S_HP'] , zerophase = True)
-        st_syn.filter('highpass', freq = self.prior['S_HP'] , zerophase = True)
+        stream.filter('highpass', freq=self.prior['S_HP'], zerophase=True)
+        st_syn.filter('highpass', freq=self.prior['S_HP'], zerophase=True)
 
-
-        stream.filter('lowpass', freq = self.prior['S_LP'] , zerophase = True)
-        st_syn.filter('lowpass', freq = self.prior['S_LP'] , zerophase = True)
+        stream.filter('lowpass', freq=self.prior['S_LP'], zerophase=True)
+        st_syn.filter('lowpass', freq=self.prior['S_LP'], zerophase=True)
 
         stream.trim(self.prior['origin_time'])
         st_syn.trim(self.prior['origin_time'])
@@ -460,14 +308,13 @@ class Plot_waveforms:
         plt.plot(st_syn.traces[2].data, 'r')
         ymin, ymax = ax1.get_ylim()
         plt.vlines(BW_start_P, ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_P')
-        plt.vlines(Syn_start_P, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_P %.2f' %depth[i])
-        plt.vlines(BW_start_S , ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
-        plt.vlines(Syn_start_S, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label = 'Syn_S %.2f' %depth[i])
+        plt.vlines(Syn_start_P, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Syn_P %.2f' % depth[i])
+        plt.vlines(BW_start_S, ymin=ymin, ymax=ymax, colors='b', linewidth=3, label='Obs_S')
+        plt.vlines(Syn_start_S, ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Syn_S %.2f' % depth[i])
         plt.legend()
         plt.show()
 
-
-    def cut_stream(self,stream, Manual = False, epi = None, depth = None):
+    def cut_stream(self, stream, Manual=False, epi=None, depth=None):
         WINDOWS = Cut_windows(self.prior['VELOC_taup'], P_HP=self.prior['P_HP'], P_LP=self.prior['P_LP'],
                               S_HP=self.prior['S_HP'], S_LP=self.prior['S_LP'], Pre_P=self.prior['Pre_P'],
                               Pre_S=self.prior['Pre_S'], Post_P=self.prior['Post_P'], Post_S=self.prior['Post_S'])
@@ -488,45 +335,42 @@ class Plot_waveforms:
             tt_S = WINDOWS.get_S(epi, depth)
 
             start_P = obspy.UTCDateTime(or_time_sec + tt_P - self.prior['Pre_P'])
-            or_P_len = int((start_P - self.otime)/ stream.traces[0].stats.delta)
+            or_P_len = int((start_P - self.otime) / stream.traces[0].stats.delta)
             start_S = obspy.UTCDateTime(or_time_sec + tt_S - self.prior['Pre_S'])
             or_S_len = int((start_S - self.otime) / stream.traces[0].stats.delta)
 
-
             end_P = obspy.UTCDateTime(or_time_sec + tt_P + self.prior['Post_P'])
             end_S = obspy.UTCDateTime(or_time_sec + tt_S + self.prior['Post_S'])
-
 
         P_stream = Stream()
         S_stream = Stream()
         # BW_stream = Stream()
 
-        for i,trace in enumerate(stream.traces):
+        for i, trace in enumerate(stream.traces):
             # Filter entire trace for P- and S separately.
             trace.filter('highpass', freq=1. / (end_P - start_P), zerophase=True)
             trace.filter('highpass', freq=1. / (end_S - start_S), zerophase=True)
             if i is not 2:
                 P_trace = Trace.slice(trace, start_P, end_P)
-                P_trace.taper(0.05, 'hann') # Taper the data
+                P_trace.taper(0.05, 'hann')  # Taper the data
                 P_len = len(P_trace)
                 npts_p = P_len + 2 * or_P_len
                 P_stream += P_trace
-                P_stream = WINDOWS.Filter(P_stream,self.prior['P_HP'],self.prior['P_LP'])
+                P_stream = WINDOWS.Filter(P_stream, self.prior['P_HP'], self.prior['P_LP'])
             S_trace = Trace.slice(trace, start_S, end_S)
             S_trace.taper(0.05, 'hann')
             S_len = len(S_trace)
             npts_s = S_len + 2 * or_S_len
             S_stream += S_trace
             S_stream = WINDOWS.Filter(S_stream, self.prior['P_HP'], self.prior['P_LP'])
-        return P_stream,S_stream, or_P_len, or_S_len
-
+        return P_stream, S_stream, or_P_len, or_S_len
 
     def normalize(self, v):
         """This function fails when division by zero"""
         normalized_v = v / np.sqrt(np.sum(v ** 2))
         return normalized_v
 
-    def paper_plot(self,real_v):
+    def paper_plot(self, real_v):
         params = {'legend.fontsize': 'x-large',
                   'figure.figsize': (15, 15),
                   'axes.labelsize': 25,
@@ -535,34 +379,32 @@ class Plot_waveforms:
                   'ytick.labelsize': 25}
         pylab.rcParams.update(params)
         df_select = self.df[["Epi", "Depth", "Strike", "Dip", "Rake"]]
-        strike,dip,rake = aux_plane(real_v[2],real_v[3],real_v[4])
+        strike, dip, rake = aux_plane(real_v[2], real_v[3], real_v[4])
 
-
-
-        fig = plt.figure(figsize=(25,6))
+        fig = plt.figure(figsize=(25, 6))
 
         row = 7
         col = 3
-        ax1 = plt.subplot2grid((row,col),(1,0))
-        plt.hist(df_select['Strike'],bins=100, alpha = 0.8)
+        ax1 = plt.subplot2grid((row, col), (1, 0))
+        plt.hist(df_select['Strike'], bins=100, alpha=0.8)
 
         ymin, ymax = ax1.get_ylim()
-        plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3,label = 'Auxiliary plane')
+        plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
         plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         ax1.set_title("Density Strike", color='b', fontsize=25)
         ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
-        ax1.set_ylabel("Posterior marginal" , fontsize=25)
+        ax1.set_ylabel("Posterior marginal", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax1.set_xlim(0,360)
+        ax1.set_xlim(0, 360)
         plt.tight_layout()
 
-        ax2 = plt.subplot2grid((row,col),(1,1))
-        plt.hist(df_select['Dip'],bins=100, alpha = 0.8)
+        ax2 = plt.subplot2grid((row, col), (1, 1))
+        plt.hist(df_select['Dip'], bins=100, alpha=0.8)
         ymin, ymax = ax2.get_ylim()
         plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
-        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3,label='True model')
+        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
         ax2.set_title("Density Dip", color='b', fontsize=25)
         ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
         ax2.xaxis.set_ticks(np.arange(0, 90, 10))
@@ -572,22 +414,22 @@ class Plot_waveforms:
         ax2.set_xlim(0, 90)
         plt.tight_layout()
 
-        ax3 = plt.subplot2grid((row,col),(1,2))
-        plt.hist(df_select['Rake'],bins=100,alpha = 0.8)
+        ax3 = plt.subplot2grid((row, col), (1, 2))
+        plt.hist(df_select['Rake'], bins=100, alpha=0.8)
         ymin, ymax = ax3.get_ylim()
-        plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label = 'Auxiliary plane')
-        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3,label='Fault plane')
+        plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         ax3.set_title("Density Rake", color='b', fontsize=25)
         ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
         ax3.tick_params(axis='x', labelsize=20)
         ax3.tick_params(axis='y', labelsize=20)
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax3.set_xlim(-180, 180)
-        plt.legend(loc = 'upper left',fontsize=20)
+        plt.legend(loc='upper left', fontsize=20)
         plt.tight_layout()
 
-        ax4 = plt.subplot2grid((row,col),(2,1),rowspan= 5)
-        plt.hist(df_select['Depth']/1000,bins=100,alpha=0.8)
+        ax4 = plt.subplot2grid((row, col), (2, 1), rowspan=5)
+        plt.hist(df_select['Depth'] / 1000, bins=100, alpha=0.8)
         ymin, ymax = ax4.get_ylim()
         xmin, xmax = ax4.get_xlim()
         plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
@@ -603,10 +445,10 @@ class Plot_waveforms:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax5 = plt.subplot2grid((row,col),(2,2), rowspan = 5)
-        plt.hist(df_select['Epi'],bins=50,alpha=0.8)
+        ax5 = plt.subplot2grid((row, col), (2, 2), rowspan=5)
+        plt.hist(df_select['Epi'], bins=50, alpha=0.8)
         ymin, ymax = ax5.get_ylim()
-        plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3,label = 'True model')
+        plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
         ax5.set_title("Density Epicentral Distance", color='b', fontsize=20)
         ax5.set_xlabel("N=%i" % (len(df_select['Epi'])), fontsize=20)
         ax5.tick_params(axis='x', labelsize=20)
@@ -615,12 +457,12 @@ class Plot_waveforms:
         # plt.legend(fontsize=20)
         plt.tight_layout()
 
-        ax6 = plt.subplot2grid((row,col),(0,0))
+        ax6 = plt.subplot2grid((row, col), (0, 0))
         Mw = 2.0 / 3.0 * (np.log10(self.df['M0']) - 9.1)
-        plt.hist(Mw,bins=np.arange(4,7,0.05),alpha=0.8)
+        plt.hist(Mw, bins=np.arange(4, 7, 0.05), alpha=0.8)
         ymin, ymax = ax6.get_ylim()
         Mw = self.Scalarmoment2Magnitude(self.prior['M0'])
-        plt.vlines(Mw, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
+        plt.vlines(Mw, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
         ax6.set_title("Density Moment Magnitude", color='b', fontsize=20)
         ax6.set_xlabel("N=%i" % (len(self.df['M0'])), fontsize=18)
         ax6.tick_params(axis='x', labelsize=18)
@@ -629,21 +471,21 @@ class Plot_waveforms:
         # ax6.set_xscale('log')
         # ax6.set_xlim(0e18, 0.5e18 )
         # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
-        plt.legend(loc='upper right',fontsize = 20)
+        plt.legend(loc='upper right', fontsize=20)
         plt.tight_layout()
 
-        ax7 = plt.subplot2grid((row,col),(0,1))
+        ax7 = plt.subplot2grid((row, col), (0, 1))
         # b = beach([real_v[2], real_v[3], real_v[4]], size=200, linewidth=2, facecolor='b')
-        xmin,xmax = ax7.get_xlim()
-        ymin,ymax = ax7.get_ylim()
-        b = beach([real_v[2], real_v[3], real_v[4]], width=100, linewidth=0, facecolor='b',xy=(0.5 * xmax, 0.5* ymax), axes=ax7)
+        xmin, xmax = ax7.get_xlim()
+        ymin, ymax = ax7.get_ylim()
+        b = beach([real_v[2], real_v[3], real_v[4]], width=100, linewidth=0, facecolor='b', xy=(0.5 * xmax, 0.5 * ymax),
+                  axes=ax7)
         ax7.add_collection(b)
         ax7.set_xticks([])
         ax7.set_yticks([])
         ax7.axis('off')
 
-
-        ax8 = plt.subplot2grid((row,col),(0,2))
+        ax8 = plt.subplot2grid((row, col), (0, 2))
         fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
 
         ax_bb.set_xticks([])
@@ -657,7 +499,7 @@ class Plot_waveforms:
         rake = self.df['Rake']
 
         # for i in range(0, len(strike)):
-        for i in range(0, len(strike),10000):
+        for i in range(0, len(strike), 10000):
 
             b = beach(fm=[strike[i], dip[i], rake[i]],
                       width=200, linewidth=0, facecolor='b',
@@ -683,9 +525,8 @@ class Plot_waveforms:
         ax8.axis('off')
         plt.show()
 
-
-        ax9 = plt.subplot2grid((row,col),(2,0))
-        inner = gridspec.GridSpecFromSubplotSpec(5,1,ax9)
+        ax9 = plt.subplot2grid((row, col), (2, 0))
+        inner = gridspec.GridSpecFromSubplotSpec(5, 1, ax9)
 
         epi = self.df['Epi']
         depth = self.df['Depth']
@@ -696,7 +537,6 @@ class Plot_waveforms:
 
         P_shift = self.df['Shift_P']
         S_shift = self.df['Shift_S']
-
 
         seis = Get_Seismogram(self.prior)
         BW_syn = Cut_windows(self.prior['VELOC_taup'])
@@ -711,21 +551,21 @@ class Plot_waveforms:
         start_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp - 50) / delta)
         end_S = int((self.BW_obs.start_S.timestamp - self.otime.timestamp + 100) / delta)
 
-
-        a= plt.subplot2grid((row,col), (2, 0))
-        b= plt.subplot2grid((row,col), (3, 0))
-        c= plt.subplot2grid((row,col), (4, 0))
-        d= plt.subplot2grid((row,col), (5, 0))
-        e= plt.subplot2grid((row,col), (6, 0))
+        a = plt.subplot2grid((row, col), (2, 0))
+        b = plt.subplot2grid((row, col), (3, 0))
+        c = plt.subplot2grid((row, col), (4, 0))
+        d = plt.subplot2grid((row, col), (5, 0))
+        e = plt.subplot2grid((row, col), (6, 0))
         # a = np.where(np.logical_and(epi>=prior['Real_epi'] , epi <= prior['Real_epi']))
         # a = np.where(np.logical_and(epi>=88 -0.5  , epi <= 88 + 0.5))
 
         # for i in range(len(a[0])):
         # for i in np.arange(len(epi) - 100, len(epi), 1):
         for i in np.arange(2):
-            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'], lon1=self.prior['lo_r'],
-                                                                           azi1=self.prior['baz'], a12=epi[i],
-                                                                           outmask=1929)
+            dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(lat1=self.prior['la_r'],
+                                                                                     lon1=self.prior['lo_r'],
+                                                                                     azi1=self.prior['baz'], a12=epi[i],
+                                                                                     outmask=1929)
 
             st_syn = seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth[i],
                                           strike=strike[i], dip=dip[i], rake=rake[i],
@@ -739,7 +579,7 @@ class Plot_waveforms:
             #          label='Synthetic', linewidth = 0.1)
 
             a.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r',
-                     label='Synthetic', linewidth=0.1)
+                   label='Synthetic', linewidth=0.1)
             # ax1.plot( P_shift_array, 'r',  label='Synthetic', linewidth = 0.1)
             a.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             a.tick_params(axis='x', labelsize=18)
@@ -750,7 +590,7 @@ class Plot_waveforms:
 
             P_shift_array = self.shift(BW_syn.P_stream.traces[1].data, -int(P_shift[i]))
             b.plot(p_time_array[start_P:end_P], P_shift_array[start_P:end_P], 'r',
-                     label='Synthetic', linewidth=0.1)
+                   label='Synthetic', linewidth=0.1)
             # ax2.plot(P_shift_array, 'r',label='Synthetic', linewidth = 0.1)
             b.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
             b.tick_params(axis='x', labelsize=18)
@@ -814,9 +654,7 @@ class Plot_waveforms:
         plt.show()
         plt.savefig(self.dir + '/Total_plot.pdf')
 
-
-
-    def Scalarmoment2Magnitude(self,M0):
+    def Scalarmoment2Magnitude(self, M0):
         Mw = 2.0 / 3.0 * (np.log10(M0) - 9.1)
         return Mw
 

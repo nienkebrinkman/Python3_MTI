@@ -39,8 +39,7 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'GS_4.txt'
-    path_to_file_BBB = directory+ 'S.txt'
+    path_to_file = directory + 'GS_Trial_1_ZP.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
@@ -59,11 +58,11 @@ def main():
 
     result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
                  column_names=column_names,burnin=burnin ,real_v=real_v)
-    result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                   column_names=column_names,  burnin=burnin,real_v=real_v)
-
-    result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names,  burnin=burnin,real_v=real_v)
+    #
+    # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
+    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
@@ -543,7 +542,7 @@ class Post_processing_sdr:
         # plt.show()
         plt.savefig(dir + '/Trace_position.pdf')
 
-        n_lowest = 1000
+        n_lowest = 10000
         # pos = np.argmin(df['Total_misfit'].values)
         lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
         lowest_misfits = df['Total_misfit'].values[lowest_indices]
@@ -551,14 +550,15 @@ class Post_processing_sdr:
         lowest_dip = df['Dip'].values[lowest_indices]
         lowest_rake = df['Rake'].values[lowest_indices]
         lowest_depth = df['Depth'].values[lowest_indices]
+        lowest_P_shift = df['Shift_P'].values[lowest_indices]
+        lowest_S_shift = df['Shift_S'].values[lowest_indices]
 
-        fig = plt.figure(figsize=(25, 6))
+        fig = plt.figure(figsize=(20, 12))
         row = 0
 
-        ax1 = plt.subplot2grid((1, 4), (0, 0))
+        ax1 = plt.subplot(231)
         plt.plot(lowest_strike,lowest_misfits,'bo')
         # plt.plot(df['Strike'].values,df['Total_misfit'].values,'bo')
-
         ymin, ymax = ax1.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
@@ -573,10 +573,9 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax2 = plt.subplot2grid((1, 4), (0, 1))
+        ax2 = plt.subplot(232)
         plt.plot(lowest_dip,lowest_misfits,'bo')
         # plt.plot(df['Dip'].values,df['Total_misfit'].values,'bo')
-
         ymin, ymax = ax2.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
@@ -592,7 +591,7 @@ class Post_processing_sdr:
         # plt.legend( fontsize=20)
         plt.tight_layout()
 
-        ax3 = plt.subplot2grid((1, 4), (0, 2))
+        ax3 = plt.subplot(233)
         plt.plot(lowest_rake,lowest_misfits,'bo')
         # plt.plot(df['Rake'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax3.get_ylim()
@@ -610,10 +609,10 @@ class Post_processing_sdr:
         plt.tight_layout()
 
 
-        ax4 = plt.subplot2grid((1, 4), (0, 3))
+        ax4 = plt.subplot(234)
         plt.plot(lowest_depth,lowest_misfits,'bo')
         # plt.plot(df['Depth'].values,df['Total_misfit'].values,'bo')
-        ymin, ymax = ax3.get_ylim()
+        ymin, ymax = ax4.get_ylim()
         if real_v is not None:
             plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Depth')
             plt.legend(loc='upper left', fontsize=20)
@@ -625,8 +624,31 @@ class Post_processing_sdr:
         ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax4.set_xlim(20000, 100000)
         plt.tight_layout()
+
+        ax5 = plt.subplot(235)
+        plt.plot(lowest_P_shift,lowest_misfits,'bo')
+        # plt.plot(df['Shift_P'].values,df['Total_misfit'].values,'bo')
+        ax5.set_title("P_Shift", color='b', fontsize=25)
+        ax5.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        ax5.tick_params(axis='x', labelsize=20)
+        ax5.tick_params(axis='y', labelsize=20)
+        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax5.set_xlim(-60, 60)
+        plt.tight_layout()
+
+        ax6 = plt.subplot(236)
+        plt.plot(lowest_S_shift,lowest_misfits,'bo')
+        # plt.plot(df['Shift_S'].values,df['Total_misfit'].values,'bo')
+        ax6.set_title("S_Shift", color='b', fontsize=25)
+        ax6.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        ax6.tick_params(axis='x', labelsize=20)
+        ax6.tick_params(axis='y', labelsize=20)
+        ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax6.set_xlim(-60, 60)
+        plt.tight_layout()
+
         # plt.show()
-        plt.savefig(dir + '/Misfit_vs_Moment.pdf')
+        plt.savefig(dir + '/Misfit_vs_Parameters.pdf')
 
 
         fig = plt.figure(figsize=(10, 6))

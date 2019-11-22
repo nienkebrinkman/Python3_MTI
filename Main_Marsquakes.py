@@ -44,7 +44,7 @@ def main():
     BW_obs = Cut_windows(PRIOR['VELOC_taup'], P_HP=PRIOR['P_HP'], P_LP=PRIOR['P_LP'], S_HP=PRIOR['S_HP'],
                          S_LP=PRIOR['S_LP'], Pre_P=PRIOR['Pre_P'], Pre_S=PRIOR['Pre_S'], Post_P=PRIOR['Post_P'],
                          Post_S=PRIOR['Post_S'], zero_phase=PRIOR['Zero_Phase'], Order=PRIOR['Order'],
-                         Taper=PRIOR['Taper_obs'])
+                         Taper=PRIOR['Taper_obs'],Taper_len=PRIOR['Taper_len'], Zero_len=PRIOR['Zero_len'])
     if PRIOR['P_pick'] == None or PRIOR['S_pick'] == None:
         BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], MANUAL= False)
     else:
@@ -68,7 +68,7 @@ def main():
     skiprows = 48  # 26
     plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
     # plot.get_Cut_waveforms()
-    plot.get_waveforms(Norm=True)
+    plot.get_waveforms(Norm=False)
 
 
 if __name__ == '__main__':

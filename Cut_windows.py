@@ -5,7 +5,7 @@ import numpy as np
 import obspy
 
 class Cut_windows:
-    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP,Pre_P,Pre_S,Post_P,Post_S, zero_phase = True,Order = 4, Taper = True):
+    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP, Pre_P, Pre_S, Post_P, Post_S, zero_phase = True, Order = 4, Taper = True, Taper_len = 1.0, Zero_len = 500):
         self.veloc_model = veloc_model_taup
         self.P_HP = P_HP
         self.P_LP = P_LP
@@ -18,6 +18,8 @@ class Cut_windows:
         self.zero_phase = zero_phase
         self.Taper = Taper
         self.Order = Order
+        self.Zero_len = Zero_len
+        self.Taper_Len = Taper_len # Length of taper that is added to your window
 
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
@@ -80,13 +82,21 @@ class Cut_windows:
             end_S = obspy.UTCDateTime(tt_S.timestamp + self.Post_S)
 
 
-
-
         self.S_original = self.original.copy()
         self.P_original = self.original.copy()
         if self.Taper == True:
-            self.P_original.taper(0.05, 'hann')
-            self.S_original.taper(0.05, 'hann')
+            self.P_original.taper(0.025, 'hann', self.start_P - or_time - 10) # Making sure the P and S wave are not effected
+            self.S_original.taper(0.025, 'hann', self.start_P - or_time - 10)
+
+            # CHECK IN OBSPY FUNCTION IF TAPER IS GOOD:
+            # import matplotlib.pylab as plt
+            # plt.close()
+            # x = np.arange(len(taper))
+            # plt.plot(x, taper, 'r', label='Hann Taper')
+            # plt.plot(3606, 1, 'bx', label='P-arrival')
+            # plt.plot(6806, 1, 'kx', label='S-arrival')
+            # plt.legend()
+            # plt.show()
 
         if self.zero_phase:
             self.P_original.filter('highpass', freq=1. / (end_P - self.start_P), zerophase=True, corners=self.Order)
@@ -96,11 +106,15 @@ class Cut_windows:
         else:
             self.P_original.filter('highpass', freq=1. / (end_P - self.start_P) , corners=self.Order)
             self.P_original.filter('highpass', freq=1. / (end_S - self.start_S) , corners=self.Order)
-            self.S_original.filter('highpass', freq=1. / (end_P - self.start_P), corners=self.Order)
-            self.S_original.filter('highpass', freq=1. / (end_S - self.start_S), corners=self.Order)
+            self.S_original.filter('highpass', freq=1. / (end_P - self.start_P) , corners=self.Order)
+            self.S_original.filter('highpass', freq=1. / (end_S - self.start_S) , corners=self.Order)
 
         self.P_original = self.Filter(self.P_original, HP=self.P_HP, LP=self.P_LP)
         self.S_original = self.Filter(self.S_original, HP=self.S_HP, LP=self.S_LP)
+
+        wlen_seconds = 3#self.Taper_Len
+        zero_len = self.Zero_len
+        wlen = int(wlen_seconds / self.dt)
 
         P_stream = Stream()
         S_stream = Stream()
@@ -109,19 +123,20 @@ class Cut_windows:
             trace_S = self.S_original.traces[i].copy()
             dt = trace_P.meta.delta
 
-
-            P_trace = Trace.slice(trace_P, self.start_P, end_P)
+            P_trace = Trace.slice(trace_P, self.start_P - wlen_seconds, end_P + wlen_seconds)
             self.P_len = len(P_trace)
-            npts_p = self.P_len + 2 * 500
-            start_p = dt * 500
-            S_trace = Trace.slice(trace_S, self.start_S, end_S)
+            npts_p = self.P_len + 2 * zero_len
+            start_p = dt * zero_len
+            S_trace = Trace.slice(trace_S, self.start_S - wlen_seconds, end_S + wlen_seconds)
             self.S_len = len(S_trace)
-            npts_s = self.S_len + 2 * 500
-            start_s = dt * 500
+            npts_s = self.S_len + 2 * zero_len
+            start_s = dt * zero_len
+
+
 
             if i == 2:
                 total_s_trace = Trace(np.zeros(npts_s),
-                                      header={"starttime": self.start_S - start_s, 'delta': trace_S.stats.delta,
+                                      header={"starttime": self.start_S - start_s - wlen_seconds, 'delta': trace_S.stats.delta,
                                               "station": trace_S.stats.station,
                                               "network": trace_S.stats.network, "location": trace_S.stats.location,
                                               "channel": trace_S.stats.channel}).__add__(S_trace, method=0,
@@ -131,7 +146,7 @@ class Cut_windows:
 
             else:
                 total_p_trace = Trace(np.zeros(npts_p),
-                                      header={"starttime": self.start_P - start_p, 'delta': trace_P.stats.delta,
+                                      header={"starttime": self.start_P - start_p - wlen_seconds, 'delta': trace_P.stats.delta,
                                               "station": trace_P.stats.station,
                                               "network": trace_P.stats.network, "location": trace_P.stats.location,
                                               "channel": trace_P.stats.channel}).__add__(P_trace, method=0,
@@ -139,7 +154,7 @@ class Cut_windows:
                                                                                        fill_value=P_trace.data,
                                                                                        sanity_checks=True)
                 total_s_trace = Trace(np.zeros(npts_s),
-                                      header={"starttime": self.start_S - start_s, 'delta': trace_S.stats.delta,
+                                      header={"starttime": self.start_S - start_s - wlen_seconds, 'delta': trace_S.stats.delta,
                                               "station": trace_S.stats.station,
                                               "network": trace_S.stats.network, "location": trace_S.stats.location,
                                               "channel": trace_S.stats.channel}).__add__(S_trace, method=0,
@@ -151,6 +166,38 @@ class Cut_windows:
             self.S_stream = S_stream
             self.P_stream = P_stream
 
+
+            window_S = self.Create_Taper(self.S_len,wlen, zero_len)
+            window_P = self.Create_Taper(self.P_len,wlen,zero_len)
+
+            import matplotlib.pylab as plt
+            plt.figure()
+            plt.subplot(211)
+            plt.plot(self.P_stream.traces[0].data, 'b' , label = 'Non-Tapered P-window')
+            plt.plot(self.P_stream.traces[0].data * window_P, 'r' , label = 'Tapered P-window')
+            plt.legend()
+            plt.subplot(212)
+            plt.plot(self.S_stream.traces[0].data, 'b' , label = 'Non-Tapered S-window')
+            plt.plot(self.S_stream.traces[0].data * window_S, 'r' , label = 'Tapered S-window')
+            plt.legend()
+            plt.show()
+
+
+
+            # Trim the original waveforms after the S arrival so that the waveforms are not too long
+            self.original.trim(endtime=end_S + 25)
+            self.P_original.trim(endtime=end_S + 25)
+            self.S_original.trim(endtime=end_S + 25)
+
+    def Create_Taper(self, Trace_len,wlen, zero_len,):
+        hann = np.hanning(wlen * 2)
+        # if 2 * wlen == int(wlen_seconds / dt):
+        #     hann = np.hanning(wlen * 2)
+        # else:
+        #     hann = np.hanning(wlen * 2 + 1)
+        window = np.hstack((np.zeros(zero_len), hann[:wlen], np.ones(Trace_len - 2 * wlen), hann[len(hann) - wlen:],
+                            np.zeros(zero_len)))
+        return window
 
     def Filter(self, stream, HP, LP):
         if self.zero_phase:

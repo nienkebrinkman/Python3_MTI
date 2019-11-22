@@ -18,7 +18,7 @@ class Grid_Search:
         self.BW_syn = Cut_windows(self.prior['VELOC_taup'], P_HP=PRIOR['P_HP'], P_LP=PRIOR['P_LP'], S_HP=PRIOR['S_HP'],
                                   S_LP=PRIOR['S_LP'], Pre_P=PRIOR['Pre_P'], Pre_S=PRIOR['Pre_S'],
                                   Post_P=PRIOR['Post_P'], Post_S=PRIOR['Post_S'], zero_phase=PRIOR['Zero_Phase'],
-                                  Order=PRIOR['Order'], Taper=PRIOR['Taper_syn'])
+                                  Order=PRIOR['Order'], Taper=PRIOR['Taper_syn'],Taper_len=PRIOR['Taper_len'], Zero_len=PRIOR['Zero_len'])
         self.seis = Get_Seismogram(self.prior)
         self.mis = Misfit()
 

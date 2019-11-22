@@ -55,7 +55,7 @@ class Misfit:
                 ax1 = plt.subplot2grid((5, 1), (i+2, 0))
 
                 plt.plot(time_array[start:end],self.normalize(s_obs[i][start:end]),'b', label = 'Observed')
-                # plt.plot(time_array[start:end],self.normalize(s_syn[i][start:end]),'r', linewidth = 0.3, label = 'Synthetic')
+                plt.plot(time_array[start:end],self.normalize(s_syn[i][start:end]),'r', linewidth = 0.3, label = 'Synthetic')
                 plt.plot(time_array[start:end],self.normalize(s_syn_shift_obspy[start:end]),'r', label = 'Synthetic')
                 ymin, ymax = ax1.get_ylim()
                 xmin, xmax = ax1.get_xlim()
