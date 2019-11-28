@@ -39,13 +39,13 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'GS_Trial_1_ZP.txt'
+    path_to_file = directory + 'Event_235_2.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows = 48#26 # 40
+    skiprows = 52#48
     column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
-                    'bw_tot', 'Shift_S', 'Shift_P', 'accept']
+                    'Xi_amp', 'Shift_S', 'Shift_P', 'accept']
     burnin = 0
 
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
@@ -56,18 +56,69 @@ def main():
     # real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
     real_v = None
 
-    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                 column_names=column_names,burnin=burnin ,real_v=real_v)
-    # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    # result.Scatter_3d(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
-    #
+    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #              column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
+    # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
+    # result.Cluster(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #                column_names=column_names,  burnin=burnin,real_v=real_v)
+
     # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
 
 class Post_processing_sdr:
+    def Scatter_3d(self, filepath, savename, directory, skiprows, column_names, burnin, real_v):
+        dir = directory + '/%s' % (savename.strip('.yaml'))
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
+        data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
+
+        df = pd.DataFrame(data, columns=column_names)
+        n_lowest = 10000
+        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+
+        #### PLOT:
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values) * 0.01# / 0.1)
+        SZ = (df['s_z'].values)# / 0.14)
+        SR = (df['s_r'].values)# / 0.35)
+        ST = (df['s_t'].values)
+
+        Misfit = (PZ+PR+SZ+SR+ST)
+
+
+        n_lowest = 10000
+        lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
+        # lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+
+
+        # indices = np.where(df['Total_misfit'].values < 5.0)
+        indices = np.where(Misfit < 3.5)
+
+        # misfits = df['Total_misfit'].values[indices]
+        misfits =Misfit[indices]
+        strike = df['Strike'].values[indices]
+        dip = df['Dip'].values[indices]
+        rake = df['Rake'].values[indices]
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure(figsize=(25,10))
+        ax = plt.subplot(111, projection = '3d')
+        Scat = ax.scatter(strike, dip, rake, c=misfits,cmap = 'rainbow')
+        ax.set_xlabel('Strike')
+        ax.set_ylabel('Dip')
+        ax.set_zlabel('Rake')
+        # cbar = plt.colorbar()
+        # cbar.set_label('Misfit', rotation=270, labelpad=20)
+        fig.colorbar(Scat)
+        plt.show()
+
+        a=1
 
     def get_convergence(self, filepath, savename, directory, skiprows, burnin,column_names, show=True):
         dir = directory + '/%s' % (savename)
@@ -104,153 +155,169 @@ class Post_processing_sdr:
             plt.savefig(dir + '/Convergence.pdf')
             plt.close()
 
+        #### PLOT:
+        # amount_of_samples = len(df['Total_misfit'])
+        # loop_length = int(amount_of_samples/10 -1)
+        # epi_mean    = np.zeros(loop_length)
+        # depth_mean  = np.zeros(loop_length)
+        # strike_mean = np.zeros(loop_length)
+        # dip_mean    = np.zeros(loop_length)
+        # rake_mean   = np.zeros(loop_length)
+        # M0_mean     = np.zeros(loop_length)
+        #
+        #
+        # for i in range(loop_length):
+        #     epi_mean[i] = np.mean(df['Epi'].values[burnin:int(i * 10 + 1)])
+        #     depth_mean[i] = np.mean(df['Depth'].values[burnin:int(i * 10 + 1)])
+        #     strike_mean[i] = np.mean(df['Strike'].values[burnin:int(i * 10 + 1)])
+        #     dip_mean[i] = np.mean(df['Dip'].values[burnin:int(i * 10 + 1)])
+        #     rake_mean[i] = np.mean(df['Rake'].values[burnin:int(i * 10 + 1)])
+        #     M0_mean[i] = np.mean(df['M0'].values[burnin:int(i * 10 + 1)])
+        #
+        # plt.close()
+        # plt.figure(figsize=(20,10))
+        # ax1 = plt.subplot(231)
+        # ax1.plot(np.arange(loop_length) * 10, epi_mean , label = 'Epicentral distance')
+        # ax1.set_ylabel("Mean", fontsize=25)
+        # ax1.set_xlabel("Sample", fontsize=25)
+        # ax1.tick_params(axis='x', labelsize=20)
+        # ax1.tick_params(axis='y', labelsize=20)
+        # ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        #
+        # ax2 = plt.subplot(232)
+        # ax2.plot(np.arange(loop_length) * 10, depth_mean , label = 'Depth')
+        # ax2.set_ylabel("Mean", fontsize=25)
+        # ax2.set_xlabel("Sample", fontsize=25)
+        # ax2.tick_params(axis='x', labelsize=20)
+        # ax2.tick_params(axis='y', labelsize=20)
+        # ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        #
+        # ax3 = plt.subplot(233)
+        # ax3.plot(np.arange(loop_length) * 10, M0_mean , label = 'M0')
+        # ax3.set_ylabel("Mean", fontsize=25)
+        # ax3.set_xlabel("Sample", fontsize=25)
+        # ax3.tick_params(axis='x', labelsize=20)
+        # ax3.tick_params(axis='y', labelsize=20)
+        # ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        # ax4 = plt.subplot(234)
+        # ax4.plot(np.arange(loop_length) * 10, strike_mean , label = 'Strike')
+        # ax4.set_ylabel("Mean", fontsize=25)
+        # ax4.set_xlabel("Sample", fontsize=25)
+        # ax4.tick_params(axis='x', labelsize=20)
+        # ax4.tick_params(axis='y', labelsize=20)
+        # ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        # ax5 = plt.subplot(235)
+        # ax5.plot(np.arange(loop_length) * 10, dip_mean , label = 'Dip')
+        # ax5.set_ylabel("Mean", fontsize=25)
+        # ax5.set_xlabel("Sample", fontsize=25)
+        # ax5.tick_params(axis='x', labelsize=20)
+        # ax5.tick_params(axis='y', labelsize=20)
+        # ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        # ax6 = plt.subplot(236)
+        # ax6.plot(np.arange(loop_length) * 10, rake_mean , label = 'Rake')
+        # ax6.set_ylabel("Mean", fontsize=25)
+        # ax6.set_xlabel("Sample", fontsize=25)
+        # ax6.tick_params(axis='x', labelsize=20)
+        # ax6.tick_params(axis='y', labelsize=20)
+        # ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # # plt.yscale('log')
+        #
+        #
+        # if show == True:
+        #
+        #     plt.show()
+        # else:
+        #     plt.savefig(dir + '/Parameter_convergence.pdf')
+        #     plt.close()
 
-        amount_of_samples = len(df['Total_misfit'])
-        loop_length = int(amount_of_samples/10 -1)
-        epi_mean    = np.zeros(loop_length)
-        depth_mean  = np.zeros(loop_length)
-        strike_mean = np.zeros(loop_length)
-        dip_mean    = np.zeros(loop_length)
-        rake_mean   = np.zeros(loop_length)
-        M0_mean     = np.zeros(loop_length)
+        #### PLOT:
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values / 0.1)
+        SZ = (df['s_z'].values / 0.14)
+        SR = (df['s_r'].values / 0.35)
+        ST = (df['s_t'].values)
 
+        n_lowest = 10000
+        lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
+        # lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
 
-        for i in range(loop_length):
-            epi_mean[i] = np.mean(df['Epi'].values[burnin:int(i * 10 + 1)])
-            depth_mean[i] = np.mean(df['Depth'].values[burnin:int(i * 10 + 1)])
-            strike_mean[i] = np.mean(df['Strike'].values[burnin:int(i * 10 + 1)])
-            dip_mean[i] = np.mean(df['Dip'].values[burnin:int(i * 10 + 1)])
-            rake_mean[i] = np.mean(df['Rake'].values[burnin:int(i * 10 + 1)])
-            M0_mean[i] = np.mean(df['M0'].values[burnin:int(i * 10 + 1)])
+        PZ = PZ[PZ.argsort()[0:n_lowest]] #PZ[lowest_indices]
+        PR = PR[PR.argsort()[0:n_lowest]] #PR[lowest_indices]
+        SZ = SZ[SZ.argsort()[0:n_lowest]] #SZ[lowest_indices]
+        SR = SR[SR.argsort()[0:n_lowest]] #SR[lowest_indices]
+        ST = ST[ST.argsort()[0:n_lowest]] #ST[lowest_indices]
 
-        plt.close()
-        plt.figure(figsize=(20,10))
-        ax1 = plt.subplot(231)
-        ax1.plot(np.arange(loop_length) * 10, epi_mean , label = 'Epicentral distance')
-        ax1.set_ylabel("Mean", fontsize=25)
-        ax1.set_xlabel("Sample", fontsize=25)
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-
-        ax2 = plt.subplot(232)
-        ax2.plot(np.arange(loop_length) * 10, depth_mean , label = 'Depth')
-        ax2.set_ylabel("Mean", fontsize=25)
-        ax2.set_xlabel("Sample", fontsize=25)
-        ax2.tick_params(axis='x', labelsize=20)
-        ax2.tick_params(axis='y', labelsize=20)
-        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-
-        ax3 = plt.subplot(233)
-        ax3.plot(np.arange(loop_length) * 10, M0_mean , label = 'M0')
-        ax3.set_ylabel("Mean", fontsize=25)
-        ax3.set_xlabel("Sample", fontsize=25)
-        ax3.tick_params(axis='x', labelsize=20)
-        ax3.tick_params(axis='y', labelsize=20)
-        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-        ax4 = plt.subplot(234)
-        ax4.plot(np.arange(loop_length) * 10, strike_mean , label = 'Strike')
-        ax4.set_ylabel("Mean", fontsize=25)
-        ax4.set_xlabel("Sample", fontsize=25)
-        ax4.tick_params(axis='x', labelsize=20)
-        ax4.tick_params(axis='y', labelsize=20)
-        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-        ax5 = plt.subplot(235)
-        ax5.plot(np.arange(loop_length) * 10, dip_mean , label = 'Dip')
-        ax5.set_ylabel("Mean", fontsize=25)
-        ax5.set_xlabel("Sample", fontsize=25)
-        ax5.tick_params(axis='x', labelsize=20)
-        ax5.tick_params(axis='y', labelsize=20)
-        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-        ax6 = plt.subplot(236)
-        ax6.plot(np.arange(loop_length) * 10, rake_mean , label = 'Rake')
-        ax6.set_ylabel("Mean", fontsize=25)
-        ax6.set_xlabel("Sample", fontsize=25)
-        ax6.tick_params(axis='x', labelsize=20)
-        ax6.tick_params(axis='y', labelsize=20)
-        ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        # plt.yscale('log')
-
-
-        if show == True:
-
-            plt.show()
-        else:
-            plt.savefig(dir + '/Parameter_convergence.pdf')
-            plt.close()
-
-
-        plt.figure(figsize=(20,10))
+        plt.figure(figsize=(20,20))
         ax1 = plt.subplot(511)
-        ax1.plot(df['p_z'].values[burnin:], label = 'Epicentral distance')
-        ax1.set_ylabel("Mean", fontsize=25)
-        ax1.set_xlabel("Sample", fontsize=25)
+        ax1.plot(PZ, label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
+        ax1.set_ylabel("Misfit", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
-        # plt.yscale('log')
+        plt.yscale('log')
+        plt.ylim((pow(20, -1), pow(10, 1)))
 
 
         ax2 = plt.subplot(512)
-        ax2.plot( df['p_r'].values[burnin:] , label = 'Depth')
-        ax2.set_ylabel("Mean", fontsize=25)
-        ax2.set_xlabel("Sample", fontsize=25)
+        ax2.plot(PR, label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
+        ax2.set_ylabel("Misfit", fontsize=25)
         ax2.tick_params(axis='x', labelsize=20)
         ax2.tick_params(axis='y', labelsize=20)
         ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
-        # plt.yscale('log')
+        plt.yscale('log')
+        plt.ylim((pow(20, -1), pow(10, 1)))
 
 
         ax3 = plt.subplot(513)
-        ax3.plot( df['s_z'].values[burnin:], label = 'M0')
-        ax3.set_ylabel("Mean", fontsize=25)
-        ax3.set_xlabel("Sample", fontsize=25)
+        ax3.plot(SZ, label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
+        ax3.set_ylabel("Misfit", fontsize=25)
         ax3.tick_params(axis='x', labelsize=20)
         ax3.tick_params(axis='y', labelsize=20)
         ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
-        # plt.yscale('log')
+        plt.yscale('log')
+        plt.ylim((pow(20, -1), pow(10, 1)))
 
         ax4 = plt.subplot(514)
-        ax4.plot( df['s_r'].values[burnin:] , label = 'Strike')
+        ax4.plot(SR , label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
         ax4.set_ylabel("Mean", fontsize=25)
-        ax4.set_xlabel("Sample", fontsize=25)
         ax4.tick_params(axis='x', labelsize=20)
         ax4.tick_params(axis='y', labelsize=20)
         ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
-        # plt.yscale('log')
+        plt.yscale('log')
+        plt.ylim((pow(20, -1), pow(10, 1)))
 
         ax5 = plt.subplot(515)
-        ax5.plot( df['s_t'].values[burnin:] , label = 'Dip')
+        ax5.plot( ST , label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
         ax5.set_ylabel("Mean", fontsize=25)
         ax5.set_xlabel("Sample", fontsize=25)
         ax5.tick_params(axis='x', labelsize=20)
@@ -258,7 +325,8 @@ class Post_processing_sdr:
         ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         plt.legend(fontsize=20)
         plt.tight_layout()
-        # plt.yscale('log')
+        plt.yscale('log')
+        plt.ylim((pow(20, -1), pow(10, 1)))
         # plt.show()
         if show == True:
             plt.show()
@@ -375,7 +443,7 @@ class Post_processing_sdr:
         moment = np.array([Mxx, Myy, Mzz, Mxy, Mxz, Myz])
         return moment
 
-    def trace(self, filepath, savename, directory, skiprows, column_names,  burnin, real_v = None,):
+    def trace(self, filepath, savename, directory, skiprows, column_names,  burnin, lowest,real_v = None,):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -408,15 +476,29 @@ class Post_processing_sdr:
         row = 0
 
         n_lowest = 200
-        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
-        strike, dip, rake = aux_plane(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
+        lowest_indices = df[lowest].values.argsort()#[0:n_lowest]
+
+
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values) * 0.01# / 0.1)
+        SZ = (df['s_z'].values)# / 0.14)
+        SR = (df['s_r'].values)# / 0.35)
+        ST = (df['s_t'].values)
+
+        Misfit = (PZ)
+        lowest_indices = Misfit.argsort()
+
+
+        strike, dip, rake = aux_plane(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]],
+                                      df_select['Rake'][lowest_indices[0]])
         print(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
         print(strike,dip,rake)
 
         ax1 = plt.subplot2grid((1, 3), (0, 0))
         # bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
-        # plt.hist(df_select['Strike'][burnin:], bins= 80, alpha=0.8)
-        plt.hist(df_select['Strike'][lowest_indices], bins= 80, alpha=0.8, label='Lowest Misfit')
+        # plt.hist(df['Strike'][burnin:], weights=(df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:]) ,density = True,bins= 80, alpha=0.8)
+        # plt.hist(df_select['Strike'][lowest_indices], bins= 80, alpha=0.8, label='Lowest Misfit')
+        plt.hist(df_select['Strike'][lowest_indices],weights=np.linspace(1,0,len(df_select['Strike'][lowest_indices])), bins= 80, alpha=0.8, label='Lowest Misfit')
 
         ymin, ymax = ax1.get_ylim()
         plt.vlines(df_select['Strike'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
@@ -436,8 +518,11 @@ class Post_processing_sdr:
 
         ax2 = plt.subplot2grid((1, 3), (0, 1))
         bin = int(90 * (len(df_select['Dip'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Dip'][burnin:]))))
-        # plt.hist(df_select['Dip'][burnin:], bins=80, alpha=0.8)
-        plt.hist(df_select['Dip'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
+        # plt.hist(df['Dip'][burnin:], weights=df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:],density = True,bins= 80, alpha=0.8)
+        # plt.hist(df_select['Dip'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
+        plt.hist(df_select['Dip'][lowest_indices],
+                 weights=np.linspace(1, 0, len(df_select['Dip'][lowest_indices])), bins=80, alpha=0.8,
+                 label='Lowest Misfit')
 
         ymin, ymax = ax2.get_ylim()
         plt.vlines(df_select['Dip'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
@@ -458,8 +543,12 @@ class Post_processing_sdr:
 
         ax3 = plt.subplot2grid((1, 3), (0, 2))
         bin = int(360 * (len(df_select['Rake'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Rake'][burnin:]))))
-        # plt.hist(df_select['Rake'][burnin:], bins=80, alpha=0.8)
-        plt.hist(df_select['Rake'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
+        # plt.hist(df['Rake'][burnin:], weights=df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:],density = True,bins= 80, alpha=0.8)
+        # plt.hist(df_select['Rake'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
+        plt.hist(df_select['Rake'][lowest_indices],
+                 weights=np.linspace(1, 0, len(df_select['Rake'][lowest_indices])), bins=80, alpha=0.8,
+                 label='Lowest Misfit')
+
         ymin, ymax = ax3.get_ylim()
         plt.vlines(df_select['Rake'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
         plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
@@ -544,8 +633,8 @@ class Post_processing_sdr:
 
         n_lowest = 10000
         # pos = np.argmin(df['Total_misfit'].values)
-        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
-        lowest_misfits = df['Total_misfit'].values[lowest_indices]
+        lowest_indices = df[lowest].values.argsort()[0:n_lowest]
+        lowest_misfits = df[lowest].values[lowest_indices]
         lowest_strike = df['Strike'].values[lowest_indices]
         lowest_dip = df['Dip'].values[lowest_indices]
         lowest_rake = df['Rake'].values[lowest_indices]
@@ -553,11 +642,15 @@ class Post_processing_sdr:
         lowest_P_shift = df['Shift_P'].values[lowest_indices]
         lowest_S_shift = df['Shift_S'].values[lowest_indices]
 
+        ind_Negative_Pshift = np.where(lowest_P_shift < 0)
+        ind_Positve_Pshift = np.where(lowest_P_shift > 0)
+
         fig = plt.figure(figsize=(20, 12))
         row = 0
 
         ax1 = plt.subplot(231)
-        plt.plot(lowest_strike,lowest_misfits,'bo')
+        plt.plot(lowest_strike[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
+        plt.plot(lowest_strike[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
         # plt.plot(df['Strike'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax1.get_ylim()
         if real_v is not None:
@@ -565,16 +658,17 @@ class Post_processing_sdr:
             plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
         ax1.set_title("Strike", color='b', fontsize=25)
         ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
-        ax1.set_ylabel("Misfit", fontsize=25)
+        ax1.set_ylabel("Misfit %s" % lowest, fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax1.set_xlim(0, 360)
-        # plt.legend( fontsize=20)
+        plt.legend( fontsize=20)
         plt.tight_layout()
 
         ax2 = plt.subplot(232)
-        plt.plot(lowest_dip,lowest_misfits,'bo')
+        plt.plot(lowest_dip[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
+        plt.plot(lowest_dip[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
         # plt.plot(df['Dip'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax2.get_ylim()
         if real_v is not None:
@@ -592,7 +686,10 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax3 = plt.subplot(233)
-        plt.plot(lowest_rake,lowest_misfits,'bo')
+        plt.plot(lowest_rake[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+                 label='Negative P - shift')
+        plt.plot(lowest_rake[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+                 label='Positive P - shift')
         # plt.plot(df['Rake'].values,df['Total_misfit'].values,'bo')
         ymin, ymax = ax3.get_ylim()
         if real_v is not None:
@@ -626,7 +723,10 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax5 = plt.subplot(235)
-        plt.plot(lowest_P_shift,lowest_misfits,'bo')
+        plt.plot(lowest_P_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+                 label='Negative P - shift')
+        plt.plot(lowest_P_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+                 label='Positive P - shift')
         # plt.plot(df['Shift_P'].values,df['Total_misfit'].values,'bo')
         ax5.set_title("P_Shift", color='b', fontsize=25)
         ax5.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
@@ -637,7 +737,10 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax6 = plt.subplot(236)
-        plt.plot(lowest_S_shift,lowest_misfits,'bo')
+        plt.plot(lowest_S_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+                 label='Negative P - shift')
+        plt.plot(lowest_S_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+                 label='Positive P - shift')
         # plt.plot(df['Shift_S'].values,df['Total_misfit'].values,'bo')
         ax6.set_title("S_Shift", color='b', fontsize=25)
         ax6.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
@@ -900,7 +1003,7 @@ class Post_processing_sdr:
         # plt.show()
         plt.close()
 
-    def get_BBB(self, filepath, savename, directory, skiprows, column_names, burnin, real_v = None):
+    def get_BBB(self, filepath, savename, directory, skiprows, column_names, burnin, lowest,real_v = None):
         dir = directory + '/%s' % (savename.strip('.yaml'))
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -918,52 +1021,250 @@ class Post_processing_sdr:
 
 
         df = pd.DataFrame(data, columns=column_names)
+        n_lowest = 1
+        lowest_indices = df[lowest].values.argsort()[0:n_lowest]
+        # lowest_indices = [50762] # No Weights
+        # lowest_indices = [88124] # Weights
 
-        fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values) * 0.01# / 0.1)
+        SZ = (df['s_z'].values)# / 0.14)
+        SR = (df['s_r'].values)# / 0.35)
+        ST = (df['s_t'].values)
+
+        Misfit = (PZ)
+        lowest_indices = Misfit.argsort()[0:n_lowest]
+
+        strike = df['Strike'].values[lowest_indices]
+        dip = df['Dip'].values[lowest_indices]
+        rake = df['Rake'].values[lowest_indices]
+        depth = df['Depth'].values[lowest_indices]
+        epi = df['Epi'].values[lowest_indices]
+
+        with open(filepath) as f:
+            content = f.readlines()
+        azimuth = float(content[50].strip('\n').split(':')[-1])
+
+        veloc_model = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
+
+        from obspy.taup import TauPyModel
+        model = TauPyModel(model=veloc_model)
+        inc_angles = []
+        azimuths = []
+        phase_names = []
+        for i in range(0,n_lowest):
+            tt_P = model.get_travel_times(source_depth_in_km=depth[i] / 1000, distance_in_degree=epi[i], phase_list=['P'])
+            inc_angles.append(tt_P[0].takeoff_angle)
+            azimuths.append(azimuth)
+            phase_names.append('P')
+            tt_S = model.get_travel_times(source_depth_in_km=depth[i] / 1000, distance_in_degree=epi[i], phase_list=['S'])
+            inc_angles.append(tt_S[0].takeoff_angle)
+            azimuths.append(azimuth)
+            phase_names.append('S')
+
+
+
+
+        fig = self.plot_BBB(strike, dip, rake,
+                            azimuths=azimuths, inc_angles=inc_angles,
+                            phase_names=phase_names)
+        plt.savefig(dir + '/BBB.pdf')
+
+
+
+
+        # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
+        #
+        # ax_bb.set_xticks([])
+        # ax_bb.set_yticks([])
+        # ax_bb.axis('off')
+        # img = None
+        # buf = io.BytesIO()
+        #
+        # n_lowest = 10
+        # lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+        #
+        # for v,i in enumerate(lowest_indices):
+        # # for i in range(0, len(strike)):
+        #
+        #     b = beach(fm=[strike[i], dip[i], rake[i]],
+        #               width=200, linewidth=0, facecolor='b',
+        #               xy=(0, 0), axes=ax_bb, alpha=1, zorder=i)
+        #     ax_bb.add_collection(b)
+        #     ax_bb.set_xlim((-0.1, 0.1))
+        #     ax_bb.set_ylim((-0.1, 0.1))
+        #
+        #     p = Circle((0., 0,), 0.065, linewidth=2, edgecolor='k', facecolor='b', zorder=5)
+        #     ax_bb.add_patch(p)
+        #
+        #     buf.seek(0)
+        #     fig_bb.savefig(buf, format='png')
+        #     buf.seek(0)
+        #     if img is None:
+        #         img = mpimg.imread(buf)
+        #     else:
+        #         img += mpimg.imread(buf)
+        # plt.close(fig_bb)
+        # fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+        # ax.imshow(img / np.max(img.flatten()))
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        # ax.axis('off')
+        # plt.savefig(dir + '/BBB.pdf')
+        ## plt.show()
+
+    def Cluster(self, filepath, savename, directory, skiprows, column_names, burnin, real_v = None):
+        dir = directory + '/%s' % (savename.strip('.yaml'))
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
+        data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
+
+        df = pd.DataFrame(data, columns=column_names)
+        n_lowest = 10000
+        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+
+        misfits = df['Total_misfit'].values
+        strike = df['Strike'].values
+        dip = df['Dip'].values
+        rake = df['Rake'].values
+
+
+        # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/alpha_shape.csv')
+        # df.head()
+        #
+        # scatter = dict(
+        #     mode="markers",
+        #     name="y",
+        #     type="scatter3d",
+        #     x=df['x'], y=df['y'], z=df['z'],
+        #     marker=dict(size=2, color="rgb(23, 190, 207)")
+        # )
+        # clusters = dict(
+        #     alphahull=7,
+        #     name="y",
+        #     opacity=0.1,
+        #     type="mesh3d",
+        #     x=df['x'], y=df['y'], z=df['z']
+        # )
+        # layout = dict(
+        #     title='3d point clustering',
+        #     scene=dict(
+        #         xaxis=dict(zeroline=False),
+        #         yaxis=dict(zeroline=False),
+        #         zaxis=dict(zeroline=False),
+        #     )
+        # )
+        # fig = dict(data=[scatter, clusters], layout=layout)
+        # Use py.iplot() for IPython notebook
+        # py.iplot(fig, filename='3d point clustering')
+
+
+
+
+        fig = plt.figure(figsize=(25, 6))
+        ax1 = plt.subplot(131)
+
+        plt.scatter(strike, dip, c=misfits,cmap = 'rainbow')
+        # plt.scatter(strike, dip, c=misfits, s=10000.0 / rake)
+        # plt.text(260, 5, "Size = Rake", fontsize=25, bbox=dict(boxstyle="round",
+        #                                                        ec=(1., 0.5, 0.5),
+        #                                                        fc=(1., 0.8, 0.8),
+        #                                                        ))
+        plt.xlabel("Strike")
+        plt.ylabel("Dip")
+        plt.tight_layout()
+        # cbar = plt.colorbar()
+        # cbar.set_label('Misfit', rotation=270, labelpad=20)
+        ax2 = plt.subplot(132)
+        plt.scatter(strike, rake, c=misfits,cmap = 'rainbow')
+        plt.xlabel("Strike")
+        plt.ylabel("Rake")
+        # cbar = plt.colorbar()
+        # cbar.set_label('Misfit', rotation=270, labelpad=20)
+        ax3 = plt.subplot(133)
+        plt.scatter(dip, rake, c=misfits,cmap = 'rainbow')
+        cbar = plt.colorbar()
+        cbar.set_label('Misfit', rotation=270, labelpad=20)
+        plt.xlabel("Dip")
+        plt.ylabel("Rake")
+
+        plt.tight_layout()
+        plt.savefig(dir + '/Clustered.pdf')
+
+        fig = plt.figure(figsize=(15,15))
+        ax1 = plt.subplot(111)
+        plt.scatter(strike, rake, c=misfits, s=10000.0 / dip,cmap = 'rainbow')
+        # plt.text(260, 5, "Size = Rake", fontsize=25, bbox=dict(boxstyle="round",
+        #                                                        ec=(1., 0.5, 0.5),
+        #                                                        fc=(1., 0.8, 0.8),
+        #                                                        ))
+        plt.xlabel("Strike")
+        plt.ylabel("Rake")
+        plt.tight_layout()
+        plt.savefig(dir + '/strike_dip_rake_misfit.pdf')
+
+
+    def plot_BBB(self, strikes, dips, rakes, azimuths=None, inc_angles=None,
+                 phase_names=None,
+                 color='blue'):
+        fig_bb = plt.figure(figsize=(5, 5), dpi=200)
+        ax_bb = fig_bb.add_axes([0., 0., 1., 1.])
 
         ax_bb.set_xticks([])
         ax_bb.set_yticks([])
         ax_bb.axis('off')
         img = None
         buf = io.BytesIO()
-
-        strike = df['Strike']
-        dip = df['Dip']
-        rake = df['Rake']
-
-        n_lowest = 10
-        lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
-
-        for v,i in enumerate(lowest_indices):
-        # for i in range(0, len(strike)):
-
-            b = beach(fm=[strike[i], dip[i], rake[i]],
-                      width=200, linewidth=0, facecolor='b',
+        i = 0
+        for strike, dip, rake in zip(strikes, dips, rakes):
+            i += 1
+            b = beach(fm=[strike, dip, rake],
+                      width=990, linewidth=0, facecolor=color,
                       xy=(0, 0), axes=ax_bb, alpha=1, zorder=i)
             ax_bb.add_collection(b)
-            ax_bb.set_xlim((-0.1, 0.1))
-            ax_bb.set_ylim((-0.1, 0.1))
-
-            p = Circle((0., 0,), 0.065, linewidth=2, edgecolor='k', facecolor='b', zorder=5)
-            ax_bb.add_patch(p)
+            ax_bb.set_xlim((-1, 1))
+            ax_bb.set_ylim((-1, 1))
 
             buf.seek(0)
-            fig_bb.savefig(buf, format='png')
+            fig_bb.savefig(buf, format='png', dpi=200)
             buf.seek(0)
             if img is None:
                 img = mpimg.imread(buf)
             else:
                 img += mpimg.imread(buf)
-        plt.close(fig_bb)
-        fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-        ax.imshow(img / np.max(img.flatten()))
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.axis('off')
-        plt.savefig(dir + '/BBB.pdf')
-        # plt.show()
 
-        # beachball([strike,dip,rake], size=200, linewidth=2, facecolor='b', outfile=dir + '/beach_true_aux.pdf')
+        plt.close(fig_bb)
+        # fig, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=250)
+        fig = plt.figure(figsize=(5, 5), dpi=200)
+        ax = fig.add_axes([0., 0., 1., 1.], label='BBB')
+        ax.imshow(img / np.max(img.flatten()))
+        ax_2 = fig.add_axes([0., 0., 1., 1.], label='Circle_ray')
+        ax_2.set_xlim((-1, 1))
+        ax_2.set_ylim((-1, 1))
+        p = Circle((0., 0,), 0.99, linewidth=2, edgecolor='k',
+                   zorder=0, fill=False)
+        ax_2.add_patch(p)
+        if azimuths is not None and inc_angles is not None:
+            for a, i, phase in zip(azimuths, inc_angles, phase_names):
+                x = np.sin(np.deg2rad(a)) * i / 90.
+                y = np.cos(np.deg2rad(a)) * i / 90.
+                p = Circle((x, y), 0.015, linewidth=2, edgecolor='k',
+                           zorder=0, facecolor='k', fill=True)
+                ax_2.add_patch(p)
+                ax_2.text(x + 0.01, y + 0.01, s=phase, fontsize=24)
+
+        # p = Circle((0., 0,), 0.99, linewidth=2, edgecolor='k',
+        #           zorder=5)
+        # ax_2.add_patch(p)
+
+        for a in [ax, ax_2]:
+            a.set_xticks([])
+            a.set_yticks([])
+            a.axis('off')
+        # plt.tight_layout()
+        # plt.savefig('result_%5.1f_km.pdf' % depth)
+        return fig
 
     def event_plot(self, savename,directory,la_receiver, lo_receiver, la_source, lo_source):
         dir = directory + '/%s' % (savename.strip('.yaml'))

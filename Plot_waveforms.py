@@ -49,7 +49,10 @@ class Plot_waveforms:
         self.param['Taper_obs'] = bool(float(content[30].strip('\n').split(':')[-1]))
         self.param['Taper_syn'] = bool(float(content[32].strip('\n').split(':')[-1]))
         self.param['Zero_Phase'] = bool(float(content[34].strip('\n').split(':')[-1]))
-        # self.param['Zero_Phase'] = False
+
+        self.param['Taper_len'] = float(content[38].strip('\n').split(':')[-1])
+        self.param['Zero_len'] = int(float(content[40].strip('\n').split(':')[-1]))
+
         self.param['Order'] = int(content[36].strip('\n').split(':')[-1])
 
     def get_waveforms(self, Norm=True):
@@ -91,14 +94,34 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 1
-        lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
-        lowest_misfits = self.df['Total_misfit'].values[lowest_indices]
+        n_lowest = 20
+        # lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         depths_inds = self.df['Depth'].values.argsort()
         depths = self.df['Depth'].values[depths_inds]
-        # depths_used = np.array([depths_inds[0],depths_inds[20],depths_inds[33],depths_inds[73],depths_inds[7000],15602,20010])
 
-        # for i in np.arange(len(epi) - 10, len(epi), 1):
+        #### PLOT:
+        PZ = (self.df['p_z'].values)
+        PR = (self.df['p_r'].values)# * 0.01# / 0.1)
+        SZ = (self.df['s_z'].values)# / 0.14)
+        SR = (self.df['s_r'].values)# / 0.35)
+        ST = (self.df['s_t'].values)
+
+        Misfit = (PZ)
+
+        lowest_indices = Misfit.argsort()[0:n_lowest]
+
+        ## Time Arrays For P and S based on the Observed data
+        tp = np.linspace(self.BW_obs.or_P_len * dt - self.param['Zero_len'] * dt - self.param['Taper_len'],
+                        self.BW_obs.or_P_len * dt + self.BW_obs.Pre_P + self.BW_obs.Post_P + self.param[
+                            'Zero_len'] * dt + self.param['Taper_len'], len(self.BW_obs.P_stream.traces[0]),
+                        endpoint=True)
+
+        ts = np.linspace(self.BW_obs.or_S_len * dt - self.param['Zero_len'] * dt - self.param['Taper_len'],
+                        self.BW_obs.or_S_len * dt + self.BW_obs.Pre_S + self.BW_obs.Post_S + self.param[
+                            'Zero_len'] * dt + self.param['Taper_len'], len(self.BW_obs.S_stream.traces[0]),
+                        endpoint=True)
+
+
         for v, i in enumerate(lowest_indices):
             # for v,i in enumerate(depths_used):
             # for i in np.arange(0,2):
@@ -114,52 +137,58 @@ class Plot_waveforms:
             BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime)
 
             # ## Determine the misfit:
-            mis = Misfit()
-            Xi_bw, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.otime, False)
+            # mis = Misfit()
+            # Xi_bw,Xi_Amp, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.otime, False)
+            # s_z = Xi_bw[0] * 0.1#* 0.14
+            # s_r = Xi_bw[1] * 0.1#* 0.35
+            # s_t = Xi_bw[2]* 1
+            # p_z = Xi_bw[3]* 5
+            # p_r = Xi_bw[4] *0.1#* 0.1
+            # Xi = s_z + s_r + s_t + p_z + p_r
 
-            ax1 = self.part_of_waveform(ax1, BW_syn.P_stream.traces[0].data, int(time_shift[1]), Norm=Norm)
-            ax2 = self.part_of_waveform(ax2, BW_syn.P_stream.traces[1].data, int(P_shift[i]), Norm=Norm)
-            ax3 = self.part_of_waveform(ax3, BW_syn.S_stream.traces[0].data, int(S_shift[i]), Norm=Norm)
-            ax4 = self.part_of_waveform(ax4, BW_syn.S_stream.traces[1].data, int(S_shift[i]), Norm=Norm)
-            ax5 = self.part_of_waveform(ax5, BW_syn.S_stream.traces[2].data, int(S_shift[i]), Norm=Norm)
+
+            ax1 = self.part_of_waveform(ax1, tp, BW_syn.P_stream.traces[0].data, int(P_shift[i]), Norm=Norm)
+            ax2 = self.part_of_waveform(ax2, tp, BW_syn.P_stream.traces[1].data, int(P_shift[i]), Norm=Norm)
+            ax3 = self.part_of_waveform(ax3, ts, BW_syn.S_stream.traces[0].data, int(S_shift[i]), Norm=Norm)
+            ax4 = self.part_of_waveform(ax4, ts, BW_syn.S_stream.traces[1].data, int(S_shift[i]), Norm=Norm)
+            ax5 = self.part_of_waveform(ax5, ts, BW_syn.S_stream.traces[2].data, int(S_shift[i]), Norm=Norm)
 
         def Time_Conv(x, pos):
             'The two args are the value and tick position'
-            return t[int(x)]
+
+            return '%.f' % (t[int(x)])
 
         formatter = FuncFormatter(Time_Conv)
+        # TODO: Fix this xlabel thingy!!!
 
-        t = np.linspace(self.BW_obs.or_P_len * dt - self.BW_obs.Pre_P - self.param['Zero_len'] * dt,
-                        self.BW_obs.or_P_len * dt + self.BW_obs.Post_P + self.param['Zero_len'] * dt, len(self.BW_obs.P_stream.traces[0]))
+
         P_time = BW_syn.get_P(epi[lowest_indices[0]], depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        ax1 = self.add_observed(ax1, tp,self.BW_obs.P_original.traces[0].data, self.BW_obs.P_stream.traces[0].data,
+                                self.BW_obs.or_P_len, int(self.BW_obs.P_len - 2*self.param['Taper_len']/dt),dt, 'PZ', None, 'P', Norm)
+        ax1.set_xlim(175 , 195)
 
-        ax1 = self.add_observed(ax1, self.BW_obs.P_original.traces[0].data, self.BW_obs.P_stream.traces[0].data,
-                                self.BW_obs.or_P_len, self.BW_obs.P_len, 'PZ', None, 'P', Norm)
-        ax1.set_xlim(400, 800)
-        ax1.xaxis.set_major_formatter(formatter)
 
-        ax2 = self.add_observed(ax2, self.BW_obs.P_original.traces[1].data, self.BW_obs.P_stream.traces[1].data,
-                                self.BW_obs.or_P_len, self.BW_obs.P_len, 'PR', None, 'P', Norm)
-        ax2.set_xlim(400, 800)
-        ax2.xaxis.set_major_formatter(formatter)
 
-        t = np.linspace(self.BW_obs.or_S_len * dt - self.BW_obs.Pre_S - self.param['Zero_len'] * dt,
-                        self.BW_obs.or_S_len * dt + self.BW_obs.Post_S + self.param['Zero_len'] * dt, len(self.BW_obs.S_stream.traces[0]))
+        ax2 = self.add_observed(ax2, tp,self.BW_obs.P_original.traces[1].data, self.BW_obs.P_stream.traces[1].data,
+                                self.BW_obs.or_P_len,int(self.BW_obs.P_len - 2*self.param['Taper_len']/dt),dt, 'PR', None, 'P', Norm)
+        ax2.set_xlim(175, 195)
+
+
+
         S_time = BW_syn.get_S(epi[lowest_indices[0]], depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
-        ax3 = self.add_observed(ax3, self.BW_obs.S_original.traces[0].data, self.BW_obs.S_stream.traces[0].data,
-                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'SZ', None, 'S', Norm)
-        ax3.set_xlim(300, 1000)
-        ax3.xaxis.set_major_formatter(formatter)
+        ax3 = self.add_observed(ax3, ts,self.BW_obs.S_original.traces[0].data, self.BW_obs.S_stream.traces[0].data,
+                                self.BW_obs.or_S_len,int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt),dt, 'SZ', None, 'S', Norm)
+        ax3.set_xlim(340, 360)
 
-        ax4 = self.add_observed(ax4, self.BW_obs.S_original.traces[1].data, self.BW_obs.S_stream.traces[1].data,
-                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'SR', None, 'S', Norm)
-        ax4.set_xlim(300, 1000)
-        ax4.xaxis.set_major_formatter(formatter)
 
-        ax5 = self.add_observed(ax5, self.BW_obs.S_original.traces[2].data, self.BW_obs.S_stream.traces[2].data,
-                                self.BW_obs.or_S_len, self.BW_obs.S_len, 'ST', None, 'S', Norm)
-        ax5.set_xlim(300, 1000)
-        ax5.xaxis.set_major_formatter(formatter)
+        ax4 = self.add_observed(ax4,ts, self.BW_obs.S_original.traces[1].data, self.BW_obs.S_stream.traces[1].data,
+                                self.BW_obs.or_S_len, int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt), dt,'SR', None, 'S', Norm)
+        ax4.set_xlim(340, 360)
+
+        ax5 = self.add_observed(ax5,ts,self.BW_obs.S_original.traces[2].data, self.BW_obs.S_stream.traces[2].data,
+                                self.BW_obs.or_S_len,int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt), dt,'ST', None, 'S', Norm)
+        ax5.set_xlim(340, 360)
+
         ax5.set_xlabel(self.otime.strftime('From Origin Time: %Y-%m-%dT%H:%M:%S + [sec]'), fontsize=18)
 
         # plt.tight_layout()
@@ -172,7 +201,7 @@ class Plot_waveforms:
         # plt.show()
         plt.close()
 
-    def part_of_waveform(self, ax, trace_wo_shift, Shift, Norm=True):
+    def part_of_waveform(self, ax, t, trace_wo_shift, Shift, Norm=True):
         """
         :param
         ax = axes
@@ -182,15 +211,15 @@ class Plot_waveforms:
         """
         P_shift_array = self.shift(trace_wo_shift, int(Shift))
         if Norm == True:
-            ax.plot(self.normalize(P_shift_array), 'r', linewidth=0.1)
+            ax.plot(t,self.normalize(P_shift_array), 'r', linewidth=0.1)
         else:
-            ax.plot(P_shift_array, 'r', linewidth=0.1)
+            ax.plot(t,P_shift_array, 'r', linewidth=0.1)
         ax.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
         ax.tick_params(axis='x', labelsize=18)
         ax.tick_params(axis='y', labelsize=18)
         return ax
 
-    def add_observed(self, ax, original_trace_OBS, cut_trace_OBS, origin_phase_len, len_of_phase, label,
+    def add_observed(self, ax, t,original_trace_OBS, cut_trace_OBS, origin_phase_len, len_of_phase, dt,label,
                      Phase_pick=None, label_phase_pick=None, Norm=True):
         """
         :param
@@ -201,16 +230,16 @@ class Plot_waveforms:
         len_of_phase cut = Length from pre to post phase cut (samples)
         Norm = True (Normalize) , False (Do not Normalize)
         """
-        start_cut = origin_phase_len - self.param['Zero_len']
-        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len']
+        start_cut = origin_phase_len - self.param['Zero_len'] - int(self.param['Taper_len'] / dt)
+        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len'] +int(self.param['Taper_len'] / dt)
 
         if Norm == True:
-            ax.plot(self.normalize(original_trace_OBS[start_cut:end_cut]), 'g',
+            ax.plot(t,self.normalize(original_trace_OBS[start_cut:end_cut]), 'g',
                     linewidth=0.5, alpha=0.7)
-            ax.plot(self.normalize(cut_trace_OBS), 'b')
+            ax.plot(t,self.normalize(cut_trace_OBS), 'b')
         else:
-            ax.plot(original_trace_OBS[start_cut:end_cut], 'g', linewidth=0.5, alpha=0.7)
-            ax.plot(cut_trace_OBS, 'b')
+            ax.plot(t,original_trace_OBS[start_cut:end_cut], 'g', linewidth=0.5, alpha=0.7)
+            ax.plot(t,cut_trace_OBS, 'b')
         ymin, ymax = ax.get_ylim()
         xmin, xmax = ax.get_xlim()
         ax.text(xmax - 5, ymin / 1.7, label, fontsize=20, color='b')

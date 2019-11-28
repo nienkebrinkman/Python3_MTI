@@ -25,73 +25,66 @@ class Grid_Search:
     def start_GS(self, BW_obs, depth, epi, M0):
         savepath = self.prior['save_dir'] + '/%s.txt' % self.prior['save_name']
         color = 'b'
-        self.plot_original_vs_filter(BW_obs,color,self.prior['save_dir'],"OBS")
+        # self.plot_original_vs_filter(BW_obs,color,self.prior['save_dir'],"OBS")
 
-        # strike_len = np.linspace(0, 360, int(360 / 5) + 1, endpoint=True)
-        # dip_len = np.linspace(0, 90, int(90 / 5) + 1, endpoint=True)
-        # rake_len = np.linspace(-180, 180, int(360 / 5) + 1, endpoint=True)
-
-
-        strike_len = np.array([315,5,155])
-        dip_len = np.array([45,75,50])
-        rake_len = np.array([60,-95,-150])
-
+        strike_len = np.linspace(0, 360, int(360 / 5) + 1, endpoint=True)
+        dip_len = np.linspace(0, 90, int(90 / 5) + 1, endpoint=True)
+        rake_len = np.linspace(-180, 180, int(360 / 5) + 1, endpoint=True)
 
         with open(savepath, 'w') as save_file:
             self.write_par(save_file)
             i = 0
             print('Iteration: %i' % i)
-            # for i_s, strike in enumerate(strike_len):
-            #     for i_d, dip in enumerate(dip_len):
-            #         for i_r, rake in enumerate(rake_len):
+            for i_s, strike in enumerate(strike_len):
+                for i_d, dip in enumerate(dip_len):
+                    for i_r, rake in enumerate(rake_len):
 
-            for i in range(0,len(dip_len)):
-                strike = strike_len[i]
-                dip = dip_len[i]
-                rake = rake_len[i]
-                ## Get the synthetic Data:
-                dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(
-                    lat1=self.prior['la_r'],
-                    lon1=self.prior['lo_r'],
-                    azi1=self.prior['baz'],
-                    a12=epi, outmask=1929)
-                st_syn = self.seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth,
-                                                   strike=strike, dip=dip, rake=rake,
-                                                   time=self.or_time, M0=M0)
 
-                self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time)
-                color = 'r'
-                self.plot_original_vs_filter(self.BW_syn,color, self.prior['save_dir'], str(i))
+                        ## Get the synthetic Data:
+                        dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(
+                            lat1=self.prior['la_r'],
+                            lon1=self.prior['lo_r'],
+                            azi1=self.prior['baz'],
+                            a12=epi, outmask=1929)
+                        st_syn = self.seis.get_seis_manual(la_s=dict['lat2'], lo_s=dict['lon2'], depth=depth,
+                                                           strike=strike, dip=dip, rake=rake,
+                                                           time=self.or_time, M0=M0)
 
-                # ## Determine the misfit:
-                Xi_bw, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
-                                                                   self.or_time, self.prior['PLOT'])
-                if self.prior['PLOT'] == True:
-                    # self.plot()
-                    if not os.path.exists(self.prior['save_dir'] + '/plots/'):
-                        os.makedirs(self.prior['save_dir'] + '/plots/')
-                    fig.savefig(
-                        self.prior['save_dir'] + '/plots/%.3f_%.3f_%.3f_%05i.png' % (strike,dip,rake, i))
-                    plt.close("all")
+                        self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time)
+                        # color = 'r'
+                        # self.plot_original_vs_filter(self.BW_syn,color, self.prior['save_dir'], str(i))
 
-                self.write_sample(save_file, epi, depth, strike, dip, rake, M0, Xi_bw, time_shift, i, accept=1)
-                i += 1
-                print('Iteration: %i' % i)
+                        # ## Determine the misfit:
+                        Xi_bw, Xi_Amp, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
+                                                                           self.or_time, self.prior['PLOT'])
+
+                        M0_New = M0 / np.mean(amplitude)
+                        if self.prior['PLOT'] == True:
+                            # self.plot()
+                            if not os.path.exists(self.prior['save_dir'] + '/plots/'):
+                                os.makedirs(self.prior['save_dir'] + '/plots/')
+                            fig.savefig(
+                                self.prior['save_dir'] + '/plots/%.3f_%.3f_%.3f_%05i.png' % (strike,dip,rake, i))
+                            plt.close("all")
+
+                        self.write_sample(save_file, epi, depth, strike, dip, rake, M0_New, Xi_bw, Xi_Amp,time_shift, i, accept=1)
+                        i += 1
+                        print('Iteration: %i' % i)
             save_file.close()
 
-    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, time_shift, iteration,
+    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Xi_Amp,time_shift, iteration,
                      accept=0):
-        s_z = Xi_bw[0]
-        s_r = Xi_bw[1]
-        s_t = Xi_bw[2]
-        p_z = Xi_bw[3]
-        p_r = Xi_bw[4]
+        s_z = Xi_bw[0]# * 0.1 #* 0.14
+        s_r = Xi_bw[1]# * 0.1#* 0.35
+        s_t = Xi_bw[2]# * 1
+        p_z = Xi_bw[3]# * 5
+        p_r = Xi_bw[4]# * 5#* 0.1
         Xi = s_z + s_r + s_t + p_z + p_r
 
         file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (
             epi, depth, strike, dip, rake, M0, Xi))
         file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (
-            p_z, p_r, s_z, s_r, s_t, Xi))
+            p_z, p_r, s_z, s_r, s_t, Xi_Amp))
         file_name.write("%i, %i, %i\n\r" % (time_shift[0], time_shift[1], iteration))
 
     def write_par(self, file_name):
@@ -116,6 +109,8 @@ class Grid_Search:
         file_name.write("Taper_syn:%5i\n\r" % self.prior['Taper_syn'])  #
         file_name.write("Zero_phase:%5i\n\r" % self.prior['Zero_Phase'])  #
         file_name.write("Order:%5i\n\r" % self.prior['Order'])  #
+        file_name.write("Taper Length:%.2f\n\r" % self.prior['Taper_len'])  #
+        file_name.write("Zero Length:%.2f\n\r" % self.prior['Zero_len'])  #
         file_name.write("amount samples:%i\n\r" % self.prior['sample_number'])  #
         file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
         file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #

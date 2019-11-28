@@ -29,7 +29,7 @@ class Cut_windows:
     def get_S(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['S'])
-        return tt[0].time
+        return tt[0].time - 3.0 #TODO: REMEMBER THAT YOU PUT HERE SOMETHING MANUAL AND YOU SHOULD REMOVE THIS AGAIN AT SOME POINT!!!
 
     def get_pp(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
@@ -112,7 +112,7 @@ class Cut_windows:
         self.P_original = self.Filter(self.P_original, HP=self.P_HP, LP=self.P_LP)
         self.S_original = self.Filter(self.S_original, HP=self.S_HP, LP=self.S_LP)
 
-        wlen_seconds = 3#self.Taper_Len
+        wlen_seconds = self.Taper_Len
         zero_len = self.Zero_len
         wlen = int(wlen_seconds / self.dt)
 
@@ -166,28 +166,35 @@ class Cut_windows:
             self.S_stream = S_stream
             self.P_stream = P_stream
 
+            # Create the taper:
+            Taper_S = self.Create_Taper(self.S_len,wlen, zero_len)
+            Taper_P = self.Create_Taper(self.P_len,wlen,zero_len)
 
-            window_S = self.Create_Taper(self.S_len,wlen, zero_len)
-            window_P = self.Create_Taper(self.P_len,wlen,zero_len)
+            # Apply the Taper:
+            if i != 2:
+                self.P_stream.traces[i].data *= Taper_P
+            self.S_stream.traces[i].data *= Taper_S
 
-            import matplotlib.pylab as plt
-            plt.figure()
-            plt.subplot(211)
-            plt.plot(self.P_stream.traces[0].data, 'b' , label = 'Non-Tapered P-window')
-            plt.plot(self.P_stream.traces[0].data * window_P, 'r' , label = 'Tapered P-window')
-            plt.legend()
-            plt.subplot(212)
-            plt.plot(self.S_stream.traces[0].data, 'b' , label = 'Non-Tapered S-window')
-            plt.plot(self.S_stream.traces[0].data * window_S, 'r' , label = 'Tapered S-window')
-            plt.legend()
-            plt.show()
+            # import matplotlib.pylab as plt
+            # plt.figure()
+            # plt.subplot(211)
+            # plt.plot(self.P_stream.traces[0].data, 'b' , label = 'Non-Tapered P-window')
+            # plt.plot(self.P_stream.traces[0].data * Taper_P, 'r' , label = 'Tapered P-window')
+            # plt.legend()
+            # plt.subplot(212)
+            # plt.plot(self.S_stream.traces[0].data, 'b' , label = 'Non-Tapered S-window')
+            # plt.plot(self.S_stream.traces[0].data * Taper_S, 'r' , label = 'Tapered S-window')
+            # plt.legend()
+            # plt.show()
+            #
+            # a=1
 
 
 
             # Trim the original waveforms after the S arrival so that the waveforms are not too long
-            self.original.trim(endtime=end_S + 25)
-            self.P_original.trim(endtime=end_S + 25)
-            self.S_original.trim(endtime=end_S + 25)
+            # self.original.trim(endtime=end_S + 25)
+            # self.P_original.trim(endtime=end_S + 25)
+            # self.S_original.trim(endtime=end_S + 25)
 
     def Create_Taper(self, Trace_len,wlen, zero_len,):
         hann = np.hanning(wlen * 2)
