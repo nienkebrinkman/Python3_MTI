@@ -27,7 +27,7 @@ class Plot_waveforms:
             os.makedirs(self.dir)
 
         self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r",
-                             "s_t", 'bw_tot', 'Shift_S', 'Shift_P', 'accept']
+                             "s_t", 'Xi_Amp', 'Shift_S', 'Shift_P', 'accept']
         data = np.loadtxt(path_txt_inversion, delimiter=',', skiprows=skiprows)
         self.df = pd.DataFrame(data, columns=self.column_names)
         self.BW_obs = BW_obs
@@ -94,21 +94,75 @@ class Plot_waveforms:
         ax4 = plt.subplot2grid((5, 1), (3, 0))
         ax5 = plt.subplot2grid((5, 1), (4, 0))
 
-        n_lowest = 20
+        n_lowest = 50
         # lowest_indices = self.df['Total_misfit'].values.argsort()[0:n_lowest]
         depths_inds = self.df['Depth'].values.argsort()
         depths = self.df['Depth'].values[depths_inds]
 
-        #### PLOT:
-        PZ = (self.df['p_z'].values)
-        PR = (self.df['p_r'].values)# * 0.01# / 0.1)
+        # #### PLOT:
+        # PZ = (self.df['p_z'].values)
+        # PR = (self.df['p_r'].values)# * 0.01# / 0.1)
+        # SZ = (self.df['s_z'].values)# / 0.14)
+        # SR = (self.df['s_r'].values)# / 0.35)
+        # ST = (self.df['s_t'].values)
+        #
+        # Misfit = (PZ)
+
+        PZ = (self.df['p_z'].values)# *10
+        PR = (self.df['p_r'].values)#  / 0.1)
         SZ = (self.df['s_z'].values)# / 0.14)
         SR = (self.df['s_r'].values)# / 0.35)
-        ST = (self.df['s_t'].values)
+        ST = (self.df['s_t'].values) #* 10
+        AMP = (self.df['Xi_Amp'].values) #* 10
 
-        Misfit = (PZ)
+        misfit = (PZ +PR + SZ + SR + ST + AMP)
 
-        lowest_indices = Misfit.argsort()[0:n_lowest]
+        lowest_indices = misfit.argsort()[0:n_lowest]
+
+
+        ####################
+        PZ = (self.df['p_z'].values)
+        PR = (self.df['p_r'].values / 0.1) * 0.017
+        SZ = (self.df['s_z'].values / 0.14)* 0.019
+        SR = (self.df['s_r'].values / 0.35) * 0.0556
+        ST = (self.df['s_t'].values)  * 2.33
+
+        misfit = PZ + ST + PR + SZ +SR
+        # indices = np.where(misfit < 0.13)
+
+
+        ### CLUSTERING BASED ON MISFIT
+        run_len = np.linspace(0, len(misfit), len(misfit), endpoint=False, dtype=int)
+        ####PZ
+        # lowest_indices = run_len[(misfit < 0.13) & (strike < 70)]
+        # lowest_indices = run_len[(misfit < 0.13) & ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100))]
+        # lowest_indices = run_len[(misfit < 0.13) &  ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) ]
+        # lowest_indices = run_len[(misfit < 0.13) &  (250< strike) & (strike < 349) ]
+        # lowest_indices = run_len[(misfit < 0.13) & (strike > 349) ]
+
+        ####PZ+ST
+        # lowest_indices = run_len[(misfit < 0.27) & (strike < 250) ]
+        # lowest_indices = run_len[(misfit < 0.27) & (strike > 250) ]
+
+        ####TOTAL
+        # lowest_indices = run_len[(misfit < 1.25) & (strike < 100)]
+        # lowest_indices = run_len[(misfit < 1.25) &(strike > 100)  & (strike<255)]
+        # lowest_indices = run_len[(misfit < 1.25) &(strike > 255) ]
+
+        ### CLUSTERING BASED ON SHIFTS:
+        ## S-SHIFT:
+
+        lowest_indices = run_len[((-61< S_shift) & (S_shift < -59))]
+        lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]
+
+        # lowest_indices = run_len[((-5< S_shift) & (S_shift < -3))]
+        # lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]
+
+        # lowest_indices = run_len[((29< S_shift) & (S_shift < 31))]
+        # lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]
+
+
+
 
         ## Time Arrays For P and S based on the Observed data
         tp = np.linspace(self.BW_obs.or_P_len * dt - self.param['Zero_len'] * dt - self.param['Taper_len'],
@@ -137,61 +191,127 @@ class Plot_waveforms:
             BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime)
 
             # ## Determine the misfit:
-            # mis = Misfit()
-            # Xi_bw,Xi_Amp, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.otime, False)
-            # s_z = Xi_bw[0] * 0.1#* 0.14
-            # s_r = Xi_bw[1] * 0.1#* 0.35
-            # s_t = Xi_bw[2]* 1
-            # p_z = Xi_bw[3]* 5
-            # p_r = Xi_bw[4] *0.1#* 0.1
-            # Xi = s_z + s_r + s_t + p_z + p_r
+            mis = Misfit()
+            Xi_bw, Xi_Norm, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.otime, False)
+            s_z = Xi_bw[0] * 0.1#* 0.14
+            s_r = Xi_bw[1] * 0.1#* 0.35
+            s_t = Xi_bw[2]* 1
+            p_z = Xi_bw[3]* 5
+            p_r = Xi_bw[4] *0.1#* 0.1
+            Xi = s_z + s_r + s_t + p_z + p_r
+
+            N_PZ = (np.max(np.abs( self.BW_obs.P_stream.traces[0].data ))) / np.max(np.abs(BW_syn.P_stream.traces[0].data))
+            N_PR = (np.max(np.abs( self.BW_obs.P_stream.traces[1].data ))) / np.max(np.abs(BW_syn.P_stream.traces[1].data))
+            N_SZ = (np.max(np.abs( self.BW_obs.S_stream.traces[0].data ))) / np.max(np.abs(BW_syn.S_stream.traces[0].data))
+            N_SR = (np.max(np.abs( self.BW_obs.S_stream.traces[1].data ))) / np.max(np.abs(BW_syn.S_stream.traces[1].data))
+            N_ST = (np.max(np.abs( self.BW_obs.S_stream.traces[2].data ))) / np.max(np.abs(BW_syn.S_stream.traces[2].data))
 
 
-            ax1 = self.part_of_waveform(ax1, tp, BW_syn.P_stream.traces[0].data, int(P_shift[i]), Norm=Norm)
-            ax2 = self.part_of_waveform(ax2, tp, BW_syn.P_stream.traces[1].data, int(P_shift[i]), Norm=Norm)
-            ax3 = self.part_of_waveform(ax3, ts, BW_syn.S_stream.traces[0].data, int(S_shift[i]), Norm=Norm)
-            ax4 = self.part_of_waveform(ax4, ts, BW_syn.S_stream.traces[1].data, int(S_shift[i]), Norm=Norm)
-            ax5 = self.part_of_waveform(ax5, ts, BW_syn.S_stream.traces[2].data, int(S_shift[i]), Norm=Norm)
 
-        def Time_Conv(x, pos):
-            'The two args are the value and tick position'
+            ax1 = self.part_of_waveform(ax1, tp, BW_syn.P_original.traces[0].data,BW_syn.P_stream.traces[0].data, int(P_shift[i]), BW_syn.or_P_len, int(BW_syn.P_len - 2*self.param['Taper_len']/dt),dt, Norm=Norm, Norm_Fact = N_PZ)
+            ax2 = self.part_of_waveform(ax2, tp, BW_syn.P_original.traces[1].data,BW_syn.P_stream.traces[1].data, int(P_shift[i]), BW_syn.or_P_len, int(BW_syn.P_len - 2*self.param['Taper_len']/dt),dt, Norm=Norm, Norm_Fact = N_PR)
+            ax3 = self.part_of_waveform(ax3, ts, BW_syn.S_original.traces[0].data,BW_syn.S_stream.traces[0].data, int(S_shift[i]), BW_syn.or_S_len, int(BW_syn.S_len - 2*self.param['Taper_len']/dt),dt, Norm=Norm, Norm_Fact = N_SZ)
+            ax4 = self.part_of_waveform(ax4, ts, BW_syn.S_original.traces[1].data,BW_syn.S_stream.traces[1].data, int(S_shift[i]), BW_syn.or_S_len, int(BW_syn.S_len - 2*self.param['Taper_len']/dt),dt, Norm=Norm, Norm_Fact = N_SR)
+            ax5 = self.part_of_waveform(ax5, ts, BW_syn.S_original.traces[2].data,BW_syn.S_stream.traces[2].data, int(S_shift[i]), BW_syn.or_S_len, int(BW_syn.S_len - 2*self.param['Taper_len']/dt),dt, Norm=Norm, Norm_Fact = N_ST)
 
-            return '%.f' % (t[int(x)])
+            if i == lowest_indices[0]:
+                ax1.text(0.7,0.9,'NPZ=%5.2f ; NST=%5.2f' % (Xi_Norm[3],Xi_Norm[2]), transform=ax1.transAxes)
+                ax2.text(0.7,0.9,'NPZ=%5.2f ; NST=%5.2f' % (Xi_Norm[3],Xi_Norm[2]), transform=ax2.transAxes)
+                ax3.text(0.7,0.9,'NPZ=%5.2f ; NST=%5.2f' % (Xi_Norm[3],Xi_Norm[2]), transform=ax3.transAxes)
+                ax5.text(0.7,0.9,'NPZ=%5.2f ; NST=%5.2f' % (Xi_Norm[3],Xi_Norm[2]), transform=ax4.transAxes)
+                ax4.text(0.7,0.9,'NPZ=%5.2f ; NST=%5.2f' % (Xi_Norm[3],Xi_Norm[2]), transform=ax5.transAxes)
+            if v == 0:
+                ymin1 = np.min(BW_syn.P_stream.traces[0].data)* N_PZ
+                ymin2 = np.min(BW_syn.P_stream.traces[1].data)* N_PR
+                ymin3 = np.min(BW_syn.S_stream.traces[0].data)* N_SZ
+                ymin4 = np.min(BW_syn.S_stream.traces[1].data)* N_SR
+                ymin5 = np.min(BW_syn.S_stream.traces[2].data)* N_ST
 
-        formatter = FuncFormatter(Time_Conv)
-        # TODO: Fix this xlabel thingy!!!
+                ymax1 = np.max(BW_syn.P_stream.traces[0].data)* N_PZ
+                ymax2 = np.max(BW_syn.P_stream.traces[1].data)* N_PR
+                ymax3 = np.max(BW_syn.S_stream.traces[0].data)* N_SZ
+                ymax4 = np.max(BW_syn.S_stream.traces[1].data)* N_SR
+                ymax5 = np.max(BW_syn.S_stream.traces[2].data)* N_ST
+            else:
+                if ymin1  > np.min(BW_syn.P_stream.traces[0].data)* N_PZ:
+                    ymin1 = np.min(BW_syn.P_stream.traces[0].data)* N_PZ
+                if ymin2 > np.min(BW_syn.P_stream.traces[1].data) * N_PR:
+                    ymin2 = np.min(BW_syn.P_stream.traces[1].data)* N_PR
+                if ymin3  > np.min(BW_syn.S_stream.traces[0].data)* N_SZ:
+                    ymin3 = np.min(BW_syn.S_stream.traces[0].data)* N_SZ
+                if ymin4  > np.min(BW_syn.S_stream.traces[1].data)* N_SR:
+                    ymin4 = np.min(BW_syn.S_stream.traces[1].data)* N_SR
+                if ymin5  > np.min(BW_syn.S_stream.traces[2].data)* N_ST:
+                    ymin5 = np.min(BW_syn.S_stream.traces[2].data)* N_ST
 
+                if ymax1 < np.max(BW_syn.P_stream.traces[0].data)* N_PZ:
+                    ymax1 = np.max(BW_syn.P_stream.traces[0].data)* N_PZ
+                if ymax2 < np.max(BW_syn.P_stream.traces[1].data)* N_PR:
+                    ymax2 = np.max(BW_syn.P_stream.traces[1].data)* N_PR
+                if ymax3 < np.max(BW_syn.S_stream.traces[0].data)* N_SZ:
+                    ymax3 = np.max(BW_syn.S_stream.traces[0].data)* N_SZ
+                if ymax4 < np.max(BW_syn.S_stream.traces[1].data)* N_SR:
+                    ymax4 = np.max(BW_syn.S_stream.traces[1].data)* N_SR
+                if ymax5 < np.max(BW_syn.S_stream.traces[2].data)* N_ST:
+                    ymax5 = np.max(BW_syn.S_stream.traces[2].data)* N_ST
 
-        P_time = BW_syn.get_P(epi[lowest_indices[0]], depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
+        if ymin1 > np.min(self.BW_obs.P_stream.traces[0].data):
+            ymin1 = np.min(self.BW_obs.P_stream.traces[0].data)
+        if ymin2 > np.min(self.BW_obs.P_stream.traces[1].data):
+            ymin2 = np.min(self.BW_obs.P_stream.traces[1].data)
+        if ymin3 > np.min(self.BW_obs.S_stream.traces[0].data):
+            ymin3 = np.min(self.BW_obs.S_stream.traces[0].data)
+        if ymin4 > np.min(self.BW_obs.S_stream.traces[1].data):
+            ymin4 = np.min(self.BW_obs.S_stream.traces[1].data)
+        if ymin5 > np.min(self.BW_obs.S_stream.traces[2].data):
+            ymin5 = np.min(self.BW_obs.S_stream.traces[2].data)
+
+        if ymax1 < np.max(self.BW_obs.P_stream.traces[0].data):
+            ymax1 = np.max(self.BW_obs.P_stream.traces[0].data)
+        if ymax2 < np.max(self.BW_obs.P_stream.traces[1].data):
+            ymax2 = np.max(self.BW_obs.P_stream.traces[1].data)
+        if ymax3 < np.max(self.BW_obs.S_stream.traces[0].data):
+            ymax3 = np.min(self.BW_obs.S_stream.traces[0].data)
+        if ymax4< np.max(self.BW_obs.S_stream.traces[1].data):
+            ymax4 = np.max(self.BW_obs.S_stream.traces[1].data)
+        if ymax5 < np.max(self.BW_obs.S_stream.traces[2].data):
+            ymax5 = np.max(self.BW_obs.S_stream.traces[2].data)
+
+        # P_time = BW_syn.get_P(epi[lowest_indices[0]], depth[lowest_indices[0]]) - P_shift[lowest_indices[0]] * delta
         ax1 = self.add_observed(ax1, tp,self.BW_obs.P_original.traces[0].data, self.BW_obs.P_stream.traces[0].data,
                                 self.BW_obs.or_P_len, int(self.BW_obs.P_len - 2*self.param['Taper_len']/dt),dt, 'PZ', None, 'P', Norm)
         ax1.set_xlim(175 , 195)
+        ax1.set_ylim(ymin1,ymax1 )
 
 
 
         ax2 = self.add_observed(ax2, tp,self.BW_obs.P_original.traces[1].data, self.BW_obs.P_stream.traces[1].data,
                                 self.BW_obs.or_P_len,int(self.BW_obs.P_len - 2*self.param['Taper_len']/dt),dt, 'PR', None, 'P', Norm)
         ax2.set_xlim(175, 195)
+        ax2.set_ylim(ymin2, ymax2)
 
 
 
-        S_time = BW_syn.get_S(epi[lowest_indices[0]], depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
+        # S_time = BW_syn.get_S(epi[lowest_indices[0]], depth[lowest_indices[0]]) - S_shift[lowest_indices[0]] * delta
         ax3 = self.add_observed(ax3, ts,self.BW_obs.S_original.traces[0].data, self.BW_obs.S_stream.traces[0].data,
                                 self.BW_obs.or_S_len,int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt),dt, 'SZ', None, 'S', Norm)
         ax3.set_xlim(340, 360)
+        ax3.set_ylim(ymin3, ymax3)
 
 
         ax4 = self.add_observed(ax4,ts, self.BW_obs.S_original.traces[1].data, self.BW_obs.S_stream.traces[1].data,
                                 self.BW_obs.or_S_len, int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt), dt,'SR', None, 'S', Norm)
         ax4.set_xlim(340, 360)
+        ax4.set_ylim(ymin4, ymax4)
 
         ax5 = self.add_observed(ax5,ts,self.BW_obs.S_original.traces[2].data, self.BW_obs.S_stream.traces[2].data,
                                 self.BW_obs.or_S_len,int(self.BW_obs.S_len - 2*self.param['Taper_len']/dt), dt,'ST', None, 'S', Norm)
         ax5.set_xlim(340, 360)
+        ax5.set_ylim(ymin5, ymax5)
 
         ax5.set_xlabel(self.otime.strftime('From Origin Time: %Y-%m-%dT%H:%M:%S + [sec]'), fontsize=18)
 
-        # plt.tight_layout()
+        plt.tight_layout()
 
         # plt.show()
         if Norm == True:
@@ -201,7 +321,7 @@ class Plot_waveforms:
         # plt.show()
         plt.close()
 
-    def part_of_waveform(self, ax, t, trace_wo_shift, Shift, Norm=True):
+    def part_of_waveform(self, ax, t, origin_trace_wo_shift,trace_wo_shift, Shift, origin_phase_len, len_of_phase, dt,Norm=True, Norm_Fact = None):
         """
         :param
         ax = axes
@@ -209,14 +329,20 @@ class Plot_waveforms:
         shift = the shift number
         Norm = True (Normalize) , False (Do not Normalize)
         """
+        start_cut = origin_phase_len - self.param['Zero_len'] - int(self.param['Taper_len'] / dt)
+        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len'] +int(self.param['Taper_len'] / dt)
+
+
         P_shift_array = self.shift(trace_wo_shift, int(Shift))
+        Origin_P_shift_array = self.shift(origin_trace_wo_shift, int(Shift))
+        color = 'blue'
         if Norm == True:
-            ax.plot(t,self.normalize(P_shift_array), 'r', linewidth=0.1)
+            ax.plot(t,Origin_P_shift_array[start_cut:end_cut] * Norm_Fact, c=color, linewidth=0.05, alpha = 0.3)
+            ax.plot(t,P_shift_array * Norm_Fact, c=color, linewidth=0.1)
         else:
-            ax.plot(t,P_shift_array, 'r', linewidth=0.1)
-        ax.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax.tick_params(axis='x', labelsize=18)
-        ax.tick_params(axis='y', labelsize=18)
+            ax.plot(t,Origin_P_shift_array[start_cut:end_cut], c=color, linewidth=0.05, alpha = 0.7)
+            ax.plot(t,P_shift_array, c=color, linewidth=0.1)
+
         return ax
 
     def add_observed(self, ax, t,original_trace_OBS, cut_trace_OBS, origin_phase_len, len_of_phase, dt,label,
@@ -234,12 +360,20 @@ class Plot_waveforms:
         end_cut = origin_phase_len + len_of_phase + self.param['Zero_len'] +int(self.param['Taper_len'] / dt)
 
         if Norm == True:
-            ax.plot(t,self.normalize(original_trace_OBS[start_cut:end_cut]), 'g',
-                    linewidth=0.5, alpha=0.7)
-            ax.plot(t,self.normalize(cut_trace_OBS), 'b')
+            ax.plot(t,original_trace_OBS[start_cut:end_cut], 'k', linewidth=0.5, alpha=0.7)
+            ax.plot(t,cut_trace_OBS, 'k')
         else:
-            ax.plot(t,original_trace_OBS[start_cut:end_cut], 'g', linewidth=0.5, alpha=0.7)
-            ax.plot(t,cut_trace_OBS, 'b')
+            ax.plot(t,original_trace_OBS[start_cut:end_cut], 'k', linewidth=0.5, alpha=0.7)
+            ax.plot(t,cut_trace_OBS, 'k')
+        ax.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        ax.tick_params(axis='x', labelsize=18)
+        ax.tick_params(axis='y', labelsize=18)
+        ax.get_yaxis().get_offset_text().set_visible(False)
+        ax_max = max(ax.get_yticks())
+        exponent_axis = np.floor(np.log10(ax_max)).astype(int)
+        ax.annotate(r'$\times$10$^{%i}$' % (exponent_axis),
+                     xy=(.02, .9), xycoords='axes fraction')
+
         ymin, ymax = ax.get_ylim()
         xmin, xmax = ax.get_xlim()
         ax.text(xmax - 5, ymin / 1.7, label, fontsize=20, color='b')

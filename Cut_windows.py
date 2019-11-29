@@ -24,12 +24,12 @@ class Cut_windows:
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['P'])
-        return tt[0].time
+        return tt[0].time#- 3.0 # For DWThot
 
     def get_S(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['S'])
-        return tt[0].time - 3.0 #TODO: REMEMBER THAT YOU PUT HERE SOMETHING MANUAL AND YOU SHOULD REMOVE THIS AGAIN AT SOME POINT!!!
+        return tt[0].time #- 3.0 # For TAYAK TODO: REMEMBER THAT YOU PUT HERE SOMETHING MANUAL AND YOU SHOULD REMOVE THIS AGAIN AT SOME POINT!!!
 
     def get_pp(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)

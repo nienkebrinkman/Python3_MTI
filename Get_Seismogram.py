@@ -10,7 +10,7 @@ class Get_Seismogram():
     def get_receiver(self):
         receiver = instaseis.Receiver(latitude=self.prior['la_r'], longitude=self.prior['lo_r'],
                                       network=self.prior['network'], station=self.prior['station'],
-                                      location=self.prior['location'])
+                                      location=self.prior['location'], depth_in_m=self.prior['rec_depth'])
         return receiver
 
     def get_source(self, la_s, lo_s, depth, strike, dip, rake, time, M0):

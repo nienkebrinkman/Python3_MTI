@@ -16,6 +16,7 @@ class Misfit:
         misfit_obs = np.array([])
         time_shift = np.array([], dtype=int)
         amplitude = np.array([])
+        Norms = np.array([])
 
         ## Maximum cross-correlation shift allowed:
         max_shift = 3.0
@@ -40,7 +41,7 @@ class Misfit:
         mu_s = np.array([1., 1., 1.]) # S_T can be shifted to 0.95 at some point
         sigma_s = np.array([0.1, 0.1, 0.1])
 
-        Norm_St = (np.sum(np.abs(s_obs[2].data))) / (np.sum(np.abs(s_syn[2].data))) #Normalization Factor SZ
+
 
         for i in range(len(s_obs)):
             delta = s_obs[i].stats.delta
@@ -48,6 +49,8 @@ class Misfit:
             CC_s = cc_obspy[shift]
 
             misfit = np.append(misfit, ((CC_s - mu_s[i]) ** 2) / (2 * (sigma_s[i]) ** 2))# + np.abs(shift))
+
+            Norms = np.append(Norms,  (np.sum(np.abs(s_obs[i].data))) / (np.sum(np.abs(s_syn[i].data))) )  # Normalization Factor SZ
 
             if plot:
                 s_syn_shift_obspy = self.shift(s_syn[i].data, shift_centered)
@@ -92,6 +95,10 @@ class Misfit:
 
         Norm_Pz = (np.sum(np.abs(p_obs[0].data))) / (np.sum(np.abs(p_syn[0].data))) #Normalization Factor PZ
 
+        p_syn_shift_obspy = self.shift(p_syn[0].data, shift_centered)
+        A = (np.dot(p_obs[0].data, p_syn_shift_obspy) / np.dot(p_obs[0].data, p_obs[0].data))
+        amplitude = np.append(amplitude, abs(A))
+
         # P- correlation
         for i in range(len(p_obs)):
             len_P_obs = len(p_obs[i].data)
@@ -103,12 +110,10 @@ class Misfit:
 
             misfit = np.append(misfit, ((CC_p - mu_p[i] ) ** 2) / (2 * (sigma_p[i]) ** 2) )#+ np.abs(shift))
 
-            p_syn_shift_obspy = self.shift(p_syn[i].data, shift_centered)
-            A = (np.dot(p_obs[i].data, p_syn_shift_obspy) / np.dot(p_obs[i].data, p_obs[i].data))
-            amplitude = np.append(amplitude,abs(A))
+            Norms = np.append(Norms, (np.sum(np.abs(p_obs[i].data))) / (np.sum(np.abs(p_syn[i].data))))
 
             if plot:
-
+                p_syn_shift_obspy = self.shift(p_syn[i].data, shift_centered)
                 start = 0#500#int((p_start_obs.timestamp - or_time.timestamp - 10) / delta)
                 end = len(p_syn_shift_obspy) +500#int((p_start_obs.timestamp  - or_time.timestamp+ 30) / delta)
                 delta = p_obs[i].stats.delta
@@ -137,8 +142,9 @@ class Misfit:
                 plt.legend(loc='lower left', fontsize=15)
         # plt.show()
         # sum_misfit = np.sum(misfit)
-        misfit_Amp = (np.abs(np.log10(Norm_Pz) - np.log10(Norm_St)) / np.log(2))**2
-        return misfit, misfit_Amp, amplitude, time_shift,fig
+
+        # misfit_Amp = (np.abs(np.log10(Norm_Pz) - np.log10(Norm_St)) / np.log(2))**2
+        return misfit, Norms, amplitude, time_shift,fig
 
 
     def shift(self, np_array, time_shift):

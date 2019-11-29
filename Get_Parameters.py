@@ -64,7 +64,7 @@ class Get_Parameters:
         PRIOR['network'] = trace.stats.network
         PRIOR['station'] = trace.stats.channel
         PRIOR['location'] = trace.stats.location
-        PRIOR['rec_depth'] = 0#589 # For BFO station
+        PRIOR['rec_depth'] = -2613.4# For BFO station
 
         # = Source =
         ## Catalogue:

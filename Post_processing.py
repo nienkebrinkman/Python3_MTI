@@ -39,7 +39,8 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    path_to_file = directory + 'Event_235_2.txt'
+    # path_to_file = directory + 'DWTHot_Amp.txt'
+    path_to_file = directory + 'DWTHot_Amp.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
@@ -55,18 +56,19 @@ def main():
     # real_v = np.array([None,None, strike, dip, rake, None])
     # real_v = np.array([88.4756, 38438, s2, d2, r2, exp])  # MSS event 5.0
     real_v = None
-
+    #
     # result.Scatter_3d(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
-    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-    #              column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
+    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+                 column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
     # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
     # result.Cluster(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
 
-    # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [0,1,2,3,4,5], show = False)
-    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [6,7,8,9,10,11], show = False)
+    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    # result.Get_cross_plots(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
 
@@ -85,40 +87,103 @@ class Post_processing_sdr:
 
         #### PLOT:
         PZ = (df['p_z'].values)
-        PR = (df['p_r'].values) * 0.01# / 0.1)
-        SZ = (df['s_z'].values)# / 0.14)
-        SR = (df['s_r'].values)# / 0.35)
-        ST = (df['s_t'].values)
+        PR = (df['p_r'].values / 0.1) * 0.017
+        SZ = (df['s_z'].values / 0.14) * 0.019
+        SR = (df['s_r'].values / 0.35)* 0.0556
+        ST = (df['s_t'].values)  * 2.33
+        AMP = df['Xi_amp'].values * 100
 
-        Misfit = (PZ+PR+SZ+SR+ST)
+        Misfit = AMP#PZ + ST + PR + SZ +SR
+        # indices = np.where(Misfit < 0.13)
+        # indices = np.where(Misfit < 0.27)
+        # indices = np.where(Misfit < 1.25)
+        indices = np.where(Misfit == 0.0)[0]
+        misfits = Misfit[indices]
 
-
-        n_lowest = 10000
-        lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
-        # lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
-
-
-        # indices = np.where(df['Total_misfit'].values < 5.0)
-        indices = np.where(Misfit < 3.5)
-
-        # misfits = df['Total_misfit'].values[indices]
-        misfits =Misfit[indices]
         strike = df['Strike'].values[indices]
         dip = df['Dip'].values[indices]
         rake = df['Rake'].values[indices]
+
+
+        ####PZ
+        # G1_S = strike[(strike < 70) ]
+        # G1_D = dip[(strike < 70) ]
+        # G1_R = rake[(strike < 70) ]
+        #
+        # G21_S = strike[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_D = dip[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_R = rake[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        #
+        #
+        # G22_S = strike[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_D = dip[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_R = rake[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        #
+        # G3_S = strike[(250< strike) & (strike < 349) ]
+        # G3_D = dip[(250< strike) & (strike < 349) ]
+        # G3_R = rake[(250< strike) & (strike < 349) ]
+        #
+        # G4_S = strike[(strike > 349) ]
+        # G4_D = dip[(strike > 349) ]
+        # G4_R = rake[(strike > 349) ]
+        # misfits = misfits[(strike > 349) ]
+
+        ####PZ+ST
+        # G1_S = strike[(strike < 250) ]
+        # G1_D = dip[(strike < 250) ]
+        # G1_R = rake[(strike < 250) ]
+        #
+        # G2_S = strike[(strike > 250) ]
+        # G2_D = dip[(strike > 250) ]
+        # G2_R = rake[(strike > 250) ]
+        # misfits = misfits[(strike > 250) ]
+
+        ####TOTAL
+        # G1_S = strike[(strike < 100) ]
+        # G1_D = dip[(strike < 100)  ]
+        # G1_R = rake[(strike < 100) ]
+        #
+        # G2_S = strike[((strike > 100)  & (strike<255) )]
+        # G2_D = dip[((strike > 100)  & (strike<255) )]
+        # G2_R = rake[((strike > 100)  & (strike<255) )]
+        #
+        # G3_S = strike[(strike>255) ]
+        # G3_D = dip[(strike>255)]
+        # G3_R = rake[(strike>255)]
+        # misfits = misfits[(strike>255)]
+
+        # fig = plt.figure(figsize=(5,2.5))
+        # ax = plt.subplot(111)
+        # plt.scatter(np.linspace(1,len(misfits),len(misfits)),misfits, c = 'green', label = 'Group 3')
+        # plt.ylabel('Misfit')
+        # plt.legend()
+        # plt.savefig(dir + '/Xi.pdf')
+        # plt.close()
+
+
+
+
+        #
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure(figsize=(25,10))
         ax = plt.subplot(111, projection = '3d')
         Scat = ax.scatter(strike, dip, rake, c=misfits,cmap = 'rainbow')
+        # Scat = ax.scatter(G1_S, G1_D, G1_R,label = 'Group 1')
+        # Scat = ax.scatter(G2_S, G2_D, G2_R,label = 'Group 2')
+        # Scat = ax.scatter(G3_S, G3_D, G3_R,label = 'Group 3')
+        # Scat = ax.scatter(G3_S, G3_D, G3_R,label = 'Group 3')
+        # Scat = ax.scatter(G4_S, G4_D, G4_R,label = 'Group 4')
         ax.set_xlabel('Strike')
+        ax.set_xlim(0,360)
         ax.set_ylabel('Dip')
         ax.set_zlabel('Rake')
+        plt.legend()
         # cbar = plt.colorbar()
         # cbar.set_label('Misfit', rotation=270, labelpad=20)
         fig.colorbar(Scat)
         plt.show()
-
-        a=1
+        #
+        # a=1
 
     def get_convergence(self, filepath, savename, directory, skiprows, burnin,column_names, show=True):
         dir = directory + '/%s' % (savename)
@@ -252,12 +317,21 @@ class Post_processing_sdr:
         #     plt.savefig(dir + '/Parameter_convergence.pdf')
         #     plt.close()
 
-        #### PLOT:
+        #### PLOT DWTHot:
+        # PZ = (df['p_z'].values) * 1.85
+        # PR = (df['p_r'].values)   # * 0.005#/ 0.1 * 0.017
+        # SZ = (df['s_z'].values) * 0.073  #* 0.010#/ 0.14 * 0.019
+        # SR = (df['s_r'].values) * 0.073   #* 0.03# * 0.0556)#/ 0.35) * 0.0556
+        # ST = (df['s_t'].values)     # * 2.33
+        # AMP = df['Xi_amp'].values * 1000 *2
+
+        #TAYAK:
         PZ = (df['p_z'].values)
-        PR = (df['p_r'].values / 0.1)
-        SZ = (df['s_z'].values / 0.14)
-        SR = (df['s_r'].values / 0.35)
-        ST = (df['s_t'].values)
+        PR = (df['p_r'].values) * 0.005#/ 0.1 * 0.017
+        SZ = (df['s_z'].values)  * 0.006#/ 0.14 * 0.019
+        SR = (df['s_r'].values) * 0.03# * 0.0556)#/ 0.35) * 0.0556
+        ST = (df['s_t'].values) * 2.33
+        AMP = df['Xi_amp'].values * 1000
 
         n_lowest = 10000
         lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
@@ -268,71 +342,125 @@ class Post_processing_sdr:
         SZ = SZ[SZ.argsort()[0:n_lowest]] #SZ[lowest_indices]
         SR = SR[SR.argsort()[0:n_lowest]] #SR[lowest_indices]
         ST = ST[ST.argsort()[0:n_lowest]] #ST[lowest_indices]
+        AMP = AMP[AMP.argsort()[0:n_lowest]]
 
-        plt.figure(figsize=(20,20))
-        ax1 = plt.subplot(511)
+        plt.figure(figsize=(8,4))
+        ax1 = plt.subplot(111)
         ax1.plot(PZ, label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
+        ax1.plot(ST, label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
+        ax1.plot(SZ, label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
+        ax1.plot(SR, label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
+        ax1.plot(PR, label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
+        ax1.plot(AMP, label = 'AMP, Mean:%.2f Min%.2f' %(np.mean(AMP),AMP.min()))
         ax1.set_ylabel("Misfit", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
+        plt.legend(fontsize=16, loc='lower right')
         plt.tight_layout()
         plt.yscale('log')
-        plt.ylim((pow(20, -1), pow(10, 1)))
+        plt.ylim((pow(20, -5), pow(10, 1)))
+        plt.savefig(dir + '/misfits.pdf')
 
+        #
+        # ax2 = plt.subplot(512)
+        # ax2.plot(PR, label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
+        # ax2.set_ylabel("Misfit", fontsize=25)
+        # ax2.tick_params(axis='x', labelsize=20)
+        # ax2.tick_params(axis='y', labelsize=20)
+        # ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # plt.yscale('log')
+        # plt.ylim((pow(20, -1), pow(10, 1)))
+        #
+        #
+        # ax3 = plt.subplot(513)
+        # ax3.plot(SZ, label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
+        # ax3.set_ylabel("Misfit", fontsize=25)
+        # ax3.tick_params(axis='x', labelsize=20)
+        # ax3.tick_params(axis='y', labelsize=20)
+        # ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # plt.yscale('log')
+        # plt.ylim((pow(20, -1), pow(10, 1)))
+        #
+        # ax4 = plt.subplot(514)
+        # ax4.plot(SR , label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
+        # ax4.set_ylabel("Mean", fontsize=25)
+        # ax4.tick_params(axis='x', labelsize=20)
+        # ax4.tick_params(axis='y', labelsize=20)
+        # ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # plt.yscale('log')
+        # plt.ylim((pow(20, -1), pow(10, 1)))
+        #
+        # ax5 = plt.subplot(515)
+        # ax5.plot( ST , label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
+        # ax5.set_ylabel("Mean", fontsize=25)
+        # ax5.set_xlabel("Sample", fontsize=25)
+        # ax5.tick_params(axis='x', labelsize=20)
+        # ax5.tick_params(axis='y', labelsize=20)
+        # ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        # plt.yscale('log')
+        # plt.ylim((pow(20, -1), pow(10, 1)))
+        # # plt.show()
+        # if show == True:
+        #     plt.show()
+        # else:
+        #     plt.savefig(dir + '/misfits.pdf')
+        #     plt.close()
 
-        ax2 = plt.subplot(512)
-        ax2.plot(PR, label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
-        ax2.set_ylabel("Misfit", fontsize=25)
-        ax2.tick_params(axis='x', labelsize=20)
-        ax2.tick_params(axis='y', labelsize=20)
-        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        plt.yscale('log')
-        plt.ylim((pow(20, -1), pow(10, 1)))
+    def Get_cross_plots(self, filepath, savename, directory, skiprows, burnin,column_names, show=True):
+        dir = directory + '/%s' % (savename)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-
-        ax3 = plt.subplot(513)
-        ax3.plot(SZ, label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
-        ax3.set_ylabel("Misfit", fontsize=25)
-        ax3.tick_params(axis='x', labelsize=20)
-        ax3.tick_params(axis='y', labelsize=20)
-        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        plt.yscale('log')
-        plt.ylim((pow(20, -1), pow(10, 1)))
-
-        ax4 = plt.subplot(514)
-        ax4.plot(SR , label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
-        ax4.set_ylabel("Mean", fontsize=25)
-        ax4.tick_params(axis='x', labelsize=20)
-        ax4.tick_params(axis='y', labelsize=20)
-        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        plt.yscale('log')
-        plt.ylim((pow(20, -1), pow(10, 1)))
-
-        ax5 = plt.subplot(515)
-        ax5.plot( ST , label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
-        ax5.set_ylabel("Mean", fontsize=25)
-        ax5.set_xlabel("Sample", fontsize=25)
-        ax5.tick_params(axis='x', labelsize=20)
-        ax5.tick_params(axis='y', labelsize=20)
-        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        plt.legend(fontsize=20)
-        plt.tight_layout()
-        plt.yscale('log')
-        plt.ylim((pow(20, -1), pow(10, 1)))
-        # plt.show()
-        if show == True:
-            plt.show()
+        if filepath.endswith('.yaml') == True:
+            with open(filepath, 'r') as stream:
+                data_file = yaml.load(stream)
+                stream.close()
+                data = data_file['data']
+                # parameters = data_file['parameters']
         else:
-            plt.savefig(dir + '/misfits.pdf')
-            plt.close()
+            # parameters = open(filepath, "r").readlines()[:33]
+            data = np.loadtxt(filepath, delimiter=',', skiprows=skiprows)
+
+        df = pd.DataFrame(data,
+                          columns=column_names)
+        #### PLOT:
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values / 0.1)
+        SZ = (df['s_z'].values / 0.14)
+        SR = (df['s_r'].values / 0.35)
+        ST = (df['s_t'].values)
+
+        n_lowest = 10000
+        Misfit = (PZ+PR+SZ+SR+ST)
+        lowest_indices = Misfit.argsort()[0:n_lowest]
+        # lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
+
+        # PZ = PZ[PZ.argsort()[0:n_lowest]] #PZ[lowest_indices]
+        # PR = PR[PR.argsort()[0:n_lowest]] #PR[lowest_indices]
+        # SZ = SZ[SZ.argsort()[0:n_lowest]] #SZ[lowest_indices]
+        # SR = SR[SR.argsort()[0:n_lowest]] #SR[lowest_indices]
+        # ST = ST[ST.argsort()[0:n_lowest]] #ST[lowest_indices]
+
+        PZ = PZ #PZ[lowest_indices]
+        PR = PR #PR[lowest_indices]
+        SZ = SZ #SZ[lowest_indices]
+        SR = SR #SR[lowest_indices]
+        ST = ST #ST[lowest_indices]
+        TOTAL = Misfit
+
+        Data = np.array([PZ,PR,SZ,SR,ST,TOTAL])
+        dimensions_list = [0, 1, 2, 3, 4, 5]
+
+        self.marginal_grid(savename,directory,Data.T,dimensions_list,bins=80,show = False)
 
     def full_moment_traces(self, filepath, savename, directory, skiprows, column_names, real_v, burnin):
         dir = directory + '/%s' % (savename.strip('.yaml'))
@@ -634,13 +762,13 @@ class Post_processing_sdr:
         n_lowest = 10000
         # pos = np.argmin(df['Total_misfit'].values)
         lowest_indices = df[lowest].values.argsort()[0:n_lowest]
-        lowest_misfits = df[lowest].values[lowest_indices]
-        lowest_strike = df['Strike'].values[lowest_indices]
-        lowest_dip = df['Dip'].values[lowest_indices]
-        lowest_rake = df['Rake'].values[lowest_indices]
-        lowest_depth = df['Depth'].values[lowest_indices]
-        lowest_P_shift = df['Shift_P'].values[lowest_indices]
-        lowest_S_shift = df['Shift_S'].values[lowest_indices]
+        lowest_misfits = df[lowest].values#[lowest_indices]
+        lowest_strike = df['Strike'].values#[lowest_indices]
+        lowest_dip = df['Dip'].values#[lowest_indices]
+        lowest_rake = df['Rake'].values#[lowest_indices]
+        lowest_depth = df['Depth'].values#[lowest_indices]
+        lowest_P_shift = df['Shift_P'].values#[lowest_indices]
+        lowest_S_shift = df['Shift_S'].values#[lowest_indices]
 
         ind_Negative_Pshift = np.where(lowest_P_shift < 0)
         ind_Positve_Pshift = np.where(lowest_P_shift > 0)
@@ -1021,25 +1149,78 @@ class Post_processing_sdr:
 
 
         df = pd.DataFrame(data, columns=column_names)
-        n_lowest = 1
+        n_lowest = 100
         lowest_indices = df[lowest].values.argsort()[0:n_lowest]
-        # lowest_indices = [50762] # No Weights
-        # lowest_indices = [88124] # Weights
-
-        PZ = (df['p_z'].values)
-        PR = (df['p_r'].values) * 0.01# / 0.1)
-        SZ = (df['s_z'].values)# / 0.14)
-        SR = (df['s_r'].values)# / 0.35)
-        ST = (df['s_t'].values)
-
-        Misfit = (PZ)
-        lowest_indices = Misfit.argsort()[0:n_lowest]
-
         strike = df['Strike'].values[lowest_indices]
         dip = df['Dip'].values[lowest_indices]
         rake = df['Rake'].values[lowest_indices]
         depth = df['Depth'].values[lowest_indices]
         epi = df['Epi'].values[lowest_indices]
+
+
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values / 0.1) * 0.017
+        SZ = (df['s_z'].values / 0.14) * 0.019
+        SR = (df['s_r'].values / 0.35) * 0.0556
+        ST = (df['s_t'].values)  * 2.33
+
+        Misfit = PZ + ST +PR+SR+SZ
+        # indices = np.where(Misfit < 0.27)
+        indices = np.where(Misfit < 1.25)
+
+        strike = df['Strike'].values[indices]
+        dip = df['Dip'].values[indices]
+        rake = df['Rake'].values[indices]
+
+        #### PZ
+        # G1_S = strike[(strike < 70) ]
+        # G1_D = dip[(strike < 70) ]
+        # G1_R = rake[(strike < 70) ]
+        #
+        # G21_S = strike[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_D = dip[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_R = rake[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        #
+        #
+        # G22_S = strike[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_D = dip[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_R = rake[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        #
+        # G3_S = strike[(250< strike) & (strike < 349) ]
+        # G3_D = dip[(250< strike) & (strike < 349) ]
+        # G3_R = rake[(250< strike) & (strike < 349) ]
+        #
+        # G4_S = strike[(strike > 349) ]
+        # G4_D = dip[(strike > 349) ]
+        # G4_R = rake[(strike > 349) ]
+        #
+        ####PZ+ST
+        # G1_S = strike[(strike < 250) ]
+        # G1_D = dip[(strike < 250) ]
+        # G1_R = rake[(strike < 250) ]
+        #
+        # G2_S = strike[(strike > 250) ]
+        # G2_D = dip[(strike > 250) ]
+        # G2_R = rake[(strike > 250) ]
+
+
+        ####TOTAL
+        G1_S = strike[(strike < 100) ]
+        G1_D = dip[(strike < 100)  ]
+        G1_R = rake[(strike < 100) ]
+
+        G2_S = strike[((strike > 100)  & (strike<255) )]
+        G2_D = dip[((strike > 100)  & (strike<255) )]
+        G2_R = rake[((strike > 100)  & (strike<255) )]
+
+        G3_S = strike[(strike>255) ]
+        G3_D = dip[(strike>255)]
+        G3_R = rake[(strike>255)]
+
+
+        strike = G3_S
+        dip = G3_D
+        rake = G3_R
 
         with open(filepath) as f:
             content = f.readlines()
@@ -1052,7 +1233,7 @@ class Post_processing_sdr:
         inc_angles = []
         azimuths = []
         phase_names = []
-        for i in range(0,n_lowest):
+        for i in range(0,1):
             tt_P = model.get_travel_times(source_depth_in_km=depth[i] / 1000, distance_in_degree=epi[i], phase_list=['P'])
             inc_angles.append(tt_P[0].takeoff_angle)
             azimuths.append(azimuth)
@@ -1067,7 +1248,7 @@ class Post_processing_sdr:
 
         fig = self.plot_BBB(strike, dip, rake,
                             azimuths=azimuths, inc_angles=inc_angles,
-                            phase_names=phase_names)
+                            phase_names=phase_names,color = 'green')
         plt.savefig(dir + '/BBB.pdf')
 
 
@@ -1124,7 +1305,13 @@ class Post_processing_sdr:
         n_lowest = 10000
         lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
 
-        misfits = df['Total_misfit'].values
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values / 0.1) * 0.017
+        SZ = (df['s_z'].values / 0.14) * 0.019
+        SR = (df['s_r'].values / 0.35) * 0.0556
+        ST = (df['s_t'].values) * 2.33
+
+        misfits = PZ +ST +PR +SZ+SR
         strike = df['Strike'].values
         dip = df['Dip'].values
         rake = df['Rake'].values
@@ -1358,7 +1545,7 @@ class Post_processing_sdr:
         number_of_plots = len(dimensions_list)
         import matplotlib.gridspec as _gridspec
         dir = directory + '/%s' % (savename.strip('.yaml'))
-        plt.figure(figsize=(8, 8))
+        plt.figure(figsize=(12, 12))
         gs1 = _gridspec.GridSpec(number_of_plots, number_of_plots)
         gs1.update(wspace=0.05, hspace=0.05)  # set the spacing between axes.
 
@@ -1378,20 +1565,18 @@ class Post_processing_sdr:
                 axis.set_xticklabels([])
                 axis.tick_params(axis="x", which="both", bottom=False, top=False)
             else:
-                axis.set_xlabel(f"dimension {dimensions_list[number_of_plots - 1]}")
+                labels = ['PZ','PR','SZ','SR','ST','Total']
+                # axis.set_xlabel(f"dimension {dimensions_list[number_of_plots - 1]}")
+                axis.set_xlabel(labels[number_of_plots - 1])
 
             axis.set_yticklabels([])
             axis.tick_params(axis="y", which="both", left=False, right=False)
             if i_plot == 0:
-                axis.set_ylabel("relative density")
+                axis.set_ylabel("PZ")
 
             # Plot histogram on diagonal
-            axis.hist(
-                samples[:,dimensions_list[i_plot]],
-                bins=bins,
-                density=False,
-                range=dim_range[i_plot],
-                color=color_1d,
+            axis.plot(
+                samples[:,dimensions_list[i_plot]]
             )
 
             for j_plot in range(i_plot):
@@ -1403,21 +1588,30 @@ class Post_processing_sdr:
                     axis.set_xticklabels([])
                     axis.tick_params(axis="x", which="both", bottom=False, top=False)
                 else:
-                    axis.set_xlabel(f"dimension {dimensions_list[j_plot]}")
+                    labels = ['PZ', 'PR', 'SZ', 'SR', 'ST', 'Total']
+                    axis.set_xlabel(labels[j_plot])
+                    # axis.set_xlabel(f"dimension {dimensions_list[j_plot]}")
 
                 if j_plot != 0:
                     axis.set_yticklabels([])
                     axis.tick_params(axis="y", which="both", left=False, right=False)
                 else:
-                    axis.set_ylabel(f"dimension {dimensions_list[i_plot]}")
+                    # axis.set_ylabel(f"dimension {dimensions_list[i_plot]}")
+                    labels = ['PZ', 'PR', 'SZ', 'SR', 'ST', 'Total']
+                    axis.set_ylabel(labels[i_plot])
 
                 # Plot 2d marginals
-                axis.hist2d(
+                # axis.hist2d(
+                #     samples[:,dimensions_list[j_plot]],
+                #     samples[:,dimensions_list[i_plot]],
+                #     bins=bins,
+                #     range=[dim_range[j_plot], dim_range[i_plot]],
+                #     cmap=colormap_2d,
+                # )
+
+                axis.scatter(
                     samples[:,dimensions_list[j_plot]],
                     samples[:,dimensions_list[i_plot]],
-                    bins=bins,
-                    range=[dim_range[j_plot], dim_range[i_plot]],
-                    cmap=colormap_2d,
                 )
 
                 # print(i_plot, j_plot) # grid indices for lower left
@@ -1430,18 +1624,18 @@ class Post_processing_sdr:
 
                 axis.axis("off")
 
-                correlation = np.corrcoef(
-                    samples[:,dimensions_list[j_plot]], samples[:,dimensions_list[i_plot]]
-                )[1][0]
-                axis.text(
-                    0.5,
-                    0.5,
-                    f"{correlation:.2f}",
-                    horizontalalignment="center",
-                    verticalalignment="center",
-                    fontsize=40 * np.abs(correlation),
-                    transform=axis.transAxes,
-                )
+                # correlation = np.corrcoef(
+                #     samples[:,dimensions_list[j_plot]], samples[:,dimensions_list[i_plot]]
+                # )[1][0]
+                # axis.text(
+                #     0.5,
+                #     0.5,
+                #     f"{correlation:.2f}",
+                #     horizontalalignment="center",
+                #     verticalalignment="center",
+                #     fontsize=40 * np.abs(correlation),
+                #     transform=axis.transAxes,
+                # )
 
         if show:
             plt.show()

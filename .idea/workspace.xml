@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Windows are tapered and trace taper is protecting the P and S phases. plot function has seconds on xlabel as well">
+    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Update in Misfit: Write out amplitude misfit between PZ and ST. &#10;Plot Update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cut_windows.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cut_windows.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_Seismogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Seismogram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Grid_Search.py" beforeDir="false" afterPath="$PROJECT_DIR$/Grid_Search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main_Marsquakes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main_Marsquakes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misfit.py" afterDir="false" />
@@ -39,6 +41,20 @@
     <SUITE FILE_PATH="coverage/BBB_project$BFO_5__1_.coverage" NAME="BFO_5 (1) Coverage Results" MODIFIED="1547195083852" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Extra/Paper_events" />
     <SUITE FILE_PATH="coverage/BBB_project$BFO_Normal.coverage" NAME="BFO_Normal Coverage Results" MODIFIED="1545394844809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Extra" />
     <SUITE FILE_PATH="coverage/BBB_project$BFO_7__1_.coverage" NAME="BFO_7 (1) Coverage Results" MODIFIED="1547195757767" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Extra/Paper_events" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
   </component>
   <component name="FileColors">
     <fileColor scope="Non-Project Files (Material Default)" color="2E3C43" />
@@ -306,7 +322,10 @@
       <workItem from="1574780246438" duration="3307000" />
       <workItem from="1574837814271" duration="20043000" />
       <workItem from="1574868431179" duration="1557000" />
-      <workItem from="1574924172750" duration="7700000" />
+      <workItem from="1574924172750" duration="24393000" />
+      <workItem from="1574959914080" duration="17789000" />
+      <workItem from="1575010064105" duration="14689000" />
+      <workItem from="1575037538679" duration="9322000" />
     </task>
     <task id="LOCAL-00001" summary="Updates: waveform fitting and weighting function">
       <created>1542368829661</created>
@@ -406,7 +425,14 @@
       <option name="project" value="LOCAL" />
       <updated>1574438350356</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Update in Misfit: Write out amplitude misfit between PZ and ST. &#10;Plot Update">
+      <created>1574933403820</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1574933403820</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -454,7 +480,8 @@
     <MESSAGE value="Filter functions (i.e. Order, ZeroPhase, Taper) are automatic in the input file" />
     <MESSAGE value="Update in plot functions (Waveform plot and in Grid Search is a plot function) Also Lots of update in the cut_windows: filter before cutting" />
     <MESSAGE value="Windows are tapered and trace taper is protecting the P and S phases. plot function has seconds on xlabel as well" />
-    <option name="LAST_COMMIT_MESSAGE" value="Windows are tapered and trace taper is protecting the P and S phases. plot function has seconds on xlabel as well" />
+    <MESSAGE value="Update in Misfit: Write out amplitude misfit between PZ and ST. &#10;Plot Update" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update in Misfit: Write out amplitude misfit between PZ and ST. &#10;Plot Update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -506,7 +533,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Grid_Search.py</url>
-          <line>215</line>
+          <line>221</line>
           <option name="timeStamp" value="412" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -516,18 +543,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Post_processing.py</url>
-          <line>647</line>
-          <option name="timeStamp" value="499" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Post_processing.py</url>
-          <line>330</line>
+          <line>411</line>
           <option name="timeStamp" value="510" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>140</line>
-          <option name="timeStamp" value="534" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -541,10 +558,10 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Python3_MTI$Test_Rotate.coverage" NAME="Test_Rotate Coverage Results" MODIFIED="1573741078528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1574930740407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1575025457711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Obspy_Trim.coverage" NAME="Obspy_Trim Coverage Results" MODIFIED="1571136057669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Get_Parameters_Marsquake_235.coverage" NAME="Get_Parameters_Marsquake_235 Coverage Results" MODIFIED="1572512200339" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1574933121765" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1575049394278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$test_cross_correlation.coverage" NAME="test_cross_correlation Coverage Results" MODIFIED="1573641293328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Test_Filter_Procedure.coverage" NAME="Test_Filter_Procedure Coverage Results" MODIFIED="1574263219732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Main_MSS.coverage" NAME="Main_MSS Coverage Results" MODIFIED="1571369160113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

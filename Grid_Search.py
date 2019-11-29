@@ -55,10 +55,10 @@ class Grid_Search:
                         # self.plot_original_vs_filter(self.BW_syn,color, self.prior['save_dir'], str(i))
 
                         # ## Determine the misfit:
-                        Xi_bw, Xi_Amp, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
+                        Xi_bw, Norms, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
                                                                            self.or_time, self.prior['PLOT'])
 
-                        M0_New = M0 / np.mean(amplitude)
+                        M0_New = M0 / np.mean(amplitude) # Only Based on PZ
                         if self.prior['PLOT'] == True:
                             # self.plot()
                             if not os.path.exists(self.prior['save_dir'] + '/plots/'):
@@ -67,12 +67,12 @@ class Grid_Search:
                                 self.prior['save_dir'] + '/plots/%.3f_%.3f_%.3f_%05i.png' % (strike,dip,rake, i))
                             plt.close("all")
 
-                        self.write_sample(save_file, epi, depth, strike, dip, rake, M0_New, Xi_bw, Xi_Amp,time_shift, i, accept=1)
+                        self.write_sample(save_file, epi, depth, strike, dip, rake, M0_New, Xi_bw, Norms,amplitude[0],time_shift, i, accept=1)
                         i += 1
                         print('Iteration: %i' % i)
             save_file.close()
 
-    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Xi_Amp,time_shift, iteration,
+    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Norms,PZ_Amplitude,time_shift, iteration,
                      accept=0):
         s_z = Xi_bw[0]# * 0.1 #* 0.14
         s_r = Xi_bw[1]# * 0.1#* 0.35
@@ -81,16 +81,22 @@ class Grid_Search:
         p_r = Xi_bw[4]# * 5#* 0.1
         Xi = s_z + s_r + s_t + p_z + p_r
 
-        file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (
+        Ns_z = Norms[0]# * 0.1 #* 0.14
+        Ns_r = Norms[1]# * 0.1#* 0.35
+        Ns_t = Norms[2]# * 1
+        Np_z = Norms[3]# * 5
+        Np_r = Norms[4]# * 5#* 0.1
+
+        file_name.write("%.5e, %.5e, %.5e, %.5e, %.5e, %.5e, %.5e, " % (
             epi, depth, strike, dip, rake, M0, Xi))
-        file_name.write("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " % (
-            p_z, p_r, s_z, s_r, s_t, Xi_Amp))
+        file_name.write("%.5e, %.5e, %.5e, %.5e, %.5e, %.5e,%.5e,%.5e,%.5e,%.5e,%.5e " % (
+            p_z, p_r, s_z, s_r, s_t, Np_z,Np_r,Ns_z,Ns_r,Ns_t,PZ_Amplitude))
         file_name.write("%i, %i, %i\n\r" % (time_shift[0], time_shift[1], iteration))
 
     def write_par(self, file_name):
 
         file_name.write(
-            "epi, depth, strike, dip, rake, M0, Total-misfit, p_z, p_r, s_z, s_r, s_t, bw_tot, shift_S, shift-P, Iteration\n\r")
+            "epi, depth, strike, dip, rake, M0, Total-misfit, p_z, p_r, s_z, s_r, s_t, Npz,Npr,Nsz,Nsr,Nst,PZ_Amplitude, shift_S, shift-P, Iteration\n\r")
         file_name.write("Velocity Model:%s\n\r" % self.prior['VELOC'])
         file_name.write("Station:%s\n\r" % self.prior['station'])
         file_name.write("Sampling rate:%.2f\n\r" % self.prior['sampling_rate'])

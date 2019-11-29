@@ -4,14 +4,14 @@ import obspy
 import toml
 
 from Get_Parameters import Get_Parameters
-from Process_mSEED import Process_mSEED
+#from Process_mSEED import Process_mSEED
 from Cut_windows import Cut_windows
 # from MCMC import MCMC
-from Plot_waveforms import Plot_waveforms
+#from Plot_waveforms import Plot_waveforms
 from Grid_Search import Grid_Search
 
 """ DEFINE YOUR INPUT FILE PATH HERE: """
-toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/Event_235b_1.toml'
+toml_path = '/home/nienke/GS/DWTHot_Amp.toml'
 # toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/Event_173.toml'
 
 
@@ -46,7 +46,7 @@ def main():
         BW_obs.Get_bw_windows(stream, PRIOR['P_pick'], PRIOR['S_pick'], PRIOR['origin_time'], MANUAL= True)
 
     # === Start Grid Search ===
-    depth = 58691.9#5000# 58691.9  #           #5000
+    depth = 58691.9##           #5000
     epi =    PRIOR['epi_s']#24.7437  #            #PRIOR['epi_s']
     M0 = PRIOR['M0']# 135943762646494.86 #      #
     GS = Grid_Search(PRIOR)
@@ -57,13 +57,13 @@ def main():
     # mcmc.start_BW(BW_obs)
 
     # === Plot waveforms from a previous run ===
-    PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/Event_235_2.txt'
-    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    skiprows = 52 #48
-    plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
-    # plot.get_Cut_waveforms()
-    plot.get_waveforms(Norm=True)
+    # PRIOR['VELOC'] = PRIOR['VELOC']
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/DWTHot_Amp.txt'
+    # savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    # skiprows = 52 #48
+    # plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
+    # # plot.get_Cut_waveforms()
+    # plot.get_waveforms(Norm=True)
 
 
 if __name__ == '__main__':
