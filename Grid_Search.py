@@ -17,8 +17,11 @@ class Grid_Search:
         self.model = Model_samples(self.prior)
         self.BW_syn = Cut_windows(self.prior['VELOC_taup'], P_HP=PRIOR['P_HP'], P_LP=PRIOR['P_LP'], S_HP=PRIOR['S_HP'],
                                   S_LP=PRIOR['S_LP'], Pre_P=PRIOR['Pre_P'], Pre_S=PRIOR['Pre_S'],
-                                  Post_P=PRIOR['Post_P'], Post_S=PRIOR['Post_S'], zero_phase=PRIOR['Zero_Phase'],
-                                  Order=PRIOR['Order'], Taper=PRIOR['Taper_syn'],Taper_len=PRIOR['Taper_len'], Zero_len=PRIOR['Zero_len'])
+                                  Post_P=PRIOR['Post_P'], Post_S=PRIOR['Post_S'],
+                                  global_P_shift=PRIOR['Global_P_shift'], global_S_shift=PRIOR['Global_S_shift'],
+                                  zero_phase=PRIOR['Zero_Phase'],
+                                  Order=PRIOR['Order'], Taper=PRIOR['Taper_syn'], Taper_len=PRIOR['Taper_len'],
+                                  Zero_len=PRIOR['Zero_len'])
         self.seis = Get_Seismogram(self.prior)
         self.mis = Misfit()
 
@@ -39,7 +42,6 @@ class Grid_Search:
                 for i_d, dip in enumerate(dip_len):
                     for i_r, rake in enumerate(rake_len):
 
-
                         ## Get the synthetic Data:
                         dict = geo.Geodesic(a=self.prior['radius'], f=self.prior['f']).ArcDirect(
                             lat1=self.prior['la_r'],
@@ -56,41 +58,43 @@ class Grid_Search:
 
                         # ## Determine the misfit:
                         Xi_bw, Norms, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
-                                                                           self.or_time, self.prior['PLOT'])
+                                                                                  self.or_time, self.prior['PLOT'])
 
-                        M0_New = M0 / np.mean(amplitude) # Only Based on PZ
+                        M0_New = M0 / np.mean(amplitude)  # Only Based on PZ
                         if self.prior['PLOT'] == True:
                             # self.plot()
                             if not os.path.exists(self.prior['save_dir'] + '/plots/'):
                                 os.makedirs(self.prior['save_dir'] + '/plots/')
                             fig.savefig(
-                                self.prior['save_dir'] + '/plots/%.3f_%.3f_%.3f_%05i.png' % (strike,dip,rake, i))
+                                self.prior['save_dir'] + '/plots/%.3f_%.3f_%.3f_%05i.png' % (strike, dip, rake, i))
                             plt.close("all")
 
-                        self.write_sample(save_file, epi, depth, strike, dip, rake, M0_New, Xi_bw, Norms,amplitude[0],time_shift, i, accept=1)
+                        self.write_sample(save_file, epi, depth, strike, dip, rake, M0_New, Xi_bw, Norms, amplitude[0],
+                                          time_shift, i, accept=1)
                         i += 1
                         print('Iteration: %i' % i)
             save_file.close()
 
-    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Norms,PZ_Amplitude,time_shift, iteration,
+    def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Norms, PZ_Amplitude, time_shift,
+                     iteration,
                      accept=0):
-        s_z = Xi_bw[0]# * 0.1 #* 0.14
-        s_r = Xi_bw[1]# * 0.1#* 0.35
-        s_t = Xi_bw[2]# * 1
-        p_z = Xi_bw[3]# * 5
-        p_r = Xi_bw[4]# * 5#* 0.1
+        s_z = Xi_bw[0]  # * 0.1 #* 0.14
+        s_r = Xi_bw[1]  # * 0.1#* 0.35
+        s_t = Xi_bw[2]  # * 1
+        p_z = Xi_bw[3]  # * 5
+        p_r = Xi_bw[4]  # * 5#* 0.1
         Xi = s_z + s_r + s_t + p_z + p_r
 
-        Ns_z = Norms[0]# * 0.1 #* 0.14
-        Ns_r = Norms[1]# * 0.1#* 0.35
-        Ns_t = Norms[2]# * 1
-        Np_z = Norms[3]# * 5
-        Np_r = Norms[4]# * 5#* 0.1
+        Ns_z = Norms[0]  # * 0.1 #* 0.14
+        Ns_r = Norms[1]  # * 0.1#* 0.35
+        Ns_t = Norms[2]  # * 1
+        Np_z = Norms[3]  # * 5
+        Np_r = Norms[4]  # * 5#* 0.1
 
         file_name.write("%.5e, %.5e, %.5e, %.5e, %.5e, %.5e, %.5e, " % (
             epi, depth, strike, dip, rake, M0, Xi))
-        file_name.write("%.5e, %.5e, %.5e, %.5e, %.5e, %.5e,%.5e,%.5e,%.5e,%.5e,%.5e " % (
-            p_z, p_r, s_z, s_r, s_t, Np_z,Np_r,Ns_z,Ns_r,Ns_t,PZ_Amplitude))
+        file_name.write("%.5e, %.5e, %.5e, %.5e, %.5e, %.5e,%.5e,%.5e,%.5e,%.5e,%.5e, " % (
+            p_z, p_r, s_z, s_r, s_t, Np_z, Np_r, Ns_z, Ns_r, Ns_t, PZ_Amplitude))
         file_name.write("%i, %i, %i\n\r" % (time_shift[0], time_shift[1], iteration))
 
     def write_par(self, file_name):
@@ -117,13 +121,15 @@ class Grid_Search:
         file_name.write("Order:%5i\n\r" % self.prior['Order'])  #
         file_name.write("Taper Length:%.2f\n\r" % self.prior['Taper_len'])  #
         file_name.write("Zero Length:%.2f\n\r" % self.prior['Zero_len'])  #
+        file_name.write("Global P Shift:%.2f\n\r" % self.prior['Global_P_shift'])  #
+        file_name.write("Global S Shift:%.2f\n\r" % self.prior['Global_S_shift'])  #
         file_name.write("amount samples:%i\n\r" % self.prior['sample_number'])  #
         file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
         file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #
         file_name.write("Flattening:%.4f\n\r" % self.prior['f'])  #
         file_name.write("Azimuth:%.4f\n\r" % self.prior['az'])  #
 
-    def plot_original_vs_filter(self, stream, color,savepath, save_name):
+    def plot_original_vs_filter(self, stream, color, savepath, save_name):
         stream.original.trim(self.prior['origin_time'])
 
         plt.figure(figsize=(8, 10))
@@ -168,7 +174,7 @@ class Grid_Search:
         ax3 = plt.subplot(322)
         x = np.arange(len(stream.original.traces[0]))
         x_cut = x[stream.or_S_len - 500:stream.or_S_len + stream.S_len + 500]
-        plt.plot(stream.original.traces[0],'g')
+        plt.plot(stream.original.traces[0], 'g')
         # plt.plot(x,self.BW_syn.original.traces[0], 'r')
         plt.plot(x_cut, stream.S_stream.traces[0], color)
         ymin, ymax = ax3.get_ylim()
@@ -195,9 +201,11 @@ class Grid_Search:
         plt.vlines(stream.or_S_len + self.prior['Pre_S'] * 20 + self.prior['Post_S'] * 20, ymin=ymin, ymax=ymax,
                    colors=color, linewidth=3, label='Obs_S')
         plt.xlim(stream.or_S_len - 100, stream.or_S_len + 400)
-        min_ = min(np.hstack((stream.original.traces[1].data[stream.or_S_len - 100:stream.or_S_len + 400],stream.S_stream.traces[1].data)))
-        max_ = max(np.hstack((stream.original.traces[1].data[stream.or_S_len - 100:stream.or_S_len + 400],stream.S_stream.traces[1].data)))
-        plt.ylim(min_,max_)
+        min_ = min(np.hstack((stream.original.traces[1].data[stream.or_S_len - 100:stream.or_S_len + 400],
+                              stream.S_stream.traces[1].data)))
+        max_ = max(np.hstack((stream.original.traces[1].data[stream.or_S_len - 100:stream.or_S_len + 400],
+                              stream.S_stream.traces[1].data)))
+        plt.ylim(min_, max_)
         plt.grid(True)
         plt.title('SR')
 
@@ -212,12 +220,13 @@ class Grid_Search:
         plt.vlines(stream.or_S_len + self.prior['Pre_S'] * 20 + self.prior['Post_S'] * 20, ymin=ymin, ymax=ymax,
                    colors=color, linewidth=3, label='Obs_S')
         plt.xlim(stream.or_S_len - 100, stream.or_S_len + 400)
-        min_ = min(np.hstack((stream.original.traces[2].data[stream.or_S_len - 100:stream.or_S_len + 400],stream.S_stream.traces[2].data)))
-        max_ = max(np.hstack((stream.original.traces[2].data[stream.or_S_len - 100:stream.or_S_len + 400],stream.S_stream.traces[2].data)))
-        plt.ylim(min_,max_)
+        min_ = min(np.hstack((stream.original.traces[2].data[stream.or_S_len - 100:stream.or_S_len + 400],
+                              stream.S_stream.traces[2].data)))
+        max_ = max(np.hstack((stream.original.traces[2].data[stream.or_S_len - 100:stream.or_S_len + 400],
+                              stream.S_stream.traces[2].data)))
+        plt.ylim(min_, max_)
         plt.grid(True)
         plt.title('ST')
-
 
         plt.tight_layout()
         savepath = savepath + '/plots/'
@@ -225,5 +234,3 @@ class Grid_Search:
             os.makedirs(savepath)
         plt.savefig(savepath + '/Waveforms_%s.png' % save_name)
         plt.close("all")
-
-

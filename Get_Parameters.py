@@ -127,6 +127,8 @@ class Get_Parameters:
         PRIOR['Pre_S'] = Param['WINDOW']['Pre_S']
         PRIOR['Post_P'] = Param['WINDOW']['Post_P']
         PRIOR['Post_S'] = Param['WINDOW']['Post_S']
+        PRIOR['Global_P_shift'] = Param['WINDOW']['Global_P_shift']
+        PRIOR['Global_S_shift'] = Param['WINDOW']['Global_S_shift']
 
         return PRIOR
 

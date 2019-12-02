@@ -4,14 +4,16 @@ import obspy
 import toml
 
 from Get_Parameters import Get_Parameters
-#from Process_mSEED import Process_mSEED
+# from Process_mSEED import Process_mSEED
 from Cut_windows import Cut_windows
 # from MCMC import MCMC
-#from Plot_waveforms import Plot_waveforms
+from Plot_waveforms import Plot_waveforms
 from Grid_Search import Grid_Search
 
 """ DEFINE YOUR INPUT FILE PATH HERE: """
-toml_path = '/home/nienke/GS/DWTHot_Amp.toml'
+toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/EH45Tcold_Amp.toml'
+
+
 # toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/Event_173.toml'
 
 
@@ -38,12 +40,13 @@ def main():
     # === Cut the BW windows (P&S) ===
     BW_obs = Cut_windows(PRIOR['VELOC_taup'], P_HP=PRIOR['P_HP'], P_LP=PRIOR['P_LP'], S_HP=PRIOR['S_HP'],
                          S_LP=PRIOR['S_LP'], Pre_P=PRIOR['Pre_P'], Pre_S=PRIOR['Pre_S'], Post_P=PRIOR['Post_P'],
-                         Post_S=PRIOR['Post_S'], zero_phase=PRIOR['Zero_Phase'], Order=PRIOR['Order'],
-                         Taper=PRIOR['Taper_obs'],Taper_len=PRIOR['Taper_len'], Zero_len=PRIOR['Zero_len'])
+                         Post_S=PRIOR['Post_S'], global_P_shift=PRIOR['Global_P_shift'],
+                         global_S_shift=PRIOR['Global_S_shift'], zero_phase=PRIOR['Zero_Phase'], Order=PRIOR['Order'],
+                         Taper=PRIOR['Taper_obs'], Taper_len=PRIOR['Taper_len'], Zero_len=PRIOR['Zero_len'])
     if PRIOR['P_pick'] == None or PRIOR['S_pick'] == None:
-        BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], MANUAL= False)
+        BW_obs.Get_bw_windows(stream, PRIOR['epi_s'], PRIOR['depth_s'], PRIOR['origin_time'], MANUAL=False)
     else:
-        BW_obs.Get_bw_windows(stream, PRIOR['P_pick'], PRIOR['S_pick'], PRIOR['origin_time'], MANUAL= True)
+        BW_obs.Get_bw_windows(stream, PRIOR['P_pick'], PRIOR['S_pick'], PRIOR['origin_time'], MANUAL=True)
 
     # === Start Grid Search ===
     depth = 58691.9##           #5000
@@ -58,9 +61,9 @@ def main():
 
     # === Plot waveforms from a previous run ===
     # PRIOR['VELOC'] = PRIOR['VELOC']
-    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/DWTHot_Amp.txt'
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TEST.txt'
     # savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    # skiprows = 52 #48
+    # skiprows = 56
     # plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
     # # plot.get_Cut_waveforms()
     # plot.get_waveforms(Norm=True)

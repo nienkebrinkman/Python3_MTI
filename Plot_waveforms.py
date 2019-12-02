@@ -26,8 +26,12 @@ class Plot_waveforms:
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
 
+
+        # self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r",
+        #                      "s_t", 'Xi_Amp', 'Shift_S', 'Shift_P', 'accept']
+
         self.column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r",
-                             "s_t", 'Xi_Amp', 'Shift_S', 'Shift_P', 'accept']
+                             "s_t", 'Npz','Npr','Nsz','Nsr','Nst','PZ_Amplitude', 'Shift_S', 'Shift_P', 'accept']
         data = np.loadtxt(path_txt_inversion, delimiter=',', skiprows=skiprows)
         self.df = pd.DataFrame(data, columns=self.column_names)
         self.BW_obs = BW_obs
@@ -55,6 +59,9 @@ class Plot_waveforms:
 
         self.param['Order'] = int(content[36].strip('\n').split(':')[-1])
 
+        self.param['Global_P_shift'] = float(content[42].strip('\n').split(':')[-1])
+        self.param['Global_S_shift'] = float(content[44].strip('\n').split(':')[-1])
+
     def get_waveforms(self, Norm=True):
         # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
         #
@@ -77,7 +84,7 @@ class Plot_waveforms:
                              S_HP=self.prior['S_HP'], S_LP=self.prior['S_LP'], Pre_P=self.param['Pre_P'],
                              Pre_S=self.param['Pre_S'], Post_P=self.param['Post_P'], Post_S=self.param['Post_S'],
                              zero_phase=self.param['Zero_Phase'], Order=self.param['Order'],
-                             Taper=self.param['Taper_syn'], Taper_len=self.param['Taper_len'],
+                             global_P_shift=self.param['Global_P_shift'],global_S_shift=self.param['Global_S_shift'], Taper=self.param['Taper_syn'], Taper_len=self.param['Taper_len'],
                              Zero_len=self.param['Zero_len'])
 
         self.BW_obs.original.trim(self.prior['origin_time'])
@@ -113,7 +120,10 @@ class Plot_waveforms:
         SZ = (self.df['s_z'].values)# / 0.14)
         SR = (self.df['s_r'].values)# / 0.35)
         ST = (self.df['s_t'].values) #* 10
-        AMP = (self.df['Xi_Amp'].values) #* 10
+
+        Norm_Pz = self.df['Npz'].values
+        Norm_St = self.df['Nst'].values
+        AMP = (np.abs(np.log10(Norm_Pz) - np.log10(Norm_St)) / np.log(2))**2
 
         misfit = (PZ +PR + SZ + SR + ST + AMP)
 
@@ -152,8 +162,8 @@ class Plot_waveforms:
         ### CLUSTERING BASED ON SHIFTS:
         ## S-SHIFT:
 
-        lowest_indices = run_len[((-61< S_shift) & (S_shift < -59))]
-        lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]
+        # lowest_indices = run_len[((-61< S_shift) & (S_shift < -59))]
+        # lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]
 
         # lowest_indices = run_len[((-5< S_shift) & (S_shift < -3))]
         # lowest_indices = misfit[lowest_indices].argsort()[0:n_lowest]

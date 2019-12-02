@@ -5,7 +5,7 @@ import numpy as np
 import obspy
 
 class Cut_windows:
-    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP, Pre_P, Pre_S, Post_P, Post_S, zero_phase = True, Order = 4, Taper = True, Taper_len = 1.0, Zero_len = 500):
+    def __init__(self, veloc_model_taup, P_HP, P_LP, S_HP, S_LP, Pre_P, Pre_S, Post_P, Post_S, global_P_shift, global_S_shift,zero_phase = True, Order = 4, Taper = True, Taper_len = 1.0, Zero_len = 500):
         self.veloc_model = veloc_model_taup
         self.P_HP = P_HP
         self.P_LP = P_LP
@@ -20,16 +20,18 @@ class Cut_windows:
         self.Order = Order
         self.Zero_len = Zero_len
         self.Taper_Len = Taper_len # Length of taper that is added to your window
+        self.global_P_shift = global_P_shift # Global P shift to the right (so left would be negative) in seconds
+        self.global_S_shift = global_S_shift
 
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['P'])
-        return tt[0].time#- 3.0 # For DWThot
+        return tt[0].time + self.global_P_shift
 
     def get_S(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['S'])
-        return tt[0].time #- 3.0 # For TAYAK TODO: REMEMBER THAT YOU PUT HERE SOMETHING MANUAL AND YOU SHOULD REMOVE THIS AGAIN AT SOME POINT!!!
+        return tt[0].time + self.global_S_shift
 
     def get_pp(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)

@@ -40,13 +40,16 @@ def main():
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
     # path_to_file = directory + 'DWTHot_Amp.txt'
-    path_to_file = directory + 'DWTHot_Amp.txt'
+    path_to_file = directory + 'DWTHot_Amp_2.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
     skiprows = 52#48
-    column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
-                    'Xi_amp', 'Shift_S', 'Shift_P', 'accept']
+    # column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
+    #                 'Xi_amp', 'Shift_S', 'Shift_P', 'accept']
+
+    column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r",
+                         "s_t", 'Npz', 'Npr', 'Nsz', 'Nsr', 'Nst', 'PZ_Amplitude', 'Shift_S', 'Shift_P', 'accept']
     burnin = 0
 
     File = np.loadtxt(path_to_file, delimiter=',', skiprows=skiprows)
@@ -59,15 +62,15 @@ def main():
     #
     # result.Scatter_3d(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
-    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                 column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
+    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #              column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
     # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
     # result.Cluster(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
 
     # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [6,7,8,9,10,11], show = False)
-    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
     # result.Get_cross_plots(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
 
     # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
@@ -317,7 +320,7 @@ class Post_processing_sdr:
         #     plt.savefig(dir + '/Parameter_convergence.pdf')
         #     plt.close()
 
-        #### PLOT DWTHot:
+        #### PLOT DWTHot 1:
         # PZ = (df['p_z'].values) * 1.85
         # PR = (df['p_r'].values)   # * 0.005#/ 0.1 * 0.017
         # SZ = (df['s_z'].values) * 0.073  #* 0.010#/ 0.14 * 0.019
@@ -325,13 +328,23 @@ class Post_processing_sdr:
         # ST = (df['s_t'].values)     # * 2.33
         # AMP = df['Xi_amp'].values * 1000 *2
 
+        #### PLOT DWTHot 2:
+        PZ = (df['p_z'].values)  * 0.8
+        PR = (df['p_r'].values)  * 0.0851
+        SZ = (df['s_z'].values)  * 0.1115
+        SR = (df['s_r'].values)  * 0.1044
+        ST = (df['s_t'].values)  * 1.0
+        Norm_Pz = df['Npz'].values
+        Norm_St = df['Nst'].values
+        AMP = ( (np.abs(np.log10(Norm_Pz) - np.log10(Norm_St)) / np.log(2))**2  ) * 30.67
+
         #TAYAK:
-        PZ = (df['p_z'].values)
-        PR = (df['p_r'].values) * 0.005#/ 0.1 * 0.017
-        SZ = (df['s_z'].values)  * 0.006#/ 0.14 * 0.019
-        SR = (df['s_r'].values) * 0.03# * 0.0556)#/ 0.35) * 0.0556
-        ST = (df['s_t'].values) * 2.33
-        AMP = df['Xi_amp'].values * 1000
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.005#/ 0.1 * 0.017
+        # SZ = (df['s_z'].values)  * 0.006#/ 0.14 * 0.019
+        # SR = (df['s_r'].values) * 0.03# * 0.0556)#/ 0.35) * 0.0556
+        # ST = (df['s_t'].values) * 2.33
+        # AMP = df['Xi_amp'].values * 1000
 
         n_lowest = 10000
         lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
@@ -359,8 +372,27 @@ class Post_processing_sdr:
         plt.legend(fontsize=16, loc='lower right')
         plt.tight_layout()
         plt.yscale('log')
-        plt.ylim((pow(20, -5), pow(10, 1)))
+        plt.ylim((pow(20, -1), pow(10, 1)))
         plt.savefig(dir + '/misfits.pdf')
+
+
+        plt.figure(figsize=(8,4))
+        ax1 = plt.subplot(111)
+        ax1.hist(PZ, bins= 80, alpha=0.8,label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
+        ax1.hist(ST, bins= 80, alpha=0.8,label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
+        ax1.hist(SZ, bins= 80, alpha=0.8,label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
+        ax1.hist(SR, bins= 80, alpha=0.8,label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
+        ax1.hist(PR, bins= 80, alpha=0.8,label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
+        ax1.hist(AMP,bins= 80, alpha=0.8, label = 'AMP, Mean:%.2f Min%.2f' %(np.mean(AMP),AMP.min()))
+        ax1.set_ylabel("Misfit", fontsize=25)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # plt.legend(fontsize=16, loc='upper left')
+        plt.tight_layout()
+        plt.xscale('log')
+        plt.xlim((pow(20, -1), pow(10, 1)))
+        plt.savefig(dir + '/misfits_Hist.pdf')
 
         #
         # ax2 = plt.subplot(512)
