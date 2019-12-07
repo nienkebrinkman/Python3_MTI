@@ -11,10 +11,10 @@ from Plot_waveforms import Plot_waveforms
 from Grid_Search import Grid_Search
 
 """ DEFINE YOUR INPUT FILE PATH HERE: """
-toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/EH45Tcold_Amp.toml'
+toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/TAYAK.toml'
 
 
-# toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/Event_173.toml'
+# toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/EH45Tcold_173.toml'
 
 
 def main():
@@ -49,24 +49,26 @@ def main():
         BW_obs.Get_bw_windows(stream, PRIOR['P_pick'], PRIOR['S_pick'], PRIOR['origin_time'], MANUAL=True)
 
     # === Start Grid Search ===
-    depth = 58691.9##           #5000
-    epi =    PRIOR['epi_s']#24.7437  #            #PRIOR['epi_s']
-    M0 = PRIOR['M0']# 135943762646494.86 #      #
-    GS = Grid_Search(PRIOR)
-    GS.start_GS(BW_obs,depth,epi,M0)
+    # depth = 58691.9##           #5000
+    # epi =    PRIOR['epi_s']#24.7437  #            #PRIOR['epi_s']
+    # M0 = PRIOR['M0']# 135943762646494.86 #      #
+    # GS = Grid_Search(PRIOR)
+    # GS.start_GS(BW_obs,depth,epi,M0)
 
     # === Start the MCMC (Metropolis Hastings) ===
     # mcmc = MCMC(PRIOR['origin_time'], PRIOR, sample_path=sample_path)
     # mcmc.start_BW(BW_obs)
 
     # === Plot waveforms from a previous run ===
-    # PRIOR['VELOC'] = PRIOR['VELOC']
-    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TEST.txt'
-    # savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    # skiprows = 56
-    # plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
-    # # plot.get_Cut_waveforms()
-    # plot.get_waveforms(Norm=True)
+    PRIOR['VELOC'] = PRIOR['VELOC']
+    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_Shift_1.txt'
+    savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/TAYA.txt'
+    # savedir = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/'
+    skiprows = 56
+    plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
+    # plot.get_Cut_waveforms()
+    plot.get_waveforms(Norm=True)
 
 
 if __name__ == '__main__':

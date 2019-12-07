@@ -5,11 +5,18 @@ import matplotlib.pylab as plt
 from obspy.core.stream import Stream
 
 class Misfit:
-    def CC_BW(self,BW_obs,BW_syn,or_time,plot = False):
-        p_obs = BW_obs.P_stream
-        p_syn = BW_syn.P_stream
-        s_obs = BW_obs.S_stream
-        s_syn = BW_syn.S_stream
+    def CC_BW(self,BW_obs,BW_syn,Full_P_shift,Full_S_shift, plot = False):
+        p_obs = BW_obs.P_stream.copy()
+        p_syn = BW_syn.P_stream.copy()
+        s_obs = BW_obs.S_stream.copy()
+        s_syn = BW_syn.S_stream.copy()
+
+        # Apply the full trace shifts specified in the input file
+        p_syn.traces[0].data = self.shift(p_syn.traces[0].data, Full_P_shift)
+        p_syn.traces[1].data = self.shift(p_syn.traces[1].data, Full_P_shift)
+        s_syn.traces[0].data = self.shift(s_syn.traces[0].data, Full_S_shift)
+        s_syn.traces[1].data = self.shift(s_syn.traces[1].data, Full_S_shift)
+        s_syn.traces[2].data = self.shift(s_syn.traces[2].data, Full_S_shift)
 
         dt = s_obs[0].meta.delta
         misfit = np.array([])
@@ -32,6 +39,8 @@ class Misfit:
 
         cc_obspy = cc.correlate(s_syn[2].data,s_obs[2].data, max_shift_sample)
         shift_centered, MAX_CC = cc.xcorr_max(cc_obspy, abs_max=False)
+
+
         shift = np.argmax(cc_obspy)
         time_shift = np.append(time_shift, shift_centered)
 

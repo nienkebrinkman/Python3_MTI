@@ -14,6 +14,7 @@ from obspy.imaging.beachball import beachball
 from pandas.plotting import scatter_matrix
 import pylab
 import obspy
+
 # from mpl_toolkits.basemap import Basemap
 import geographiclib.geodesic as geo
 # import mplstereonet
@@ -30,6 +31,8 @@ from pyrocko import moment_tensor as mtm
 
 
 def main():
+
+
     # NPZ_path = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
     # file = np.load(NPZ_path)
 
@@ -39,12 +42,14 @@ def main():
     strike, dip, rake = aux_plane(238, 80, 143) # check quickly any moment tensor
 
     directory = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    # path_to_file = directory + 'DWTHot_Amp.txt'
-    path_to_file = directory + 'DWTHot_Amp_2.txt'
+    # directory = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/'
+    # path_to_file = directory + 'TAYAK_Shift_1.txt'
+    # path_to_file = directory + 'DWTHot_Amp_Shift.txt'
+    path_to_file = directory + 'EH45Tcold_Amp_Shift.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows = 52#48
+    skiprows = 56#48
     # column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
     #                 'Xi_amp', 'Shift_S', 'Shift_P', 'accept']
 
@@ -62,18 +67,18 @@ def main():
     #
     # result.Scatter_3d(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
-    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-    #              column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
+    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+                 column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
     # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
     # result.Cluster(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
 
     # result.marginal_grid( savename=savename, directory=directory,samples=File[:,:], dimensions_list = [6,7,8,9,10,11], show = False)
-    result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
+    # result.get_convergence(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
     # result.Get_cross_plots(filepath=path_to_file, savename = savename, directory = directory, skiprows = skiprows, burnin=burnin,column_names = column_names, show=False)
 
-    # result.event_plot(savename = savename,directory = directory,la_receiver = 4.5, lo_receiver = 136 , la_source = 10.99, lo_source = 160.95)
+    # result.event_plot(savename = savename,directory = directory,la_receiver = 4.502384, lo_receiver = 135.623447 , la_source = 3.45, lo_source = 164.68)
 
 
 class Post_processing_sdr:
@@ -88,105 +93,241 @@ class Post_processing_sdr:
         n_lowest = 10000
         lowest_indices = df['Total_misfit'].values.argsort()[0:n_lowest]
 
-        #### PLOT:
-        PZ = (df['p_z'].values)
-        PR = (df['p_r'].values / 0.1) * 0.017
-        SZ = (df['s_z'].values / 0.14) * 0.019
-        SR = (df['s_r'].values / 0.35)* 0.0556
-        ST = (df['s_t'].values)  * 2.33
-        AMP = df['Xi_amp'].values * 100
+        ## TAYAK
+        # # PZ = (df['p_z'].values)
+        # # PR = (df['p_r'].values) * 0.017
+        # # SZ = (df['s_z'].values) * 0.019
+        # # SR = (df['s_r'].values) * 0.0556
+        # # ST = (df['s_t'].values) * 2.33
+        # # AMP = (( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) / 2
+        # # Misfit = PZ + ST + PR + SZ + SR + AMP
+        #
+        # # indices = np.where(Misfit < 0.13)
+        # # indices = np.where(Misfit < 0.27)
+        # # indices = np.where(Misfit < 1.25)
+        # # indices = np.where(Misfit < 1.55)
+        # ## DWTHot_Shift_1
+        # # indices = np.where(Misfit < 0.184) # PZ
+        # # indices = np.where(Misfit < 0.00000002) # AMP --> Low treshold
+        # # indices = np.where(Misfit < 0.000002) # AMP --> High treshold
+        # # indices = np.where(Misfit < 0.42) # PZ + ST
+        #
+        # misfits = Misfit[indices]
+        #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
 
-        Misfit = AMP#PZ + ST + PR + SZ +SR
+        ## EVENT_235_2
+        ####PZ
+        # G1_S = np.hstack((strike[(strike < 70) ] , strike[(strike > 349) ] ))
+        # G1_D = np.hstack(( dip[(strike < 70) ] ,  dip[(strike > 349) ] ))
+        # G1_R = np.hstack(( rake[(strike < 70) ] , rake[(strike > 349) ] ))
+        # M1 = np.hstack(( misfits[(strike < 70)] , misfits[(strike > 349) ] ))
+        #
+        # G21_S = strike[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_D = dip[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # G21_R = rake[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        # M21 = misfits[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
+        #
+        # G22_S = strike[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_D = dip[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # G22_R = rake[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        # M22 = misfits[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
+        #
+        # G3_S = strike[(250< strike) & (strike < 349) ]
+        # G3_D = dip[(250< strike) & (strike < 349) ]
+        # G3_R = rake[(250< strike) & (strike < 349) ]
+        # M3 = misfits[(250< strike) & (strike < 349) ]
+
+        ####PZ+ST
+        # G1_S = strike[(strike < 250) ]
+        # G1_D = dip[(strike < 250) ]
+        # G1_R = rake[(strike < 250) ]
+        # M1 = misfits[(strike < 250) ]
+        #
+        # G2_S = strike[(strike > 250) ]
+        # G2_D = dip[(strike > 250) ]
+        # G2_R = rake[(strike > 250) ]
+        # M2 = misfits[(strike > 250) ]
+
+        ####TOTAL
+        # G1_S = np.hstack(( strike[(strike < 100) ], strike[(strike>255) ] ))
+        # G1_D = np.hstack((dip[(strike < 100)  ] ,dip[(strike>255)]))
+        # G1_R = np.hstack(( rake[(strike < 100) ] , rake[(strike>255)] ))
+        # M1 = np.hstack(( misfits[(strike < 100) ], misfits[(strike>255)] ))
+        #
+        # G2_S = strike[((strike > 100)  & (strike<255) )]
+        # G2_D = dip[((strike > 100)  & (strike<255) )]
+        # G2_R = rake[((strike > 100)  & (strike<255) )]
+        # M2 = misfits[((strike > 100)  & (strike<255) )]
+
+        ## DWTHot
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.1
+        # SZ = (df['s_z'].values) * 0.055
+        # SR = (df['s_r'].values) * 0.21
+        # ST = (df['s_t'].values) * 0.2
+        # AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4)
+        #
+        # Misfit = PZ + ST + PR + SZ + SR #+ AMP
+        #
         # indices = np.where(Misfit < 0.13)
-        # indices = np.where(Misfit < 0.27)
-        # indices = np.where(Misfit < 1.25)
-        indices = np.where(Misfit == 0.0)[0]
+        # indices = np.where(Misfit < 5.95)
+        #
+        #
+        # misfits = Misfit[indices]
+        #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
+
+        ###PZ
+        # G1_S = strike[(rake < -100) ]
+        # G1_D =  dip[(rake < -100) ]
+        # G1_R = rake[(rake < -100) ]
+        # M1 =  misfits[(rake < -100) ]
+        #
+        # G2_S =  strike[((rake > -100) & (rake < 0))]
+        # G2_D =  dip[((rake > -100) & (rake < 0))]
+        # G2_R =  rake[((rake > -100) & (rake < 0))]
+        # M2   =  misfits[((rake > -100) & (rake < 0))]
+        #
+        # G3_S =  strike[((rake > 0) & (rake < 100))]
+        # G3_D =  dip[((rake > 0) & (rake < 100))]
+        # G3_R =  rake[((rake > 0) & (rake < 100))]
+        # M3   =  misfits[((rake > 0) & (rake < 100))]
+        #
+        # G4_S = strike[(rake > 100) ]
+        # G4_D = dip[(rake > 100) ]
+        # G4_R = rake[(rake > 100) ]
+        # M4   = misfits[(rake > 100) ]
+
+
+        ### PZ + ST
+
+        # G1_S = strike[(rake < -100) ]
+        # G1_D =  dip[(rake < -100) ]
+        # G1_R = rake[(rake < -100) ]
+        # M1 =  misfits[(rake < -100) ]
+        #
+        # G2_S =  strike[((rake > -100) & (rake < 0))]
+        # G2_D =  dip[((rake > -100) & (rake < 0))]
+        # G2_R =  rake[((rake > -100) & (rake < 0))]
+        # M2   =  misfits[((rake > -100) & (rake < 0))]
+        #
+        # G3_S =  strike[((rake > 0) & (rake < 100))]
+        # G3_D =  dip[((rake > 0) & (rake < 100))]
+        # G3_R =  rake[((rake > 0) & (rake < 100))]
+        # M3   =  misfits[((rake > 0) & (rake < 100))]
+        #
+        # G4_S = strike[(rake > 100) ]
+        # G4_D = dip[(rake > 100) ]
+        # G4_R = rake[(rake > 100) ]
+        # M4   = misfits[(rake > 100) ]
+
+
+        #### TOTAL (INCLUDING AMPLITUDE)
+
+        # G1_S = strike[(strike > 225) ]
+        # G1_D =  dip[(strike > 225) ]
+        # G1_R = rake[(strike > 225) ]
+        # M1 =  misfits[(strike > 225) ]
+        #
+        # G2_S =  strike[(strike < 225) ]
+        # G2_D =  dip[(strike < 225) ]
+        # G2_R =  rake[(strike < 225) ]
+        # M2   =  misfits[(strike < 225) ]
+
+
+        ## EH34Tcold
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values) * 0.5
+        SZ = (df['s_z'].values) * 0.16
+        SR = (df['s_r'].values) * 0.15
+        ST = (df['s_t'].values) * 0.94
+        AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) * 1.3
+
+        Misfit = PZ + ST + PR + SZ + SR #+ AMP
+
+        indices = np.where(Misfit < 0.5)
+        indices = np.where(Misfit < 0.7)
+        indices = np.where(Misfit < 8.75)
+
+
         misfits = Misfit[indices]
 
         strike = df['Strike'].values[indices]
         dip = df['Dip'].values[indices]
         rake = df['Rake'].values[indices]
 
+        ## PZ
+        # G1_S =  strike[(strike < 160) ]
+        # G1_D =  dip[(strike < 160) ]
+        # G1_R =  rake[(strike < 160) ]
+        # M1   =  misfits[(strike < 160) ]
+        #
+        # G2_S =  strike[(strike > 160) ]
+        # G2_D =  dip[(strike > 160) ]
+        # G2_R =  rake[(strike > 160) ]
+        # M2   =  misfits[(strike > 160) ]
 
-        ####PZ
-        # G1_S = strike[(strike < 70) ]
-        # G1_D = dip[(strike < 70) ]
-        # G1_R = rake[(strike < 70) ]
-        #
-        # G21_S = strike[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
-        # G21_D = dip[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
-        # G21_R = rake[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
-        #
-        #
-        # G22_S = strike[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
-        # G22_D = dip[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
-        # G22_R = rake[( ( (70 < strike) & (strike < 250)) & ((-100 < rake ) & (rake <0)) )]
-        #
-        # G3_S = strike[(250< strike) & (strike < 349) ]
-        # G3_D = dip[(250< strike) & (strike < 349) ]
-        # G3_R = rake[(250< strike) & (strike < 349) ]
-        #
-        # G4_S = strike[(strike > 349) ]
-        # G4_D = dip[(strike > 349) ]
-        # G4_R = rake[(strike > 349) ]
-        # misfits = misfits[(strike > 349) ]
+        ## PZ + ST
 
-        ####PZ+ST
-        # G1_S = strike[(strike < 250) ]
-        # G1_D = dip[(strike < 250) ]
-        # G1_R = rake[(strike < 250) ]
+        # G1_S =  strike[(strike < 200) ]
+        # G1_D =  dip[(strike < 200) ]
+        # G1_R =  rake[(strike < 200) ]
+        # M1   =  misfits[(strike < 200) ]
         #
-        # G2_S = strike[(strike > 250) ]
-        # G2_D = dip[(strike > 250) ]
-        # G2_R = rake[(strike > 250) ]
-        # misfits = misfits[(strike > 250) ]
+        # G2_S =  strike[(strike > 200) ]
+        # G2_D =  dip[(strike > 200) ]
+        # G2_R =  rake[(strike > 200) ]
+        # M2   =  misfits[(strike > 200) ]
 
-        ####TOTAL
-        # G1_S = strike[(strike < 100) ]
-        # G1_D = dip[(strike < 100)  ]
-        # G1_R = rake[(strike < 100) ]
-        #
-        # G2_S = strike[((strike > 100)  & (strike<255) )]
-        # G2_D = dip[((strike > 100)  & (strike<255) )]
-        # G2_R = rake[((strike > 100)  & (strike<255) )]
-        #
-        # G3_S = strike[(strike>255) ]
-        # G3_D = dip[(strike>255)]
-        # G3_R = rake[(strike>255)]
-        # misfits = misfits[(strike>255)]
+        ## TOTAL
+
+        G1_S =  strike[(strike < 125) ]
+        G1_D =  dip[(strike < 125) ]
+        G1_R =  rake[(strike < 125) ]
+        M1   =  misfits[(strike < 125) ]
+
+        G2_S =  strike[(strike > 125) ]
+        G2_D =  dip[(strike > 125) ]
+        G2_R =  rake[(strike > 125) ]
+        M2   =  misfits[(strike > 125) ]
 
         # fig = plt.figure(figsize=(5,2.5))
         # ax = plt.subplot(111)
-        # plt.scatter(np.linspace(1,len(misfits),len(misfits)),misfits, c = 'green', label = 'Group 3')
+        # plt.scatter(G4_R,M4, c = 'red', label = 'Group 4')
         # plt.ylabel('Misfit')
+        # plt.xlabel('Rake')
+        # plt.xlim(-180,180)
         # plt.legend()
+        # plt.tight_layout()
         # plt.savefig(dir + '/Xi.pdf')
+        #
         # plt.close()
 
 
-
-
-        #
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure(figsize=(25,10))
         ax = plt.subplot(111, projection = '3d')
-        Scat = ax.scatter(strike, dip, rake, c=misfits,cmap = 'rainbow')
-        # Scat = ax.scatter(G1_S, G1_D, G1_R,label = 'Group 1')
-        # Scat = ax.scatter(G2_S, G2_D, G2_R,label = 'Group 2')
+        # Scat = ax.scatter(strike, dip, rake, c=misfits,cmap = 'rainbow')
+        Scat = ax.scatter(G1_S, G1_D, G1_R,label = 'Group 1')
+        Scat = ax.scatter(G2_S, G2_D, G2_R,label = 'Group 2')
         # Scat = ax.scatter(G3_S, G3_D, G3_R,label = 'Group 3')
-        # Scat = ax.scatter(G3_S, G3_D, G3_R,label = 'Group 3')
-        # Scat = ax.scatter(G4_S, G4_D, G4_R,label = 'Group 4')
+        # Scat = ax.scatter(G4_S, G4_D, G4_R, label='Group 4')
         ax.set_xlabel('Strike')
         ax.set_xlim(0,360)
         ax.set_ylabel('Dip')
+        ax.set_ylim(0,90)
         ax.set_zlabel('Rake')
-        plt.legend()
+        ax.set_zlim(-180,180)
+        plt.legend(loc='upper left')
         # cbar = plt.colorbar()
         # cbar.set_label('Misfit', rotation=270, labelpad=20)
         fig.colorbar(Scat)
         plt.show()
-        #
-        # a=1
 
     def get_convergence(self, filepath, savename, directory, skiprows, burnin,column_names, show=True):
         dir = directory + '/%s' % (savename)
@@ -205,23 +346,23 @@ class Post_processing_sdr:
 
         df = pd.DataFrame(data,
                           columns=column_names)
-        plt.figure(1)
-        ax = plt.subplot(111)
-        ax.plot(np.arange(0, len(df['Total_misfit'])), df['Total_misfit'])
-        # ax.plot(np.arange(0, len(df['Total_misfit'])), df['p_z'],c='r')
-        # ax.plot(np.arange(0, len(df['Total_misfit'])), df['s_t'],c='g')
-        plt.yscale('log')
-        plt.xlabel('Iteration')
-        plt.ylabel('-Log(likelihood)')
-        # ax.invert_yaxis()
-        ax.xaxis.tick_top()
-
-        plt.tight_layout()
-        if show == True:
-            plt.show()
-        else:
-            plt.savefig(dir + '/Convergence.pdf')
-            plt.close()
+        # plt.figure(1)
+        # ax = plt.subplot(111)
+        # ax.plot(np.arange(0, len(df['Total_misfit'])), df['Total_misfit'])
+        # # ax.plot(np.arange(0, len(df['Total_misfit'])), df['p_z'],c='r')
+        # # ax.plot(np.arange(0, len(df['Total_misfit'])), df['s_t'],c='g')
+        # plt.yscale('log')
+        # plt.xlabel('Iteration')
+        # plt.ylabel('-Log(likelihood)')
+        # # ax.invert_yaxis()
+        # ax.xaxis.tick_top()
+        #
+        # plt.tight_layout()
+        # if show == True:
+        #     plt.show()
+        # else:
+        #     plt.savefig(dir + '/Convergence.pdf')
+        #     plt.close()
 
         #### PLOT:
         # amount_of_samples = len(df['Total_misfit'])
@@ -329,22 +470,38 @@ class Post_processing_sdr:
         # AMP = df['Xi_amp'].values * 1000 *2
 
         #### PLOT DWTHot 2:
-        PZ = (df['p_z'].values)  * 0.8
-        PR = (df['p_r'].values)  * 0.0851
-        SZ = (df['s_z'].values)  * 0.1115
-        SR = (df['s_r'].values)  * 0.1044
-        ST = (df['s_t'].values)  * 1.0
-        Norm_Pz = df['Npz'].values
-        Norm_St = df['Nst'].values
-        AMP = ( (np.abs(np.log10(Norm_Pz) - np.log10(Norm_St)) / np.log(2))**2  ) * 30.67
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.1
+        # SZ = (df['s_z'].values) * 0.055
+        # SR = (df['s_r'].values) * 0.21
+        # ST = (df['s_t'].values) * 0.2
+        # AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4)
 
         #TAYAK:
         # PZ = (df['p_z'].values)
-        # PR = (df['p_r'].values) * 0.005#/ 0.1 * 0.017
-        # SZ = (df['s_z'].values)  * 0.006#/ 0.14 * 0.019
-        # SR = (df['s_r'].values) * 0.03# * 0.0556)#/ 0.35) * 0.0556
+        # PR = (df['p_r'].values) * 0.017
+        # SZ = (df['s_z'].values) * 0.019
+        # SR = (df['s_r'].values) * 0.0556
         # ST = (df['s_t'].values) * 2.33
-        # AMP = df['Xi_amp'].values * 1000
+        # AMP = (( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) / 2
+
+        #### EVENT 173
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values)
+        # SZ = (df['s_z'].values)
+        # SR = (df['s_r'].values)
+        # ST = (df['s_t'].values)
+        # AMP = (np.abs(np.log10(df['Npz'].values) - np.log10(df['Nst'].values)) / np.log(2))**2
+
+
+        ## EH45Tcold
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values)# * 0.5
+        SZ = (df['s_z'].values)# * 0.16
+        SR = (df['s_r'].values)# * 0.15
+        ST = (df['s_t'].values)# * 0.94
+        AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) #* 1.3
+
 
         n_lowest = 10000
         lowest_indices = (PZ+PR+SZ+SR+ST).argsort()[0:n_lowest]
@@ -357,8 +514,8 @@ class Post_processing_sdr:
         ST = ST[ST.argsort()[0:n_lowest]] #ST[lowest_indices]
         AMP = AMP[AMP.argsort()[0:n_lowest]]
 
-        plt.figure(figsize=(8,4))
-        ax1 = plt.subplot(111)
+        plt.figure(figsize=(15,5))
+        ax1 = plt.subplot(121)
         ax1.plot(PZ, label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
         ax1.plot(ST, label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
         ax1.plot(SZ, label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
@@ -366,6 +523,7 @@ class Post_processing_sdr:
         ax1.plot(PR, label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
         ax1.plot(AMP, label = 'AMP, Mean:%.2f Min%.2f' %(np.mean(AMP),AMP.min()))
         ax1.set_ylabel("Misfit", fontsize=25)
+        ax1.set_xlabel("Sample", fontsize=25)
         ax1.tick_params(axis='x', labelsize=20)
         ax1.tick_params(axis='y', labelsize=20)
         ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
@@ -373,26 +531,25 @@ class Post_processing_sdr:
         plt.tight_layout()
         plt.yscale('log')
         plt.ylim((pow(20, -1), pow(10, 1)))
-        plt.savefig(dir + '/misfits.pdf')
-
-
-        plt.figure(figsize=(8,4))
-        ax1 = plt.subplot(111)
-        ax1.hist(PZ, bins= 80, alpha=0.8,label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
-        ax1.hist(ST, bins= 80, alpha=0.8,label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
-        ax1.hist(SZ, bins= 80, alpha=0.8,label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
-        ax1.hist(SR, bins= 80, alpha=0.8,label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
-        ax1.hist(PR, bins= 80, alpha=0.8,label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
+        ax2 = plt.subplot(122)
+        ax2.hist(PZ, bins= 80, alpha=0.8,label = 'PZ, Mean:%.2f Min%.2f' %(np.mean(PZ),PZ.min()))
+        ax2.hist(ST, bins= 80, alpha=0.8,label = 'ST, Mean:%.2f Min%.2f' %(np.mean(ST),ST.min()))
+        ax2.hist(SZ, bins= 80, alpha=0.8,label = 'SZ, Mean:%.2f Min%.2f' %(np.mean(SZ),SZ.min()))
+        ax2.hist(SR, bins= 80, alpha=0.8,label = 'SR, Mean:%.2f Min%.2f' %(np.mean(SR),SR.min()))
+        ax2.hist(PR, bins= 80, alpha=0.8,label = 'PR, Mean:%.2f Min%.2f' %(np.mean(PR),PR.min()))
         ax1.hist(AMP,bins= 80, alpha=0.8, label = 'AMP, Mean:%.2f Min%.2f' %(np.mean(AMP),AMP.min()))
-        ax1.set_ylabel("Misfit", fontsize=25)
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        # plt.legend(fontsize=16, loc='upper left')
-        plt.tight_layout()
+        ax2.set_xlabel("Misfit", fontsize=25)
+        ax2.set_ylabel("Frequency", fontsize=25)
+        ax2.tick_params(axis='x', labelsize=20)
+        ax2.tick_params(axis='y', labelsize=20)
+        ax2.ticklabel_format(style="sci", axis='x', scilimits=(-2, 2))
         plt.xscale('log')
         plt.xlim((pow(20, -1), pow(10, 1)))
-        plt.savefig(dir + '/misfits_Hist.pdf')
+        plt.ylim(0,500)
+        # plt.legend(fontsize=16, loc='upper left')
+        plt.tight_layout()
+        # plt.show()
+        plt.savefig(dir + '/misfits.pdf')
 
         #
         # ax2 = plt.subplot(512)
@@ -633,36 +790,106 @@ class Post_processing_sdr:
             M0_true = real_v[5]
 
         fig = plt.figure(figsize=(25, 6))
-        row = 0
+        # row = 0
+        #
+        # n_lowest = 200
+        # lowest_indices = df[lowest].values.argsort()#[0:n_lowest]
 
-        n_lowest = 200
-        lowest_indices = df[lowest].values.argsort()#[0:n_lowest]
 
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.01# / 0.1)
+        # SZ = (df['s_z'].values)# / 0.14)
+        # SR = (df['s_r'].values)# / 0.35)
+        # ST = (df['s_t'].values)
+        #
+        # Misfit = (PZ)
+        # lowest_indices = Misfit.argsort()
+        #
+        #
+        # strike, dip, rake = aux_plane(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]],
+        #                               df_select['Rake'][lowest_indices[0]])
+        # print(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
+        # print(strike,dip,rake)
 
+        #### TAYAK:
+        # PZ = (df['p_z'].values)
+        # PR = df['p_r'].values* 0.017
+        # SZ = df['s_z'].values * 0.019
+        # SR = df['s_r'].values* 0.0556
+        # ST = (df['s_t'].values)  * 2.33
+        # # AMP = df['Xi_amp'].values * 100
+
+        ## TAYAK:
+        # indices = np.where(Misfit < 0.13)
+        # indices = np.where(Misfit < 0.27)
+        # indices = np.where(Misfit < 1.25)
+
+        ## DWTHot
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.1
+        # SZ = (df['s_z'].values) * 0.055
+        # SR = (df['s_r'].values) * 0.21
+        # ST = (df['s_t'].values) * 0.2
+        # AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4)
+        #
+        # Misfit = PZ + ST + PR + SZ +SR
+        #
+        # ## DWTHot
+        # # indices = np.where(Misfit < 0.13)
+        # indices = np.where(Misfit < 5.95)
+        # misfits = Misfit[indices]
+        #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
+
+        ## EH45Tcold
         PZ = (df['p_z'].values)
-        PR = (df['p_r'].values) * 0.01# / 0.1)
-        SZ = (df['s_z'].values)# / 0.14)
-        SR = (df['s_r'].values)# / 0.35)
-        ST = (df['s_t'].values)
+        PR = (df['p_r'].values) * 0.5
+        SZ = (df['s_z'].values) * 0.16
+        SR = (df['s_r'].values) * 0.15
+        ST = (df['s_t'].values) * 0.94
+        AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) * 1.3
 
-        Misfit = (PZ)
-        lowest_indices = Misfit.argsort()
+        Misfit = PZ +ST + PR + SZ + SR #+ AMP
+
+        # indices = np.where(Misfit < 0.5)
+        # indices = np.where(Misfit < 0.7)
+        indices = np.where(Misfit < 8.75)
+        misfits = Misfit[indices]
+
+        strike = df['Strike'].values[indices]
+        dip = df['Dip'].values[indices]
+        rake = df['Rake'].values[indices]
 
 
-        strike, dip, rake = aux_plane(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]],
-                                      df_select['Rake'][lowest_indices[0]])
-        print(df_select['Strike'][lowest_indices[0]], df_select['Dip'][lowest_indices[0]], df_select['Rake'][lowest_indices[0]])
-        print(strike,dip,rake)
+
+        lowest_indice = misfits.argsort()[0]
+        strike_fault= strike[lowest_indice]
+        dip_fault= dip[lowest_indice]
+        rake_fault= rake[lowest_indice]
+        strike_aux, dip_aux, rake_aux = aux_plane(strike_fault,dip_fault,rake_fault)
+
 
         ax1 = plt.subplot2grid((1, 3), (0, 0))
-        # bin = int(360 * (len(df_select['Strike'][burnin:])**(1/3) / (3.49 * np.std(df_select['Strike'][burnin:]))))
+        bin = int(360 * (len(strike)**(1/3) / (3.49 * np.std(strike))))
+        binn = int(360 * (len(df['Strike'].values)**(1/3) / (3.49 * np.std(df['Strike'].values))))
         # plt.hist(df['Strike'][burnin:], weights=(df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:]) ,density = True,bins= 80, alpha=0.8)
         # plt.hist(df_select['Strike'][lowest_indices], bins= 80, alpha=0.8, label='Lowest Misfit')
-        plt.hist(df_select['Strike'][lowest_indices],weights=np.linspace(1,0,len(df_select['Strike'][lowest_indices])), bins= 80, alpha=0.8, label='Lowest Misfit')
+        # plt.hist(df_select['Strike'][lowest_indices],weights=np.linspace(1,0,len(df_select['Strike'][lowest_indices])), bins= 80, alpha=0.8, label='Lowest Misfit')
+
+        # n, x, _ = plt.hist(df['Strike'].values,weights=Misfit.max() - Misfit,density = True, bins= binn, alpha=0.4, color = 'grey')
+        n, x, _ = plt.hist(strike, weights=Misfit.max() - misfits,density=True, bins=20, alpha=0.8, color='grey',
+                           label='Lowest Misfit')
+        # bin_centers = 0.5 * (x[1:] + x[:-1])
+        # plt.plot(bin_centers, n)  ## using bin_centers rather than edges
 
         ymin, ymax = ax1.get_ylim()
-        plt.vlines(df_select['Strike'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
-        plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+        plt.vlines(strike_fault, ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(strike_aux, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+
+        # plt.vlines(df_select['Strike'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        # plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
             plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
@@ -677,16 +904,21 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax2 = plt.subplot2grid((1, 3), (0, 1))
-        bin = int(90 * (len(df_select['Dip'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Dip'][burnin:]))))
+        bin = int(90 * (len(dip) ** (1 / 3) / (3.49 * np.std(dip))))
+        binn = int(90 * (len(df['Dip'].values) ** (1 / 3) / (3.49 * np.std(df['Dip'].values))))
         # plt.hist(df['Dip'][burnin:], weights=df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:],density = True,bins= 80, alpha=0.8)
         # plt.hist(df_select['Dip'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
-        plt.hist(df_select['Dip'][lowest_indices],
-                 weights=np.linspace(1, 0, len(df_select['Dip'][lowest_indices])), bins=80, alpha=0.8,
-                 label='Lowest Misfit')
+        # plt.hist(df_select['Dip'][lowest_indices],
+        #          weights=np.linspace(1, 0, len(df_select['Dip'][lowest_indices])), bins=80, alpha=0.8,
+        #          label='Lowest Misfit')
+        # plt.hist(df['Dip'].values,weights=Misfit.max() - Misfit,bins=30, density = True,alpha=0.4, color = 'grey')
+        plt.hist(dip,weights=Misfit.max() - misfits, bins=30, density = True,alpha=0.8, color = 'grey')
 
         ymin, ymax = ax2.get_ylim()
-        plt.vlines(df_select['Dip'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
-        plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+        plt.vlines(dip_fault, ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(dip_aux, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+        # plt.vlines(df_select['Dip'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        # plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
             plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
@@ -702,20 +934,27 @@ class Post_processing_sdr:
         plt.tight_layout()
 
         ax3 = plt.subplot2grid((1, 3), (0, 2))
-        bin = int(360 * (len(df_select['Rake'][burnin:]) ** (1 / 3) / (3.49 * np.std(df_select['Rake'][burnin:]))))
+        bin = int(360 * (len(rake) ** (1 / 3) / (3.49 * np.std(rake))))
+        binn = int(360 * (len(df['Rake'].values) ** (1 / 3) / (3.49 * np.std(df['Rake'].values))))
         # plt.hist(df['Rake'][burnin:], weights=df['Total_misfit'][burnin:].max() -  df['Total_misfit'][burnin:],density = True,bins= 80, alpha=0.8)
         # plt.hist(df_select['Rake'][lowest_indices], bins=80, alpha=0.8, label='Lowest Misfit')
-        plt.hist(df_select['Rake'][lowest_indices],
-                 weights=np.linspace(1, 0, len(df_select['Rake'][lowest_indices])), bins=80, alpha=0.8,
-                 label='Lowest Misfit')
-
+        # plt.hist(df_select['Rake'][lowest_indices],
+        #          weights=np.linspace(1, 0, len(df_select['Rake'][lowest_indices])), bins=80, alpha=0.8,
+        #          label='Lowest Misfit')
+        #
+        # plt.hist(df['Rake'].values,weights=Misfit.max() - Misfit, bins=binn, density = True,alpha=0.4,color = 'grey',
+        #          label='All values')
+        plt.hist(rake,weights=Misfit.max() - misfits, bins=30, density = True,alpha=0.8,color = 'grey',
+                 label='Clustered Groups')
         ymin, ymax = ax3.get_ylim()
-        plt.vlines(df_select['Rake'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
-        plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+        plt.vlines(rake_fault, ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        plt.vlines(rake_aux, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
+        # plt.vlines(df_select['Rake'][lowest_indices[0]], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Fault plane')
+        # plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Auxiliary plane')
         if real_v is not None:
             plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
             plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
-            plt.legend(loc='upper left', fontsize=20)
+            plt.legend(loc='lower left', fontsize=18)
             # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
         ax3.set_title("Density Rake", color='b', fontsize=25)
         ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
@@ -728,231 +967,240 @@ class Post_processing_sdr:
         # plt.show()
         plt.savefig(dir + '/Trace_fault.pdf')
 
-        fig = plt.figure(figsize=(25, 6))
+        beachball([strike_fault, dip_fault, rake_fault], size=200, linewidth=2, facecolor='grey',
+                  outfile=dir + '/beach_true.pdf')
 
-        ax4 = plt.subplot2grid((1, 3), (0, 0))
-        plt.hist(df_select['Depth'][burnin:] / 1000, bins=50, alpha=0.8)
-        ymin, ymax = ax4.get_ylim()
-        xmin, xmax = ax4.get_xlim()
-        if real_v is not None:
-            plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+        fig = self.plot_BBB(strike, dip, rake,color = 'grey')
+        plt.savefig(dir + '/BBB.pdf')
 
-        ax4.set_title("Density Depth", color='b', fontsize=20)
-        # ax4.set_xlabel("N=%i" % (len(df_select['Depth'])), fontsize=20)
-        ax4.set_xlabel("Depth [km]", fontsize=20)
-        ax4.set_ylabel("Posterior marginal", fontsize=20)
-        ax4.tick_params(axis='x', labelsize=20)
-        ax4.tick_params(axis='y', labelsize=20)
-        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax4.ticklabel_format(style="sci", axis='x', scilimits=(-2, 2))
 
-        # ax4.set_xlim(real_v[1]-10000, real_v[1]+10000)
-        ax4.set_xlim(xmin, xmax)
-        # plt.legend( fontsize=20)
-        plt.tight_layout()
 
-        ax5 = plt.subplot2grid((1, 3), (0, 1))
-        plt.hist(df_select['Epi'][burnin:], bins=50, alpha=0.8)
-        # plt.hist(df['Epi'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
-        # plt.hist(df2['Epi'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
-        if real_v is not None:
-            ymin, ymax = ax5.get_ylim()
-
-        # plt.vlines(df_select['Epi'][0], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Start model')
-            plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3,label = 'True model')
-        ax5.set_title("Density Epicentral Distance", color='b', fontsize=20)
-        ax5.set_xlabel("N=%i" % (len(df_select['Epi'])), fontsize=20)
-        ax5.tick_params(axis='x', labelsize=20)
-        ax5.tick_params(axis='y', labelsize=20)
-        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        # plt.legend(fontsize=20)
-        plt.tight_layout()
-
-        ax6 = plt.subplot2grid((1, 3), (0, 2))
-        Mw = 2.0 / 3.0 * (np.log10(df['M0'][burnin:]) - 9.1)
-        plt.hist(Mw, bins=np.arange(3, 5, 0.05), alpha=0.8)
-        # plt.hist(df['M0'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
-        # plt.hist(df2['M0'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
+        #
+        # fig = plt.figure(figsize=(25, 6))
+        #
+        # ax4 = plt.subplot2grid((1, 3), (0, 0))
+        # plt.hist(df_select['Depth'][burnin:] / 1000, bins=50, alpha=0.8)
+        # ymin, ymax = ax4.get_ylim()
+        # xmin, xmax = ax4.get_xlim()
         # if real_v is not None:
-        #     ymin, ymax = ax6.get_ylim()
-        #     plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
-        # plt.vlines(df['M0'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label = 'Start model')
-        ax6.set_title("Density Moment Magnitude", color='b', fontsize=20)
-        ax6.set_xlabel("N=%i" % (len(df['M0'])), fontsize=18)
-        ax6.tick_params(axis='x', labelsize=18)
-        ax6.tick_params(axis='y', labelsize=18)
-        ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        # ax6.set_xscale('log')
-        # ax6.set_xlim(0e18, 0.5e18 )
-        # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
-        plt.legend(loc='upper right', fontsize=20)
-        plt.tight_layout()
+        #     plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+        #
+        # ax4.set_title("Density Depth", color='b', fontsize=20)
+        # # ax4.set_xlabel("N=%i" % (len(df_select['Depth'])), fontsize=20)
+        # ax4.set_xlabel("Depth [km]", fontsize=20)
+        # ax4.set_ylabel("Posterior marginal", fontsize=20)
+        # ax4.tick_params(axis='x', labelsize=20)
+        # ax4.tick_params(axis='y', labelsize=20)
+        # ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax4.ticklabel_format(style="sci", axis='x', scilimits=(-2, 2))
+        #
+        # # ax4.set_xlim(real_v[1]-10000, real_v[1]+10000)
+        # ax4.set_xlim(xmin, xmax)
+        # # plt.legend( fontsize=20)
+        # plt.tight_layout()
+        #
+        # ax5 = plt.subplot2grid((1, 3), (0, 1))
+        # plt.hist(df_select['Epi'][burnin:], bins=50, alpha=0.8)
+        # # plt.hist(df['Epi'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
+        # # plt.hist(df2['Epi'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
+        # if real_v is not None:
+        #     ymin, ymax = ax5.get_ylim()
+        #
+        # # plt.vlines(df_select['Epi'][0], ymin=ymin, ymax=ymax, colors='r', linewidth=3, label='Start model')
+        #     plt.vlines(real_v[0], ymin=ymin, ymax=ymax, colors='k', linewidth=3,label = 'True model')
+        # ax5.set_title("Density Epicentral Distance", color='b', fontsize=20)
+        # ax5.set_xlabel("N=%i" % (len(df_select['Epi'])), fontsize=20)
+        # ax5.tick_params(axis='x', labelsize=20)
+        # ax5.tick_params(axis='y', labelsize=20)
+        # ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # # plt.legend(fontsize=20)
+        # plt.tight_layout()
+        #
+        # ax6 = plt.subplot2grid((1, 3), (0, 2))
+        # Mw = 2.0 / 3.0 * (np.log10(df['M0'][burnin:]) - 9.1)
+        # plt.hist(Mw, bins=np.arange(3, 5, 0.05), alpha=0.8)
+        # # plt.hist(df['M0'][burnin:],bins=100,alpha=0.5,color = 'b',label = 'MAAK')
+        # # plt.hist(df2['M0'][burnin:],bins=100,alpha=0.5,color = 'r',label = 'EH45TcoldCrust_1b')
+        # # if real_v is not None:
+        # #     ymin, ymax = ax6.get_ylim()
+        # #     plt.vlines(M0_true, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label= 'True model')
+        # # plt.vlines(df['M0'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label = 'Start model')
+        # ax6.set_title("Density Moment Magnitude", color='b', fontsize=20)
+        # ax6.set_xlabel("N=%i" % (len(df['M0'])), fontsize=18)
+        # ax6.tick_params(axis='x', labelsize=18)
+        # ax6.tick_params(axis='y', labelsize=18)
+        # ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # # ax6.set_xscale('log')
+        # # ax6.set_xlim(0e18, 0.5e18 )
+        # # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
+        # plt.legend(loc='upper right', fontsize=20)
+        # plt.tight_layout()
+        #
+        # # plt.show()
+        # plt.savefig(dir + '/Trace_position.pdf')
 
-        # plt.show()
-        plt.savefig(dir + '/Trace_position.pdf')
-
-        n_lowest = 10000
-        # pos = np.argmin(df['Total_misfit'].values)
-        lowest_indices = df[lowest].values.argsort()[0:n_lowest]
-        lowest_misfits = df[lowest].values#[lowest_indices]
-        lowest_strike = df['Strike'].values#[lowest_indices]
-        lowest_dip = df['Dip'].values#[lowest_indices]
-        lowest_rake = df['Rake'].values#[lowest_indices]
-        lowest_depth = df['Depth'].values#[lowest_indices]
-        lowest_P_shift = df['Shift_P'].values#[lowest_indices]
-        lowest_S_shift = df['Shift_S'].values#[lowest_indices]
-
-        ind_Negative_Pshift = np.where(lowest_P_shift < 0)
-        ind_Positve_Pshift = np.where(lowest_P_shift > 0)
-
-        fig = plt.figure(figsize=(20, 12))
-        row = 0
-
-        ax1 = plt.subplot(231)
-        plt.plot(lowest_strike[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
-        plt.plot(lowest_strike[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
-        # plt.plot(df['Strike'].values,df['Total_misfit'].values,'bo')
-        ymin, ymax = ax1.get_ylim()
-        if real_v is not None:
-            plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
-            plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
-        ax1.set_title("Strike", color='b', fontsize=25)
-        ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
-        ax1.set_ylabel("Misfit %s" % lowest, fontsize=25)
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax1.set_xlim(0, 360)
-        plt.legend( fontsize=20)
-        plt.tight_layout()
-
-        ax2 = plt.subplot(232)
-        plt.plot(lowest_dip[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
-        plt.plot(lowest_dip[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
-        # plt.plot(df['Dip'].values,df['Total_misfit'].values,'bo')
-        ymin, ymax = ax2.get_ylim()
-        if real_v is not None:
-            plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
-            plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
-        # plt.vlines(df_select['Dip'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label='Start model')
-        ax2.set_title("Dip", color='b', fontsize=25)
-        ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
-        ax2.xaxis.set_ticks(np.arange(0, 90, 10))
-        ax2.tick_params(axis='x', labelsize=20)
-        ax2.tick_params(axis='y', labelsize=20)
-        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax2.set_xlim(0, 90)
+        # n_lowest = 10000
+        # # pos = np.argmin(df['Total_misfit'].values)
+        # lowest_indices = df[lowest].values.argsort()[0:n_lowest]
+        # lowest_misfits = df[lowest].values#[lowest_indices]
+        # lowest_strike = df['Strike'].values#[lowest_indices]
+        # lowest_dip = df['Dip'].values#[lowest_indices]
+        # lowest_rake = df['Rake'].values#[lowest_indices]
+        # lowest_depth = df['Depth'].values#[lowest_indices]
+        # lowest_P_shift = df['Shift_P'].values#[lowest_indices]
+        # lowest_S_shift = df['Shift_S'].values#[lowest_indices]
+        #
+        # ind_Negative_Pshift = np.where(lowest_P_shift < 0)
+        # ind_Positve_Pshift = np.where(lowest_P_shift > 0)
+        #
+        # fig = plt.figure(figsize=(20, 12))
+        # row = 0
+        #
+        # ax1 = plt.subplot(231)
+        # plt.plot(lowest_strike[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
+        # plt.plot(lowest_strike[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
+        # # plt.plot(df['Strike'].values,df['Total_misfit'].values,'bo')
+        # ymin, ymax = ax1.get_ylim()
+        # if real_v is not None:
+        #     plt.vlines(real_v[2], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+        #     plt.vlines(strike, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
+        # ax1.set_title("Strike", color='b', fontsize=25)
+        # ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
+        # ax1.set_ylabel("Misfit %s" % lowest, fontsize=25)
+        # ax1.tick_params(axis='x', labelsize=20)
+        # ax1.tick_params(axis='y', labelsize=20)
+        # ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax1.set_xlim(0, 360)
         # plt.legend( fontsize=20)
-        plt.tight_layout()
+        # plt.tight_layout()
+        #
+        # ax2 = plt.subplot(232)
+        # plt.plot(lowest_dip[ind_Negative_Pshift],lowest_misfits[ind_Negative_Pshift],'bo', label = 'Negative P - shift')
+        # plt.plot(lowest_dip[ind_Positve_Pshift],lowest_misfits[ind_Positve_Pshift],'ro', label = 'Positive P - shift')
+        # # plt.plot(df['Dip'].values,df['Total_misfit'].values,'bo')
+        # ymin, ymax = ax2.get_ylim()
+        # if real_v is not None:
+        #     plt.vlines(real_v[3], ymin=ymin, ymax=ymax, colors='g', linewidth=3)
+        #     plt.vlines(dip, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='True model')
+        # # plt.vlines(df_select['Dip'][1], ymin=ymin, ymax=ymax, colors='r', linewidth=3,label='Start model')
+        # ax2.set_title("Dip", color='b', fontsize=25)
+        # ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
+        # ax2.xaxis.set_ticks(np.arange(0, 90, 10))
+        # ax2.tick_params(axis='x', labelsize=20)
+        # ax2.tick_params(axis='y', labelsize=20)
+        # ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax2.set_xlim(0, 90)
+        # # plt.legend( fontsize=20)
+        # plt.tight_layout()
+        #
+        # ax3 = plt.subplot(233)
+        # plt.plot(lowest_rake[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+        #          label='Negative P - shift')
+        # plt.plot(lowest_rake[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+        #          label='Positive P - shift')
+        # # plt.plot(df['Rake'].values,df['Total_misfit'].values,'bo')
+        # ymin, ymax = ax3.get_ylim()
+        # if real_v is not None:
+        #     plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
+        #     plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
+        #     plt.legend(loc='upper left', fontsize=20)
+        #     # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
+        # ax3.set_title("Rake", color='b', fontsize=25)
+        # ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        # ax3.tick_params(axis='x', labelsize=20)
+        # ax3.tick_params(axis='y', labelsize=20)
+        # ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax3.set_xlim(-180, 180)
+        # plt.tight_layout()
+        #
+        #
+        # ax4 = plt.subplot(234)
+        # plt.plot(lowest_depth,lowest_misfits,'bo')
+        # # plt.plot(df['Depth'].values,df['Total_misfit'].values,'bo')
+        # ymin, ymax = ax4.get_ylim()
+        # if real_v is not None:
+        #     plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Depth')
+        #     plt.legend(loc='upper left', fontsize=20)
+        #     # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
+        # ax4.set_title("Depth", color='b', fontsize=25)
+        # ax4.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        # ax4.tick_params(axis='x', labelsize=20)
+        # ax4.tick_params(axis='y', labelsize=20)
+        # ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax4.set_xlim(20000, 100000)
+        # plt.tight_layout()
+        #
+        # ax5 = plt.subplot(235)
+        # plt.plot(lowest_P_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+        #          label='Negative P - shift')
+        # plt.plot(lowest_P_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+        #          label='Positive P - shift')
+        # # plt.plot(df['Shift_P'].values,df['Total_misfit'].values,'bo')
+        # ax5.set_title("P_Shift", color='b', fontsize=25)
+        # ax5.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        # ax5.tick_params(axis='x', labelsize=20)
+        # ax5.tick_params(axis='y', labelsize=20)
+        # ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax5.set_xlim(-60, 60)
+        # plt.tight_layout()
+        #
+        # ax6 = plt.subplot(236)
+        # plt.plot(lowest_S_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
+        #          label='Negative P - shift')
+        # plt.plot(lowest_S_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
+        #          label='Positive P - shift')
+        # # plt.plot(df['Shift_S'].values,df['Total_misfit'].values,'bo')
+        # ax6.set_title("S_Shift", color='b', fontsize=25)
+        # ax6.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        # ax6.tick_params(axis='x', labelsize=20)
+        # ax6.tick_params(axis='y', labelsize=20)
+        # ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax6.set_xlim(-60, 60)
+        # plt.tight_layout()
+        #
+        # # plt.show()
+        # plt.savefig(dir + '/Misfit_vs_Parameters.pdf')
 
-        ax3 = plt.subplot(233)
-        plt.plot(lowest_rake[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
-                 label='Negative P - shift')
-        plt.plot(lowest_rake[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
-                 label='Positive P - shift')
-        # plt.plot(df['Rake'].values,df['Total_misfit'].values,'bo')
-        ymin, ymax = ax3.get_ylim()
-        if real_v is not None:
-            plt.vlines(real_v[4], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Auxiliary plane')
-            plt.vlines(rake, ymin=ymin, ymax=ymax, colors='k', linewidth=3, label='Fault plane')
-            plt.legend(loc='upper left', fontsize=20)
-            # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
-        ax3.set_title("Rake", color='b', fontsize=25)
-        ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
-        ax3.tick_params(axis='x', labelsize=20)
-        ax3.tick_params(axis='y', labelsize=20)
-        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax3.set_xlim(-180, 180)
-        plt.tight_layout()
-
-
-        ax4 = plt.subplot(234)
-        plt.plot(lowest_depth,lowest_misfits,'bo')
-        # plt.plot(df['Depth'].values,df['Total_misfit'].values,'bo')
-        ymin, ymax = ax4.get_ylim()
-        if real_v is not None:
-            plt.vlines(real_v[1], ymin=ymin, ymax=ymax, colors='g', linewidth=3, label='Depth')
-            plt.legend(loc='upper left', fontsize=20)
-            # plt.legend(loc='center left', bbox_to_anchor=(1.1, 0.5))
-        ax4.set_title("Depth", color='b', fontsize=25)
-        ax4.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
-        ax4.tick_params(axis='x', labelsize=20)
-        ax4.tick_params(axis='y', labelsize=20)
-        ax4.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax4.set_xlim(20000, 100000)
-        plt.tight_layout()
-
-        ax5 = plt.subplot(235)
-        plt.plot(lowest_P_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
-                 label='Negative P - shift')
-        plt.plot(lowest_P_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
-                 label='Positive P - shift')
-        # plt.plot(df['Shift_P'].values,df['Total_misfit'].values,'bo')
-        ax5.set_title("P_Shift", color='b', fontsize=25)
-        ax5.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
-        ax5.tick_params(axis='x', labelsize=20)
-        ax5.tick_params(axis='y', labelsize=20)
-        ax5.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax5.set_xlim(-60, 60)
-        plt.tight_layout()
-
-        ax6 = plt.subplot(236)
-        plt.plot(lowest_S_shift[ind_Negative_Pshift], lowest_misfits[ind_Negative_Pshift], 'bo',
-                 label='Negative P - shift')
-        plt.plot(lowest_S_shift[ind_Positve_Pshift], lowest_misfits[ind_Positve_Pshift], 'ro',
-                 label='Positive P - shift')
-        # plt.plot(df['Shift_S'].values,df['Total_misfit'].values,'bo')
-        ax6.set_title("S_Shift", color='b', fontsize=25)
-        ax6.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
-        ax6.tick_params(axis='x', labelsize=20)
-        ax6.tick_params(axis='y', labelsize=20)
-        ax6.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax6.set_xlim(-60, 60)
-        plt.tight_layout()
-
-        # plt.show()
-        plt.savefig(dir + '/Misfit_vs_Parameters.pdf')
-
-
-        fig = plt.figure(figsize=(10, 6))
-        row = 0
-
-        ax1 = plt.subplot2grid((3,1), (0, 0))
-        plt.plot(df_select['Strike'])
-        ax1.set_title("Strike", color='b', fontsize=25)
-        ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
-        ax1.set_ylabel("Misfit", fontsize=25)
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-        ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax1.set_ylim(0, 360)
-        # plt.legend( fontsize=20)
-        plt.tight_layout()
-
-        ax2 = plt.subplot2grid((3,1), (1,0))
-        plt.plot(df_select['Dip'])
-
-        ax2.set_title("Dip", color='b', fontsize=25)
-        ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
-        ax2.xaxis.set_ticks(np.arange(0, 90, 10))
-        ax2.tick_params(axis='x', labelsize=20)
-        ax2.tick_params(axis='y', labelsize=20)
-        ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax2.set_ylim(0, 90)
-        # plt.legend( fontsize=20)
-        plt.tight_layout()
-
-        ax3 = plt.subplot2grid((3, 1), (2,0))
-        plt.plot(df_select['Rake'])
-        ax3.set_title("Rake", color='b', fontsize=25)
-        ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
-        ax3.tick_params(axis='x', labelsize=20)
-        ax3.tick_params(axis='y', labelsize=20)
-        ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
-        ax3.set_ylim(-180, 180)
-        plt.tight_layout()
-        # plt.show()
-        plt.savefig(dir + '/Trace_plot.pdf')
+        #
+        # fig = plt.figure(figsize=(10, 6))
+        # row = 0
+        #
+        # ax1 = plt.subplot2grid((3,1), (0, 0))
+        # plt.plot(df_select['Strike'])
+        # ax1.set_title("Strike", color='b', fontsize=25)
+        # ax1.set_xlabel("N=%i" % (len(df_select['Strike'])), fontsize=25)
+        # ax1.set_ylabel("Misfit", fontsize=25)
+        # ax1.tick_params(axis='x', labelsize=20)
+        # ax1.tick_params(axis='y', labelsize=20)
+        # ax1.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax1.set_ylim(0, 360)
+        # # plt.legend( fontsize=20)
+        # plt.tight_layout()
+        #
+        # ax2 = plt.subplot2grid((3,1), (1,0))
+        # plt.plot(df_select['Dip'])
+        #
+        # ax2.set_title("Dip", color='b', fontsize=25)
+        # ax2.set_xlabel("N=%i" % (len(df_select['Dip'])), fontsize=25)
+        # ax2.xaxis.set_ticks(np.arange(0, 90, 10))
+        # ax2.tick_params(axis='x', labelsize=20)
+        # ax2.tick_params(axis='y', labelsize=20)
+        # ax2.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax2.set_ylim(0, 90)
+        # # plt.legend( fontsize=20)
+        # plt.tight_layout()
+        #
+        # ax3 = plt.subplot2grid((3, 1), (2,0))
+        # plt.plot(df_select['Rake'])
+        # ax3.set_title("Rake", color='b', fontsize=25)
+        # ax3.set_xlabel("N=%i" % (len(df_select['Rake'])), fontsize=25)
+        # ax3.tick_params(axis='x', labelsize=20)
+        # ax3.tick_params(axis='y', labelsize=20)
+        # ax3.ticklabel_format(style="sci", axis='y', scilimits=(-2, 2))
+        # ax3.set_ylim(-180, 180)
+        # plt.tight_layout()
+        # # plt.show()
+        # plt.savefig(dir + '/Trace_plot.pdf')
 
     def get_beachballs(self, strike, dip, rake, M0, savepath):
         rdip = np.deg2rad(dip)
@@ -1189,25 +1437,26 @@ class Post_processing_sdr:
         depth = df['Depth'].values[lowest_indices]
         epi = df['Epi'].values[lowest_indices]
 
-
-        PZ = (df['p_z'].values)
-        PR = (df['p_r'].values / 0.1) * 0.017
-        SZ = (df['s_z'].values / 0.14) * 0.019
-        SR = (df['s_r'].values / 0.35) * 0.0556
-        ST = (df['s_t'].values)  * 2.33
-
-        Misfit = PZ + ST +PR+SR+SZ
-        # indices = np.where(Misfit < 0.27)
-        indices = np.where(Misfit < 1.25)
-
-        strike = df['Strike'].values[indices]
-        dip = df['Dip'].values[indices]
-        rake = df['Rake'].values[indices]
-
+        ## TAYAK: EVENT_235_1
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.017
+        # SZ = (df['s_z'].values) * 0.019
+        # SR = (df['s_r'].values) * 0.0556
+        # ST = (df['s_t'].values)  * 2.33
+        # AMP = (((np.abs(np.log10(df['Npz'].values) - np.log10(df['Nst'].values))) / np.log(2))) ** (1 / 4) / 2
+        # Misfit = PZ + ST + PR + SR + SZ + AMP
+        # # indices = np.where(Misfit < 0.13)
+        # # indices = np.where(Misfit < 0.27)
+        # # indices = np.where(Misfit < 1.25)
+        # indices = np.where(Misfit < 1.55)
+        # #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
         #### PZ
-        # G1_S = strike[(strike < 70) ]
-        # G1_D = dip[(strike < 70) ]
-        # G1_R = rake[(strike < 70) ]
+        # G1_S = np.hstack((strike[(strike < 70) ] , strike[(strike > 349) ] ))
+        # G1_D = np.hstack(( dip[(strike < 70) ] ,  dip[(strike > 349) ] ))
+        # G1_R = np.hstack(( rake[(strike < 70) ] , rake[(strike > 349) ] ))
         #
         # G21_S = strike[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
         # G21_D = dip[( ( (70 < strike) & (strike < 250)) & ((-180 < rake ) & (rake <-100)) )]
@@ -1221,11 +1470,7 @@ class Post_processing_sdr:
         # G3_S = strike[(250< strike) & (strike < 349) ]
         # G3_D = dip[(250< strike) & (strike < 349) ]
         # G3_R = rake[(250< strike) & (strike < 349) ]
-        #
-        # G4_S = strike[(strike > 349) ]
-        # G4_D = dip[(strike > 349) ]
-        # G4_R = rake[(strike > 349) ]
-        #
+
         ####PZ+ST
         # G1_S = strike[(strike < 250) ]
         # G1_D = dip[(strike < 250) ]
@@ -1237,26 +1482,135 @@ class Post_processing_sdr:
 
 
         ####TOTAL
-        G1_S = strike[(strike < 100) ]
-        G1_D = dip[(strike < 100)  ]
-        G1_R = rake[(strike < 100) ]
-
-        G2_S = strike[((strike > 100)  & (strike<255) )]
-        G2_D = dip[((strike > 100)  & (strike<255) )]
-        G2_R = rake[((strike > 100)  & (strike<255) )]
-
-        G3_S = strike[(strike>255) ]
-        G3_D = dip[(strike>255)]
-        G3_R = rake[(strike>255)]
+        # G1_S = np.hstack(( strike[(strike < 100) ] , strike[(strike>255) ] ))
+        # G1_D = np.hstack(( dip[(strike < 100)  ], dip[(strike>255)] ))
+        # G1_R = np.hstack(( rake[(strike < 100) ],  rake[(strike>255)] ))
+        #
+        # G2_S = strike[((strike > 100)  & (strike<255) )]
+        # G2_D = dip[((strike > 100)  & (strike<255) )]
+        # G2_R = rake[((strike > 100)  & (strike<255) )]
 
 
-        strike = G3_S
-        dip = G3_D
-        rake = G3_R
+        ## DWTHot_Shift_1
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.1
+        # SZ = (df['s_z'].values) * 0.055
+        # SR = (df['s_r'].values) * 0.21
+        # ST = (df['s_t'].values) * 0.2
+        # AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4)
+        #
+        # Misfit = PZ + ST + PR + SZ + SR #+ AMP
+        #
+        # # indices = np.where(Misfit < 0.13)
+        # indices = np.where(Misfit < 5.95)
+        #
+        # misfits = Misfit[indices]
+        #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
+
+        ###PZ
+        # G1_S = strike[(rake < -100) ]
+        # G1_D =  dip[(rake < -100) ]
+        # G1_R = rake[(rake < -100) ]
+        # M1 =  misfits[(rake < -100) ]
+        #
+        # G2_S =  strike[((rake > -100) & (rake < 0))]
+        # G2_D =  dip[((rake > -100) & (rake < 0))]
+        # G2_R =  rake[((rake > -100) & (rake < 0))]
+        # M2   =  misfits[((rake > -100) & (rake < 0))]
+        #
+        # G3_S =  strike[((rake > 0) & (rake < 100))]
+        # G3_D =  dip[((rake > 0) & (rake < 100))]
+        # G3_R =  rake[((rake > 0) & (rake < 100))]
+        # M3   =  misfits[((rake > 0) & (rake < 100))]
+        #
+        # G4_S = strike[(rake > 100) ]
+        # G4_D = dip[(rake > 100) ]
+        # G4_R = rake[(rake > 100) ]
+        # M4   = misfits[(rake > 100) ]
+
+        ## TOTAL
+
+        # G1_S = strike[(strike > 225) ]
+        # G1_D =  dip[(strike > 225) ]
+        # G1_R = rake[(strike > 225) ]
+        # M1 =  misfits[(strike > 225) ]
+        #
+        # G2_S =  strike[(strike < 225) ]
+        # G2_D =  dip[(strike < 225) ]
+        # G2_R =  rake[(strike < 225) ]
+        # M2   =  misfits[(strike < 225) ]
+
+
+        ## EH45Tcold
+        PZ = (df['p_z'].values)
+        PR = (df['p_r'].values) * 0.5
+        SZ = (df['s_z'].values) * 0.16
+        SR = (df['s_r'].values) * 0.15
+        ST = (df['s_t'].values) * 0.94
+        AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) * 1.3
+
+        Misfit = PZ + ST + PR + SZ + SR #+ AMP
+
+        # indices = np.where(Misfit < 0.5)
+        # indices = np.where(Misfit < 0.7)
+        indices = np.where(Misfit < 8.75)
+
+
+        misfits = Misfit[indices]
+
+        strike = df['Strike'].values[indices]
+        dip = df['Dip'].values[indices]
+        rake = df['Rake'].values[indices]
+
+        ## PZ
+        # G1_S =  strike[(strike < 160) ]
+        # G1_D =  dip[(strike < 160) ]
+        # G1_R =  rake[(strike < 160) ]
+        # M1   =  misfits[(strike < 160) ]
+        #
+        # G2_S =  strike[(strike > 160) ]
+        # G2_D =  dip[(strike > 160) ]
+        # G2_R =  rake[(strike > 160) ]
+        # M2   =  misfits[(strike > 160) ]
+
+        ## PZST
+
+        # G1_S =  strike[(strike < 200) ]
+        # G1_D =  dip[(strike < 200) ]
+        # G1_R =  rake[(strike < 200) ]
+        # M1   =  misfits[(strike < 200) ]
+        #
+        # G2_S =  strike[(strike > 200) ]
+        # G2_D =  dip[(strike > 200) ]
+        # G2_R =  rake[(strike > 200) ]
+        # M2   =  misfits[(strike > 200) ]
+
+
+        ## TOTAL
+
+
+        G1_S =  strike[(strike < 125) ]
+        G1_D =  dip[(strike < 125) ]
+        G1_R =  rake[(strike < 125) ]
+        M1   =  misfits[(strike < 125) ]
+
+        G2_S =  strike[(strike > 125) ]
+        G2_D =  dip[(strike > 125) ]
+        G2_R =  rake[(strike > 125) ]
+        M2   =  misfits[(strike > 125) ]
+
+
+
+        strike = G2_S
+        dip = G2_D
+        rake = G2_R
 
         with open(filepath) as f:
             content = f.readlines()
-        azimuth = float(content[50].strip('\n').split(':')[-1])
+        azimuth = float(content[54].strip('\n').split(':')[-1])
 
         veloc_model = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
 
@@ -1280,7 +1634,7 @@ class Post_processing_sdr:
 
         fig = self.plot_BBB(strike, dip, rake,
                             azimuths=azimuths, inc_angles=inc_angles,
-                            phase_names=phase_names,color = 'green')
+                            phase_names=phase_names,color = 'orange')
         plt.savefig(dir + '/BBB.pdf')
 
 
@@ -1422,7 +1776,6 @@ class Post_processing_sdr:
         plt.ylabel("Rake")
         plt.tight_layout()
         plt.savefig(dir + '/strike_dip_rake_misfit.pdf')
-
 
     def plot_BBB(self, strikes, dips, rakes, azimuths=None, inc_angles=None,
                  phase_names=None,

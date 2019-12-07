@@ -58,7 +58,9 @@ class Grid_Search:
 
                         # ## Determine the misfit:
                         Xi_bw, Norms, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
-                                                                                  self.or_time, self.prior['PLOT'])
+                                                                                  self.prior['Full_P_shift'],
+                                                                                  self.prior['Full_S_shift'],
+                                                                                  self.prior['PLOT'])
 
                         M0_New = M0 / np.mean(amplitude)  # Only Based on PZ
                         if self.prior['PLOT'] == True:

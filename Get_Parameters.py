@@ -129,7 +129,8 @@ class Get_Parameters:
         PRIOR['Post_S'] = Param['WINDOW']['Post_S']
         PRIOR['Global_P_shift'] = Param['WINDOW']['Global_P_shift']
         PRIOR['Global_S_shift'] = Param['WINDOW']['Global_S_shift']
-
+        PRIOR['Full_P_shift'] = Param['WINDOW']['Full_P_shift']
+        PRIOR['Full_S_shift'] = Param['WINDOW']['Full_S_shift']
         return PRIOR
 
     def Get_ranges(self,PRIOR):

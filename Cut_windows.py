@@ -26,12 +26,14 @@ class Cut_windows:
     def get_P(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['P'])
-        return tt[0].time + self.global_P_shift
+        tt = tt[0].time + self.global_P_shift
+        return tt
 
     def get_S(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['S'])
-        return tt[0].time + self.global_S_shift
+        tt = tt[0].time + self.global_S_shift
+        return tt
 
     def get_pp(self, epi, depth_m):
         model = TauPyModel(model=self.veloc_model)
@@ -68,6 +70,8 @@ class Cut_windows:
             self.or_P_len = int((self.start_P - or_time)/ stream.traces[0].stats.delta)
             self.start_S = obspy.UTCDateTime(or_time_sec + tt_S - self.Pre_S)
             self.or_S_len = int((self.start_S - or_time) / stream.traces[0].stats.delta)
+            # print(self.start_P)
+            # print(self.start_S)
 
             end_P = obspy.UTCDateTime(or_time_sec + tt_P + self.Post_P)
             end_S = obspy.UTCDateTime(or_time_sec + tt_S + self.Post_S)
@@ -116,7 +120,7 @@ class Cut_windows:
 
         wlen_seconds = self.Taper_Len
         zero_len = self.Zero_len
-        wlen = int(wlen_seconds / self.dt)
+        # wlen = int(wlen_seconds / self.dt)
 
         P_stream = Stream()
         S_stream = Stream()
@@ -168,14 +172,14 @@ class Cut_windows:
             self.S_stream = S_stream
             self.P_stream = P_stream
 
-            # Create the taper:
-            Taper_S = self.Create_Taper(self.S_len,wlen, zero_len)
-            Taper_P = self.Create_Taper(self.P_len,wlen,zero_len)
-
-            # Apply the Taper:
-            if i != 2:
-                self.P_stream.traces[i].data *= Taper_P
-            self.S_stream.traces[i].data *= Taper_S
+            ## Create the taper:
+            # Taper_S = self.Create_Taper(self.S_len,wlen, zero_len)
+            # Taper_P = self.Create_Taper(self.P_len,wlen,zero_len)
+            #
+            # # Apply the Taper:
+            # if i != 2:
+            #     self.P_stream.traces[i].data *= Taper_P
+            # self.S_stream.traces[i].data *= Taper_S
 
             # import matplotlib.pylab as plt
             # plt.figure()
