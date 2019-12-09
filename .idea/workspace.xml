@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Global P- and S-shift are in the input file">
-      <change afterPath="$PROJECT_DIR$/CLEAN_NEW_CODE.py" afterDir="false" />
+    <list default="true" id="749a8081-3749-4413-bf28-60f975decb24" name="Default" comment="Updates in shift!">
+      <change afterPath="$PROJECT_DIR$/Greens_Functions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Linear_Inversion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLEAN_NEW_CODE.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Cut_windows.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cut_windows.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Get_Parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/Get_Parameters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Grid_Search.py" beforeDir="false" afterPath="$PROJECT_DIR$/Grid_Search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main_Marsquakes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main_Marsquakes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misfit.py" afterDir="false" />
@@ -102,7 +103,29 @@
       <recent name="$PROJECT_DIR$/Database/Earth" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Main_Marsquakes">
+  <component name="RunManager" selected="Python.Linear_Inversion">
+    <configuration name="Linear_Inversion" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="BBB_project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Linear_Inversion.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="Main_Marsquakes" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="BBB_project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -191,42 +214,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_cross_correlation" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="BBB_project" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_cross_correlation.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.Main_Marsquakes" />
       <item itemvalue="Python.Post_processing" />
-      <item itemvalue="Python.test_cross_correlation" />
       <item itemvalue="Python.Test_Rotate" />
       <item itemvalue="Python.Test_Filter_Procedure" />
+      <item itemvalue="Python.Linear_Inversion" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Linear_Inversion" />
         <item itemvalue="Python.Main_Marsquakes" />
         <item itemvalue="Python.Post_processing" />
         <item itemvalue="Python.Test_Filter_Procedure" />
         <item itemvalue="Python.Test_Rotate" />
-        <item itemvalue="Python.test_cross_correlation" />
       </list>
     </recent_temporary>
   </component>
@@ -340,7 +341,13 @@
       <workItem from="1575529798302" duration="21953000" />
       <workItem from="1575614332941" duration="19294000" />
       <workItem from="1575645305927" duration="2994000" />
-      <workItem from="1575730756954" duration="10597000" />
+      <workItem from="1575730756954" duration="10635000" />
+      <workItem from="1575792676432" duration="5811000" />
+      <workItem from="1575799609294" duration="335000" />
+      <workItem from="1575800339979" duration="14937000" />
+      <workItem from="1575826113613" duration="4276000" />
+      <workItem from="1575833754169" duration="1409000" />
+      <workItem from="1575888222605" duration="17397000" />
     </task>
     <task id="LOCAL-00001" summary="Updates: waveform fitting and weighting function">
       <created>1542368829661</created>
@@ -461,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575283554691</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Updates in shift!">
+      <created>1575741776460</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1575741776460</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -512,62 +526,76 @@
     <MESSAGE value="Update in Misfit: Write out amplitude misfit between PZ and ST. &#10;Plot Update" />
     <MESSAGE value="Plot functions, Normalization stuff, Clustering, more stuff, always fun!!!!!!" />
     <MESSAGE value="Global P- and S-shift are in the input file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Global P- and S-shift are in the input file" />
+    <MESSAGE value="Updates in shift!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updates in shift!" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="298" y="155" width="542" height="734" key="#xdebugger.evaluate" timestamp="1575740424687">
+    <state x="739" y="722" width="757" height="949" key="#xdebugger.evaluate" timestamp="1575905289743">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="739" y="722" width="757" height="316" key="#xdebugger.evaluate/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575905289743" />
+    <state x="329" y="131" width="757" height="949" key="#xdebugger.evaluate/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900599316" />
+    <state x="121" y="246" width="770" height="568" key="#xdebugger.evaluate/0.27.1920.1053@0.27.1920.1053" timestamp="1575832436164" />
+    <state x="1062" y="151" width="745" height="812" key="CommitChangelistDialog2" timestamp="1575741776259">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="1028" y="45" width="757" height="603" key="#xdebugger.evaluate/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575646672552" />
-    <state x="298" y="155" width="542" height="734" key="#xdebugger.evaluate/0.27.1920.1053@0.27.1920.1053" timestamp="1575740424687" />
-    <state width="918" height="268" key="GridCell.Tab.0.bottom" timestamp="1575740564072">
+    <state x="1062" y="151" width="745" height="812" key="CommitChangelistDialog2/0.27.1920.1053@0.27.1920.1053" timestamp="1575741776259" />
+    <state x="1218" y="358" width="424" height="491" key="FileChooserDialogImpl" timestamp="1575896883564">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="1218" y="358" width="424" height="491" key="FileChooserDialogImpl/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575896883564" />
+    <state width="918" height="313" key="GridCell.Tab.0.bottom" timestamp="1575908251777">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.0.bottom/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908251777" />
+    <state width="918" height="258" key="GridCell.Tab.0.bottom/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900623813" />
+    <state width="908" height="268" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162435" />
+    <state width="918" height="313" key="GridCell.Tab.0.center" timestamp="1575908251777">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.0.center/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908251777" />
+    <state width="918" height="258" key="GridCell.Tab.0.center/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900623813" />
+    <state width="908" height="268" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162435" />
+    <state width="918" height="313" key="GridCell.Tab.0.left" timestamp="1575908251777">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.0.left/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908251777" />
+    <state width="918" height="258" key="GridCell.Tab.0.left/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900623813" />
+    <state width="908" height="268" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162434" />
+    <state width="918" height="313" key="GridCell.Tab.0.right" timestamp="1575908251777">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.0.right/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908251777" />
+    <state width="918" height="258" key="GridCell.Tab.0.right/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900623813" />
+    <state width="908" height="268" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162435" />
+    <state width="918" height="313" key="GridCell.Tab.1.bottom" timestamp="1575908257134">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.1.bottom/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908257134" />
+    <state width="918" height="267" key="GridCell.Tab.1.bottom/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900599974" />
+    <state width="908" height="268" key="GridCell.Tab.1.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162436" />
+    <state width="918" height="313" key="GridCell.Tab.1.center" timestamp="1575908257134">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.1.center/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908257134" />
+    <state width="918" height="267" key="GridCell.Tab.1.center/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900599974" />
+    <state width="908" height="268" key="GridCell.Tab.1.center/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162436" />
+    <state width="918" height="313" key="GridCell.Tab.1.left" timestamp="1575908257134">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.1.left/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908257134" />
+    <state width="918" height="267" key="GridCell.Tab.1.left/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900599974" />
+    <state width="908" height="268" key="GridCell.Tab.1.left/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162435" />
+    <state width="918" height="313" key="GridCell.Tab.1.right" timestamp="1575908257134">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="918" height="313" key="GridCell.Tab.1.right/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575908257134" />
+    <state width="918" height="267" key="GridCell.Tab.1.right/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575900599974" />
+    <state width="908" height="268" key="GridCell.Tab.1.right/0.27.1920.1053@0.27.1920.1053" timestamp="1575835162436" />
+    <state x="1035" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2" timestamp="1575741777823">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="908" height="316" key="GridCell.Tab.0.bottom/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.0.bottom/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564072" />
-    <state width="918" height="268" key="GridCell.Tab.0.center" timestamp="1575740564072">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.0.center/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.0.center/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564072" />
-    <state width="918" height="268" key="GridCell.Tab.0.left" timestamp="1575740564072">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.0.left/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.0.left/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564072" />
-    <state width="918" height="268" key="GridCell.Tab.0.right" timestamp="1575740564072">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.0.right/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.0.right/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564072" />
-    <state width="918" height="268" key="GridCell.Tab.1.bottom" timestamp="1575740564004">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.1.bottom/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.1.bottom/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.1.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564004" />
-    <state width="918" height="268" key="GridCell.Tab.1.center" timestamp="1575740564003">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.1.center/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.1.center/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.1.center/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564003" />
-    <state width="918" height="268" key="GridCell.Tab.1.left" timestamp="1575740564003">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.1.left/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.1.left/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.1.left/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564003" />
-    <state width="918" height="268" key="GridCell.Tab.1.right" timestamp="1575740564003">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state width="908" height="316" key="GridCell.Tab.1.right/0.1200.1920.1080/0.0.1920.1200@0.0.1920.1200" timestamp="1575650573434" />
-    <state width="918" height="316" key="GridCell.Tab.1.right/0.1200.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1575640906367" />
-    <state width="918" height="268" key="GridCell.Tab.1.right/0.27.1920.1053@0.27.1920.1053" timestamp="1575740564003" />
+    <state x="1035" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/0.27.1920.1053@0.27.1920.1053" timestamp="1575741777823" />
     <state x="100" y="127" width="1720" height="853" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1575495666967">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
@@ -623,7 +651,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Grid_Search.py</url>
-          <line>232</line>
+          <line>247</line>
           <option name="timeStamp" value="412" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -637,29 +665,24 @@
           <option name="timeStamp" value="510" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Post_processing.py</url>
-          <line>736</line>
-          <option name="timeStamp" value="519" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Post_processing.py</url>
-          <line>762</line>
-          <option name="timeStamp" value="540" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Plot_waveforms.py</url>
-          <line>405</line>
+          <line>411</line>
           <option name="timeStamp" value="550" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>63</line>
-          <option name="timeStamp" value="551" />
+          <line>106</line>
+          <option name="timeStamp" value="586" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Misfit.py</url>
-          <line>43</line>
-          <option name="timeStamp" value="554" />
+          <url>file://$PROJECT_DIR$/Cut_windows.py</url>
+          <line>78</line>
+          <option name="timeStamp" value="593" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Linear_Inversion.py</url>
+          <line>49</line>
+          <option name="timeStamp" value="597" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -673,8 +696,9 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Python3_MTI$Obspy_Trim.coverage" NAME="Obspy_Trim Coverage Results" MODIFIED="1571136057669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1575622457482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1575740563955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Post_processing.coverage" NAME="Post_processing Coverage Results" MODIFIED="1575905767836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Linear_Inversion.coverage" NAME="Linear_Inversion Coverage Results" MODIFIED="1575908251666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python3_MTI$Main_Marsquakes.coverage" NAME="Main_Marsquakes Coverage Results" MODIFIED="1575907125471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Main_MSS.coverage" NAME="Main_MSS Coverage Results" MODIFIED="1571369160113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Get_Parameters_Marsquake_235.coverage" NAME="Get_Parameters_Marsquake_235 Coverage Results" MODIFIED="1572512200339" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python3_MTI$Test_Rotate.coverage" NAME="Test_Rotate Coverage Results" MODIFIED="1573741078528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

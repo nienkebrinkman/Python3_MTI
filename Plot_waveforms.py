@@ -61,6 +61,9 @@ class Plot_waveforms:
         self.param['Global_P_shift'] = float(content[42].strip('\n').split(':')[-1])
         self.param['Global_S_shift'] = float(content[44].strip('\n').split(':')[-1])
 
+        self.param['Full_P_shift'] = int(content[46].strip('\n').split(':')[-1])
+        self.param['Full_S_shift'] = int(content[48].strip('\n').split(':')[-1])
+
     def get_waveforms(self, Norm=True):
         # fig_bb, ax_bb = plt.subplots(1, 1, figsize=(4, 4))
         #
@@ -75,8 +78,8 @@ class Plot_waveforms:
         rake = self.df['Rake']
         M0 = self.df['M0']
         self.param = self.prior
-        P_shift = self.df['Shift_P'] + self.param['Full_P_shift']
-        S_shift = self.df['Shift_S'] + self.param['Full_S_shift']
+        P_shift = self.df['Shift_P']# + self.param['Full_P_shift']
+        S_shift = self.df['Shift_S']# + self.param['Full_S_shift']
 
         seis = Get_Seismogram(self.prior)
         BW_syn = Cut_windows(self.prior['VELOC_taup'], P_HP=self.param['P_HP'], P_LP=self.param['P_LP'],
@@ -121,9 +124,10 @@ class Plot_waveforms:
         ST = (self.df['s_t'].values)
         AMP =(( (np.abs(np.log10(self.df['Npz'].values ) - np.log10(self.df['Nst'].values ))) / np.log(2)) ) ** (1/4)
 
-        misfit = (PZ) #+ PR + SZ + SR + ST )
+        misfit =PZ + PR + SZ + SR + ST
 
         lowest_indices = misfit.argsort()[0:n_lowest]
+        # lowest_indices = np.array([0])
 
         #################### TAYAK :
         # PZ = (self.df['p_z'].values)
@@ -240,17 +244,18 @@ class Plot_waveforms:
                                           strike=strike[i], dip=dip[i], rake=rake[i],
                                           time=self.otime, M0=self.prior['M0'])
 
-            BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime)
+            BW_syn.Get_bw_windows(st_syn, epi[i], depth[i], self.otime, self.param['Full_P_shift'],self.param['Full_S_shift'])
 
             # ## Determine the misfit:
             mis = Misfit()
             Xi_bw, Xi_Norm, amplitude, time_shift, fig1 = mis.CC_BW(self.BW_obs, BW_syn, self.param['Full_P_shift'],self.param['Full_S_shift'], False)
-            # s_z = Xi_bw[0] * 0.1  # * 0.14
-            # s_r = Xi_bw[1] * 0.1  # * 0.35
-            # s_t = Xi_bw[2] * 1
-            # p_z = Xi_bw[3] * 5
-            # p_r = Xi_bw[4] * 0.1  # * 0.1
-            # Xi = s_z + s_r + s_t + p_z + p_r
+            s_z = Xi_bw[0]
+            s_r = Xi_bw[1]
+            s_t = Xi_bw[2]
+            p_z = Xi_bw[3]
+            p_r = Xi_bw[4]
+
+            Xi = s_z + s_r + s_t + p_z + p_r
 
             N_PZ = (np.max(np.abs(self.BW_obs.P_stream.traces[0].data))) / np.max(
                 np.abs(BW_syn.P_stream.traces[0].data))
@@ -262,28 +267,28 @@ class Plot_waveforms:
                 np.abs(BW_syn.S_stream.traces[1].data))
             N_ST = (np.max(np.abs(self.BW_obs.S_stream.traces[2].data))) / np.max(
                 np.abs(BW_syn.S_stream.traces[2].data))
-            S_shift[i] = time_shift[0]+ self.param['Full_S_shift']  #-37 #-12
-            P_shift[i] = time_shift[1]+ self.param['Full_P_shift']  # 17#-4
+            S_shift[i] = 0 # self.param['Full_S_shift']  #-37 #-12
+            P_shift[i] = 0 # self.param['Full_P_shift']  # 17#-4
 
             ax1 = self.part_of_waveform(ax1, tp, BW_syn.P_original.traces[0].data, BW_syn.P_stream.traces[0].data,
                                         int(P_shift[i]), BW_syn.or_P_len,
-                                        int(BW_syn.P_len - 2 * self.param['Taper_len'] / dt), dt, Norm=Norm,
+                                        int(BW_syn.P_len - 2 * self.param['Taper_len'] / dt), self.param['Full_P_shift'],dt, Norm=Norm,
                                         Norm_Fact=N_PZ)
             ax2 = self.part_of_waveform(ax2, tp, BW_syn.P_original.traces[1].data, BW_syn.P_stream.traces[1].data,
                                         int(P_shift[i]), BW_syn.or_P_len,
-                                        int(BW_syn.P_len - 2 * self.param['Taper_len'] / dt), dt, Norm=Norm,
+                                        int(BW_syn.P_len - 2 * self.param['Taper_len'] / dt), self.param['Full_P_shift'], dt, Norm=Norm,
                                         Norm_Fact=N_PR)
             ax3 = self.part_of_waveform(ax3, ts, BW_syn.S_original.traces[0].data, BW_syn.S_stream.traces[0].data,
                                         int(S_shift[i]), BW_syn.or_S_len,
-                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), dt, Norm=Norm,
+                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), self.param['Full_S_shift'], dt, Norm=Norm,
                                         Norm_Fact=N_SZ)
             ax4 = self.part_of_waveform(ax4, ts, BW_syn.S_original.traces[1].data, BW_syn.S_stream.traces[1].data,
                                         int(S_shift[i]), BW_syn.or_S_len,
-                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), dt, Norm=Norm,
+                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), self.param['Full_S_shift'], dt, Norm=Norm,
                                         Norm_Fact=N_SR)
             ax5 = self.part_of_waveform(ax5, ts, BW_syn.S_original.traces[2].data, BW_syn.S_stream.traces[2].data,
                                         int(S_shift[i]), BW_syn.or_S_len,
-                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), dt, Norm=Norm,
+                                        int(BW_syn.S_len - 2 * self.param['Taper_len'] / dt), self.param['Full_S_shift'], dt, Norm=Norm,
                                         Norm_Fact=N_ST)
 
 
@@ -291,9 +296,10 @@ class Plot_waveforms:
             print("P-shift: %i" % int(P_shift[i]))
             print("S-shift: %i" % int(S_shift[i]))
             if i == lowest_indices[0]:
-                P_time = tp[int(BW_syn.Pre_P / dt) + self.param['Zero_len'] + int(self.param['Taper_len'] / dt) - int(P_shift[i]) ]
-                S_time = ts[int(BW_syn.Pre_S / dt) + self.param['Zero_len'] + int(self.param['Taper_len'] / dt) - int(S_shift[i]) ]
+                P_time = tp[int(BW_syn.Pre_P / dt) + self.param['Zero_len'] + int(self.param['Taper_len'] / dt) - int(self.param['Full_P_shift']) ]
+                S_time = ts[int(BW_syn.Pre_S / dt) + self.param['Zero_len'] + int(self.param['Taper_len'] / dt) - int(self.param['Full_S_shift']) ]
 
+                # ax1.set_title("Xi: %.2e,Pz: %.2e, Pr: %.2e, Sz: %.2e, Sr: %.2e, St: %.2e" % (Xi,p_z,p_r,s_z,s_r,s_t))
                 ax1 = self.Add_Phase_pick_arrival(ax1, P_time, 'P')
                 ax2 = self.Add_Phase_pick_arrival(ax2, P_time, 'P')
                 ax3 = self.Add_Phase_pick_arrival(ax3, S_time, 'S')
@@ -425,7 +431,7 @@ class Plot_waveforms:
             ax.legend()
         return ax
 
-    def part_of_waveform(self, ax, t, origin_trace_wo_shift, trace_wo_shift, Shift, origin_phase_len, len_of_phase, dt,
+    def part_of_waveform(self, ax, t, origin_trace_wo_shift, trace_wo_shift, Shift, origin_phase_len, len_of_phase,Full_shift, dt,
                          Norm=True, Norm_Fact=None):
         """
         :param
@@ -434,18 +440,27 @@ class Plot_waveforms:
         shift = the shift number
         Norm = True (Normalize) , False (Do not Normalize)
         """
-        start_cut = origin_phase_len - self.param['Zero_len'] - int(self.param['Taper_len'] / dt)
-        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len'] + int(self.param['Taper_len'] / dt)
+        start_cut = origin_phase_len - self.param['Zero_len'] - int(self.param['Taper_len'] / dt) + Full_shift
+        end_cut = origin_phase_len + len_of_phase + self.param['Zero_len'] + int(self.param['Taper_len'] / dt) + Full_shift
 
         P_shift_array = self.shift(trace_wo_shift, int(Shift))
         Origin_P_shift_array = self.shift(origin_trace_wo_shift, int(Shift))
         color = 'blue'
         if Norm == True:
-            ax.plot(t, Origin_P_shift_array[start_cut:end_cut] * Norm_Fact , c=color, linewidth=1, alpha=0.5)
+            ax.plot(t, Origin_P_shift_array[start_cut:end_cut] * Norm_Fact , c=color, linewidth=5, alpha=0.5)
             ax.plot(t, P_shift_array * Norm_Fact , c=color, linewidth=3)
         else:
             ax.plot(t, Origin_P_shift_array[start_cut:end_cut], c=color, linewidth=0.05, alpha=0.7)
             ax.plot(t, P_shift_array, c=color, linewidth=0.1)
+
+            # plt.close()
+            # ax = plt.subplot(111)
+            # plt.plot(Origin_P_shift_array)
+            # ymin, ymax = ax.get_ylim()
+            # plt.vlines(origin_phase_len, ymin=ymin, ymax=ymax, colors='r', linestyles='dashdot')
+            # plt.vlines(start_cut, ymin=ymin, ymax=ymax, colors='r')
+            # plt.vlines(end_cut, ymin=ymin, ymax=ymax, colors='r')
+            # plt.show()
 
         return ax
 

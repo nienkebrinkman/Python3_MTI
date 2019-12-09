@@ -11,10 +11,11 @@ from Plot_waveforms import Plot_waveforms
 from Grid_Search import Grid_Search
 
 """ DEFINE YOUR INPUT FILE PATH HERE: """
-toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/TAYAK.toml'
+toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Input/DWTHot_Amp.toml'
+# toml_path = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/NEW_RUNS/1/EH45Tcold_Amp.toml'
 
 
-# toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/EH45Tcold_173.toml'
+# toml_path = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Input/DWTHot_173.toml'
 
 
 def main():
@@ -61,11 +62,12 @@ def main():
 
     # === Plot waveforms from a previous run ===
     PRIOR['VELOC'] = PRIOR['VELOC']
-    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/TAYAK_Shift_1.txt'
+    path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/DWTHot__.txt'
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/NEW_RUNS/1/EH45Tcold.txt'
     savedir = '/home/nienke/Documents/Master/Data/Mars/S0235b/waveforms/Output/'
-    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/TAYA.txt'
+    # path_txt = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/DWTHot_173.txt'
     # savedir = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/'
-    skiprows = 56
+    skiprows = 60#56
     plot = Plot_waveforms(BW_obs, path_txt, savedir, PRIOR, skiprows)
     # plot.get_Cut_waveforms()
     plot.get_waveforms(Norm=True)

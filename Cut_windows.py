@@ -45,7 +45,7 @@ class Cut_windows:
         tt = model.get_travel_times(source_depth_in_km=depth_m / 1000, distance_in_degree=epi,phase_list=['sP'])
         return tt[0].time
 
-    def Get_bw_windows(self, stream, UNKNOWN_1, UNKNOWN_2, or_time, MANUAL = False):
+    def Get_bw_windows(self, stream, UNKNOWN_1, UNKNOWN_2, or_time, Full_P_shift = None, Full_S_shift = None ,MANUAL = False):
         ## YOU can do EITHER MANUAL or not:
         """   if MANUAL = False:
                 UNKNOWN_1 = EPI
@@ -53,6 +53,9 @@ class Cut_windows:
               if MANUAL = True:
                 UNKNOWN_1 = tt_P
                 UNKNOWN_2 = tt_S
+
+            Full_P_shift = extra shift applied to synthetic, so should be None if Observed
+            Full_S_shift = extra shift applied to synthetic, so should be None if Observed
 
         """
 
@@ -87,6 +90,15 @@ class Cut_windows:
             end_P = obspy.UTCDateTime(tt_P.timestamp + self.Post_P)
             end_S = obspy.UTCDateTime(tt_S.timestamp + self.Post_S)
 
+        if Full_P_shift == None:
+            Full_P_shift = 0
+        else:
+            Full_P_shift = Full_P_shift * self.dt
+
+        if Full_S_shift == None:
+            Full_S_shift = 0
+        else:
+            Full_S_shift = Full_S_shift * self.dt
 
         self.S_original = self.original.copy()
         self.P_original = self.original.copy()
@@ -129,11 +141,11 @@ class Cut_windows:
             trace_S = self.S_original.traces[i].copy()
             dt = trace_P.meta.delta
 
-            P_trace = Trace.slice(trace_P, self.start_P - wlen_seconds, end_P + wlen_seconds)
+            P_trace = Trace.slice(trace_P, self.start_P - wlen_seconds + Full_P_shift, end_P + wlen_seconds + Full_P_shift)
             self.P_len = len(P_trace)
             npts_p = self.P_len + 2 * zero_len
             start_p = dt * zero_len
-            S_trace = Trace.slice(trace_S, self.start_S - wlen_seconds, end_S + wlen_seconds)
+            S_trace = Trace.slice(trace_S, self.start_S - wlen_seconds+ Full_S_shift, end_S + wlen_seconds + Full_S_shift)
             self.S_len = len(S_trace)
             npts_s = self.S_len + 2 * zero_len
             start_s = dt * zero_len
@@ -142,7 +154,7 @@ class Cut_windows:
 
             if i == 2:
                 total_s_trace = Trace(np.zeros(npts_s),
-                                      header={"starttime": self.start_S - start_s - wlen_seconds, 'delta': trace_S.stats.delta,
+                                      header={"starttime": self.start_S - start_s - wlen_seconds + Full_S_shift, 'delta': trace_S.stats.delta,
                                               "station": trace_S.stats.station,
                                               "network": trace_S.stats.network, "location": trace_S.stats.location,
                                               "channel": trace_S.stats.channel}).__add__(S_trace, method=0,
@@ -152,7 +164,7 @@ class Cut_windows:
 
             else:
                 total_p_trace = Trace(np.zeros(npts_p),
-                                      header={"starttime": self.start_P - start_p - wlen_seconds, 'delta': trace_P.stats.delta,
+                                      header={"starttime": self.start_P - start_p - wlen_seconds + Full_P_shift, 'delta': trace_P.stats.delta,
                                               "station": trace_P.stats.station,
                                               "network": trace_P.stats.network, "location": trace_P.stats.location,
                                               "channel": trace_P.stats.channel}).__add__(P_trace, method=0,
@@ -160,7 +172,7 @@ class Cut_windows:
                                                                                        fill_value=P_trace.data,
                                                                                        sanity_checks=True)
                 total_s_trace = Trace(np.zeros(npts_s),
-                                      header={"starttime": self.start_S - start_s - wlen_seconds, 'delta': trace_S.stats.delta,
+                                      header={"starttime": self.start_S - start_s - wlen_seconds+ Full_S_shift, 'delta': trace_S.stats.delta,
                                               "station": trace_S.stats.station,
                                               "network": trace_S.stats.network, "location": trace_S.stats.location,
                                               "channel": trace_S.stats.channel}).__add__(S_trace, method=0,
@@ -201,6 +213,8 @@ class Cut_windows:
             # self.original.trim(endtime=end_S + 25)
             # self.P_original.trim(endtime=end_S + 25)
             # self.S_original.trim(endtime=end_S + 25)
+
+
 
     def Create_Taper(self, Trace_len,wlen, zero_len,):
         hann = np.hanning(wlen * 2)

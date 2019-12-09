@@ -30,9 +30,9 @@ class Grid_Search:
         color = 'b'
         # self.plot_original_vs_filter(BW_obs,color,self.prior['save_dir'],"OBS")
 
-        strike_len = np.linspace(0, 360, int(360 / 5) + 1, endpoint=True)
+        strike_len = np.linspace(0, 360, int(360 / 15) + 1, endpoint=True)
         dip_len = np.linspace(0, 90, int(90 / 5) + 1, endpoint=True)
-        rake_len = np.linspace(-180, 180, int(360 / 5) + 1, endpoint=True)
+        rake_len = np.linspace(-180, 180, int(360 / 15) + 1, endpoint=True)
 
         with open(savepath, 'w') as save_file:
             self.write_par(save_file)
@@ -52,11 +52,13 @@ class Grid_Search:
                                                            strike=strike, dip=dip, rake=rake,
                                                            time=self.or_time, M0=M0)
 
-                        self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time)
+                        self.BW_syn.Get_bw_windows(st_syn, epi, depth, self.or_time, self.prior['Full_P_shift'],self.prior['Full_S_shift'])
                         # color = 'r'
                         # self.plot_original_vs_filter(self.BW_syn,color, self.prior['save_dir'], str(i))
 
-                        # ## Determine the misfit:
+
+
+                        ## Determine the misfit:
                         Xi_bw, Norms, amplitude, time_shift, fig = self.mis.CC_BW(BW_obs, self.BW_syn,
                                                                                   self.prior['Full_P_shift'],
                                                                                   self.prior['Full_S_shift'],
@@ -76,6 +78,17 @@ class Grid_Search:
                         i += 1
                         print('Iteration: %i' % i)
             save_file.close()
+
+    # def Full_shift(self, st_syn, st_obs, Full_shift):
+    #     zeros_int =
+    #
+    #     tr_syn = self.shift(tr_syn, Full_shift)
+    #     if Full_shift < 0:
+    #         tr_obs[-time_shift:] = np_array[:time_shift]
+    #     elif Full_shift == 0:
+    #         new_array[:] = np_array[:]
+    #     else:
+    #         new_array[:-time_shift] = np_array[time_shift:]
 
     def write_sample(self, file_name, epi, depth, strike, dip, rake, M0, Xi_bw, Norms, PZ_Amplitude, time_shift,
                      iteration,
@@ -125,6 +138,8 @@ class Grid_Search:
         file_name.write("Zero Length:%.2f\n\r" % self.prior['Zero_len'])  #
         file_name.write("Global P Shift:%.2f\n\r" % self.prior['Global_P_shift'])  #
         file_name.write("Global S Shift:%.2f\n\r" % self.prior['Global_S_shift'])  #
+        file_name.write("Full P Shift:%i\n\r" % self.prior['Full_P_shift'])  #
+        file_name.write("Full S Shift:%i\n\r" % self.prior['Full_S_shift'])  #
         file_name.write("amount samples:%i\n\r" % self.prior['sample_number'])  #
         file_name.write("Temperature:%i\n\r" % self.prior['Temperature'])  #
         file_name.write("Radius:%.4f\n\r" % self.prior['radius'])  #

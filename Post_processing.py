@@ -45,11 +45,11 @@ def main():
     # directory = '/home/nienke/Documents/Master/Data/Mars/S0173a/waveforms/Output/'
     # path_to_file = directory + 'TAYAK_Shift_1.txt'
     # path_to_file = directory + 'DWTHot_Amp_Shift.txt'
-    path_to_file = directory + 'EH45Tcold_Amp_Shift.txt'
+    path_to_file = directory + 'TAYAK.txt'
 
     savename = 'Trials'
     show = False  # Choose True for direct show, choose False for saving
-    skiprows = 56#48
+    skiprows = 60#48
     # column_names = ["Epi", "Depth", "Strike", "Dip", "Rake", "M0", "Total_misfit", "p_z", "p_r", "s_z", "s_r", "s_t",
     #                 'Xi_amp', 'Shift_S', 'Shift_P', 'accept']
 
@@ -67,10 +67,10 @@ def main():
     #
     # result.Scatter_3d(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
-    result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-                 column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
-    # result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
-    #                column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
+    # result.trace(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+    #              column_names=column_names,burnin=burnin ,lowest = 'Total_misfit',real_v=real_v)
+    result.get_BBB(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
+                   column_names=column_names,  burnin=burnin,lowest = 'Total_misfit',real_v=real_v)
     # result.Cluster(filepath=path_to_file, savename=savename, directory=directory, skiprows=skiprows,
     #                column_names=column_names,  burnin=burnin,real_v=real_v)
 
@@ -1429,7 +1429,7 @@ class Post_processing_sdr:
 
 
         df = pd.DataFrame(data, columns=column_names)
-        n_lowest = 100
+        n_lowest = 20
         lowest_indices = df[lowest].values.argsort()[0:n_lowest]
         strike = df['Strike'].values[lowest_indices]
         dip = df['Dip'].values[lowest_indices]
@@ -1545,25 +1545,25 @@ class Post_processing_sdr:
 
 
         ## EH45Tcold
-        PZ = (df['p_z'].values)
-        PR = (df['p_r'].values) * 0.5
-        SZ = (df['s_z'].values) * 0.16
-        SR = (df['s_r'].values) * 0.15
-        ST = (df['s_t'].values) * 0.94
-        AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) * 1.3
-
-        Misfit = PZ + ST + PR + SZ + SR #+ AMP
-
-        # indices = np.where(Misfit < 0.5)
-        # indices = np.where(Misfit < 0.7)
-        indices = np.where(Misfit < 8.75)
-
-
-        misfits = Misfit[indices]
-
-        strike = df['Strike'].values[indices]
-        dip = df['Dip'].values[indices]
-        rake = df['Rake'].values[indices]
+        # PZ = (df['p_z'].values)
+        # PR = (df['p_r'].values) * 0.5
+        # SZ = (df['s_z'].values) * 0.16
+        # SR = (df['s_r'].values) * 0.15
+        # ST = (df['s_t'].values) * 0.94
+        # AMP =(( (np.abs(np.log10(df['Npz'].values ) - np.log10(df['Nst'].values ))) / np.log(2)) ) ** (1/4) * 1.3
+        #
+        # Misfit = PZ + ST + PR + SZ + SR #+ AMP
+        #
+        # # indices = np.where(Misfit < 0.5)
+        # # indices = np.where(Misfit < 0.7)
+        # indices = np.where(Misfit < 8.75)
+        #
+        #
+        # misfits = Misfit[indices]
+        #
+        # strike = df['Strike'].values[indices]
+        # dip = df['Dip'].values[indices]
+        # rake = df['Rake'].values[indices]
 
         ## PZ
         # G1_S =  strike[(strike < 160) ]
@@ -1592,25 +1592,25 @@ class Post_processing_sdr:
         ## TOTAL
 
 
-        G1_S =  strike[(strike < 125) ]
-        G1_D =  dip[(strike < 125) ]
-        G1_R =  rake[(strike < 125) ]
-        M1   =  misfits[(strike < 125) ]
-
-        G2_S =  strike[(strike > 125) ]
-        G2_D =  dip[(strike > 125) ]
-        G2_R =  rake[(strike > 125) ]
-        M2   =  misfits[(strike > 125) ]
-
-
-
-        strike = G2_S
-        dip = G2_D
-        rake = G2_R
+        # G1_S =  strike[(strike < 125) ]
+        # G1_D =  dip[(strike < 125) ]
+        # G1_R =  rake[(strike < 125) ]
+        # M1   =  misfits[(strike < 125) ]
+        #
+        # G2_S =  strike[(strike > 125) ]
+        # G2_D =  dip[(strike > 125) ]
+        # G2_R =  rake[(strike > 125) ]
+        # M2   =  misfits[(strike > 125) ]
+        #
+        #
+        #
+        # strike = G2_S
+        # dip = G2_D
+        # rake = G2_R
 
         with open(filepath) as f:
             content = f.readlines()
-        azimuth = float(content[54].strip('\n').split(':')[-1])
+        azimuth = float(content[58].strip('\n').split(':')[-1])
 
         veloc_model = '/home/nienke/Documents/Master/Data/Database/TAYAK.npz'
 

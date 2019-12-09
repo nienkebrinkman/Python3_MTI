@@ -12,11 +12,11 @@ class Misfit:
         s_syn = BW_syn.S_stream.copy()
 
         # Apply the full trace shifts specified in the input file
-        p_syn.traces[0].data = self.shift(p_syn.traces[0].data, Full_P_shift)
-        p_syn.traces[1].data = self.shift(p_syn.traces[1].data, Full_P_shift)
-        s_syn.traces[0].data = self.shift(s_syn.traces[0].data, Full_S_shift)
-        s_syn.traces[1].data = self.shift(s_syn.traces[1].data, Full_S_shift)
-        s_syn.traces[2].data = self.shift(s_syn.traces[2].data, Full_S_shift)
+        # p_syn.traces[0].data = self.shift(p_syn.traces[0].data, Full_P_shift)
+        # p_syn.traces[1].data = self.shift(p_syn.traces[1].data, Full_P_shift)
+        # s_syn.traces[0].data = self.shift(s_syn.traces[0].data, Full_S_shift)
+        # s_syn.traces[1].data = self.shift(s_syn.traces[1].data, Full_S_shift)
+        # s_syn.traces[2].data = self.shift(s_syn.traces[2].data, Full_S_shift)
 
         dt = s_obs[0].meta.delta
         misfit = np.array([])
@@ -26,7 +26,7 @@ class Misfit:
         Norms = np.array([])
 
         ## Maximum cross-correlation shift allowed:
-        max_shift = 3.0
+        max_shift = 1.0
         max_shift_sample = int(max_shift / dt)
         if plot:
             fig = plt.figure(figsize=(10, 12))
@@ -105,15 +105,19 @@ class Misfit:
         Norm_Pz = (np.sum(np.abs(p_obs[0].data))) / (np.sum(np.abs(p_syn[0].data))) #Normalization Factor PZ
 
         p_syn_shift_obspy = self.shift(p_syn[0].data, shift_centered)
-        A = (np.dot(p_obs[0].data, p_syn_shift_obspy) / np.dot(p_obs[0].data, p_obs[0].data))
-        amplitude = np.append(amplitude, abs(A))
+
 
         # P- correlation
         for i in range(len(p_obs)):
             len_P_obs = len(p_obs[i].data)
 
-            # cc_obspy = cc.correlate(p_syn[i].data,p_syn[i].data,int(len_P_obs))
-            cc_obspy = cc.correlate(p_syn[i].data,p_obs[i].data,max_shift_sample)
+
+            cc_obspy = cc.correlate(p_syn[i].data, p_obs[i].data, max_shift_sample)
+
+            if i == 0:
+                p_syn_shift_obspy = self.shift(p_syn[i].data, shift_centered)
+                A = (np.dot(p_obs[i].data, p_syn_shift_obspy) / np.dot(p_obs[i].data, p_obs[i].data))
+                amplitude = np.append(amplitude, abs(A))
 
             CC_p = cc_obspy[shift]
 
